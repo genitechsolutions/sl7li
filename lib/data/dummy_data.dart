@@ -1,3 +1,5 @@
+import 'my_request.dart';
+
 class ServiceItem {
   const ServiceItem({required this.name, required this.image});
 
@@ -436,4 +438,38 @@ const loginDistricts = [
   'برزة',
   'دمر',
   'مشروع دمر',
+];
+
+// ── طلباتي ──
+const _requestDescription = 'شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب';
+
+const sampleActiveRequests = [
+  MyRequest(
+    date: '5 آب 2026',
+    priority: RequestPriority.urgent,
+    title: 'طلب خدمة إصلاحات الكهربائية',
+    description: _requestDescription,
+    stage: 0,
+    offersCount: 7,
+  ),
+  MyRequest(
+    date: '5 آب 2026',
+    priority: RequestPriority.emergency,
+    title: 'طلب خدمة إصلاحات الكهربائية',
+    description: _requestDescription,
+    stage: 1,
+    craftsmanName: 'مركز قزاز للتكيف والتبريد',
+    craftsmanRating: '4.9',
+    craftsmanReviews: 128,
+  ),
+  MyRequest(
+    date: '5 آب 2026',
+    priority: RequestPriority.normal,
+    title: 'طلب خدمة إصلاحات الكهربائية',
+    description: _requestDescription,
+    stage: 2,
+    craftsmanName: 'مركز قزاز للتكيف والتبريد',
+    craftsmanRating: '4.9',
+    craftsmanReviews: 128,
+  ),
 ];

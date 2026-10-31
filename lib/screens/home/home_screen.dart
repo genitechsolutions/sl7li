@@ -7,6 +7,7 @@ import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../data/dummy_data.dart';
 import '../craftsman_profile/craftsman_profile_screen.dart';
 import '../offer_details/offer_details_screen.dart';
+import '../my_requests/my_requests_screen.dart';
 import '../new_request/new_request_screen.dart';
 import '../offers/offers_screen.dart';
 import '../search/search_screen.dart';
@@ -32,7 +33,12 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: context.colors.background,
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: 0,
-          onTap: (index) {}, // TODO: navigate to tab screens
+          // TODO: navigate to messages / settings tabs
+          onTap: (index) {
+            if (index == 1) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const MyRequestsScreen()));
+            }
+          },
           onAddTap: () => Navigator.push(context, NewRequestScreen.route()),
         ),
         body: SafeArea(
