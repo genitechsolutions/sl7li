@@ -30,17 +30,43 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
+  final _scroll = ScrollController();
   late final List<ChatMessage> _messages = [...sampleChat];
+
+  // بعد ما نبعد عن بطاقة الطلب (فوق) بنبيّن "العودة للعرض"، وبعد ما نبعد عن الآخر بنبيّن زر النزول.
+  bool _showBackToRequest = false;
+  bool _showToBottom = false;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() {}));
+    _scroll.addListener(_onScroll);
   }
+
+  void _onScroll() {
+    if (!_scroll.hasClients) return;
+    final pos = _scroll.position;
+    final back = pos.pixels > 160;
+    final bottom = pos.maxScrollExtent - pos.pixels > 160;
+    if (back != _showBackToRequest || bottom != _showToBottom) {
+      setState(() {
+        _showBackToRequest = back;
+        _showToBottom = bottom;
+      });
+    }
+  }
+
+  void _scrollTo(double offset) => _scroll.animateTo(
+    offset,
+    duration: const Duration(milliseconds: 300),
+    curve: Curves.easeOut,
+  );
 
   @override
   void dispose() {
     _controller.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -80,28 +106,107 @@ class _ChatScreenState extends State<ChatScreen> {
             _Header(conversation: widget.conversation),
             Expanded(
               // TODO: asset — نقشة الصواعق الخفيفة بخلفية الدردشة (Figma 327:900) محتاجة تصدير.
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: Stack(
                 children: [
-                  if (widget.firstTime) ...[
-                    _ProfileCard(conversation: widget.conversation),
-                    const SizedBox(height: 16),
-                    const _Pill('2 رسائل غير مقروءة'),
-                    const SizedBox(height: 16),
-                  ],
-                  const _RequestCardBubble(),
-                  const SizedBox(height: 8),
-                  for (var i = 0; i < _messages.length; i++) ...[
-                    if (i == 4)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Center(child: _Pill('اليوم')),
+                  ListView(
+                    controller: _scroll,
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                    children: [
+                      if (widget.firstTime) ...[
+                        _ProfileCard(conversation: widget.conversation),
+                        const SizedBox(height: 16),
+                        const _Pill('2 رسائل غير مقروءة'),
+                        const SizedBox(height: 16),
+                      ],
+                      const _RequestCardBubble(),
+                      const SizedBox(height: 8),
+                      for (var i = 0; i < _messages.length; i++) ...[
+                        if (i == 4)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Center(child: _Pill('اليوم')),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _Bubble(message: _messages[i]),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (_showBackToRequest)
+                    Positioned(
+                      top: 8,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () => _scrollTo(0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.accent,
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'العودة للعرض',
+                                  style: AppTextStyles.body12.copyWith(
+                                    fontSize: 13,
+                                    color: colors.textOnAccent,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                RotatedBox(
+                                  quarterTurns: 2,
+                                  child: SvgPicture.asset(
+                                    'assets/icons/ic_chevron_down.svg',
+                                    width: 16,
+                                    height: 16,
+                                    colorFilter: ColorFilter.mode(
+                                      colors.textOnAccent,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _Bubble(message: _messages[i]),
                     ),
-                  ],
+                  if (_showToBottom)
+                    PositionedDirectional(
+                      end: 20,
+                      bottom: 16,
+                      child: GestureDetector(
+                        onTap: () =>
+                            _scrollTo(_scroll.position.maxScrollExtent),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: colors.background,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: colors.border),
+                          ),
+                          alignment: Alignment.center,
+                          child: SvgPicture.asset(
+                            'assets/icons/ic_chevron_down.svg',
+                            width: 20,
+                            height: 20,
+                            colorFilter: ColorFilter.mode(
+                              colors.primaryContent,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
