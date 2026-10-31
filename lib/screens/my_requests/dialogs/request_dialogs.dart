@@ -49,8 +49,18 @@ Future<String?> showUpdateStatusDialog(BuildContext context) {
             colors.success,
             colors.textOnPrimary,
           ),
-          action('تعديل الطلب', 'edit', colors.accentButton, colors.textOnAccent),
-          action('إلغاء الطلب', 'cancel', colors.destructive, colors.textOnPrimary),
+          action(
+            'تعديل الطلب',
+            'edit',
+            colors.accentButton,
+            colors.textOnAccent,
+          ),
+          action(
+            'إلغاء الطلب',
+            'cancel',
+            colors.destructive,
+            colors.textOnPrimary,
+          ),
           AppDialogButton(
             label: 'رجوع',
             background: colors.background,

@@ -64,7 +64,7 @@ class RequestStepper extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
-                                            color: i < stage
+                      color: i < stage
                           ? colors.successLight
                           : i == stage
                           ? colors.stepActive

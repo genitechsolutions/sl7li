@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Container(
               color: colors.background,
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               child: SafeArea(
                 bottom: false,
                 child: Row(
@@ -123,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     const Padding(
                       padding: _labelPadding,
                       child: FormLabel('الاسم الكامل'),

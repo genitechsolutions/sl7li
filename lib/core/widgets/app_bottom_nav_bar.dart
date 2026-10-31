@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -32,22 +34,25 @@ class AppBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          // التصميم يضع "الرئيسية" على اليسار، فنثبّت الترتيب LTR.
-          // بالشاشات الضيقة (أقل من 372) بنصغّر الصف كله بدل الـ overflow.
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final row = _row(context);
-              if (constraints.maxWidth >= _minRowWidth) return row;
-              return FittedBox(
-                fit: BoxFit.scaleDown,
-                child: SizedBox(width: _minRowWidth, child: row),
-              );
-            },
-          ),
+      child: Padding(
+        // Figma: 8 فوق، و16 تحت التحديد (مؤشر الجهاز بيرسم جواه)، أو منطقة الإيماءات إذا أكبر.
+        padding: EdgeInsets.fromLTRB(
+          20,
+          8,
+          20,
+          math.max(16, MediaQuery.paddingOf(context).bottom),
+        ),
+        // التصميم يضع "الرئيسية" على اليسار، فنثبّت الترتيب LTR.
+        // بالشاشات الضيقة (أقل من 372) بنصغّر الصف كله بدل الـ overflow.
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final row = _row(context);
+            if (constraints.maxWidth >= _minRowWidth) return row;
+            return FittedBox(
+              fit: BoxFit.scaleDown,
+              child: SizedBox(width: _minRowWidth, child: row),
+            );
+          },
         ),
       ),
     );
@@ -104,7 +109,14 @@ class AppBottomNavBar extends StatelessWidget {
               colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
             ),
             const SizedBox(height: 4),
-            Text(label, style: AppTextStyles.body12.copyWith(color: color)),
+            Text(
+              label,
+              style: AppTextStyles.body12.copyWith(
+                fontSize: 13,
+                height: 1.5,
+                color: color,
+              ),
+            ),
           ],
         ),
       ),

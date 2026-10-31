@@ -103,7 +103,7 @@ class _NotificationSettingsScreenState
           children: [
             Container(
               color: colors.background,
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               child: SafeArea(
                 bottom: false,
                 child: Row(

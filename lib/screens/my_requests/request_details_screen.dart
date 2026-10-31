@@ -298,12 +298,12 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
         child: OfferTile(offer: sampleBestOffer, onOpen: () {}),
       ),
       Padding(
-        padding: const EdgeInsets.fromLTRB(32, 16, 32, 8),
+        padding: const EdgeInsets.fromLTRB(32, 20, 32, 8),
         child: Text('باقي العروض:', style: label),
       ),
       for (final offer in sampleOtherOffers)
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
           child: OfferTile(offer: offer, onOpen: () {}),
         ),
     ];
@@ -321,11 +321,11 @@ class _Header extends StatelessWidget {
 
     return Container(
       color: colors.primary,
-      padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 14),
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 15),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.only(top: 14),
+          padding: const EdgeInsets.only(top: 15),
           child: Row(
             children: [
               Expanded(

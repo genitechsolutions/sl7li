@@ -22,11 +22,12 @@ class NotificationsScreen extends StatelessWidget {
       String title,
       List<NotificationItem> items, {
       Widget? trailing,
+      double top = 28,
     }) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+          padding: EdgeInsets.fromLTRB(20, top, 20, 12),
           child: Row(
             children: [
               Text(title, style: AppTextStyles.title18Medium),
@@ -112,6 +113,7 @@ class NotificationsScreen extends StatelessWidget {
                   section(
                     'إشعارات مهمة',
                     sampleImportantNotifications,
+                    top: 20,
                     trailing: Text(
                       'تمييز الكل كمقروءة',
                       style: AppTextStyles.body12.copyWith(
@@ -197,7 +199,9 @@ class _NotificationCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 item.title,
-                                style: AppTextStyles.body16Medium,
+                                style: AppTextStyles.body16Medium.copyWith(
+                                  height: 1.5,
+                                ),
                               ),
                             ),
                             Text(

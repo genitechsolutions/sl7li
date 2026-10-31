@@ -30,7 +30,7 @@ class OfferTile extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 11),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -159,6 +159,7 @@ class OfferTile extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           feeRow('أجور الكشف والمواصلات', offer.inspectionFee),
+          const SizedBox(height: 8),
           feeRow('أجور المواد والأدوات', offer.materialsFee),
         ],
       ),

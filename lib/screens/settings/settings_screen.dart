@@ -56,12 +56,14 @@ class SettingsScreen extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    Widget sectionTitle(String text) => Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+    // 20 قبل أول قسم و28 بعدين (+4 هامش الصف = 32 متل التصميم).
+    Widget sectionTitle(String text, {double top = 28}) => Padding(
+      padding: EdgeInsets.fromLTRB(20, top, 20, 8),
       child: Text(
         text,
         style: AppTextStyles.title18Medium.copyWith(
           color: colors.textSecondary,
+          height: 1.5,
         ),
       ),
     );
@@ -91,16 +93,18 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Center(child: Text('رضا الكويفاتي', style: AppTextStyles.title20)),
+            const SizedBox(height: 4),
             Center(
               child: Text(
                 '+963 939 316 463',
                 textDirection: TextDirection.ltr,
                 style: AppTextStyles.body18.copyWith(
                   color: colors.textSecondary,
+                  height: 1.5,
                 ),
               ),
             ),
-            sectionTitle('التطبيق'),
+            sectionTitle('التطبيق', top: 20),
             _Row(
               icon: 'assets/icons/ic_set_profile.svg',
               title: 'الملف الشخصي',
@@ -292,7 +296,12 @@ class _Row extends StatelessWidget {
             children: [
               SvgPicture.asset(icon, width: 24, height: 24),
               const SizedBox(width: 12),
-              Expanded(child: Text(title, style: AppTextStyles.body16Medium)),
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.body16Medium.copyWith(height: 1.5),
+                ),
+              ),
               if (trailing != null)
                 trailing!
               else
@@ -347,6 +356,7 @@ class _AccountButton extends StatelessWidget {
               label,
               style: AppTextStyles.title18Medium.copyWith(
                 fontWeight: FontWeight.w600,
+                height: 1.5,
                 color: fg,
               ),
             ),
