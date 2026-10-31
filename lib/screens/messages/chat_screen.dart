@@ -285,8 +285,9 @@ class _Header extends StatelessWidget {
                 surfaceTintColor: Colors.transparent,
                 elevation: 8,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                constraints: const BoxConstraints(minWidth: 189, maxWidth: 189),
                 offset: const Offset(0, 36),
                 onSelected: (value) {
                   switch (value) {
@@ -302,11 +303,10 @@ class _Header extends StatelessWidget {
                     context,
                     'agree',
                     'الاتفاق مع المهني',
-                    // TODO: asset — أيقونة الاتفاق من Figma (382:2389)
-                    Icon(
-                      Icons.how_to_reg_outlined,
-                      size: 20,
-                      color: colors.success,
+                    SvgPicture.asset(
+                      'assets/icons/ic_menu_agree.svg',
+                      width: 20,
+                      height: 20,
                     ),
                   ),
                   _menuItem(
@@ -314,13 +314,9 @@ class _Header extends StatelessWidget {
                     'rate',
                     'تقييم المهني',
                     SvgPicture.asset(
-                      'assets/icons/ic_star.svg',
+                      'assets/icons/ic_menu_star.svg',
                       width: 20,
                       height: 20,
-                      colorFilter: ColorFilter.mode(
-                        colors.star,
-                        BlendMode.srcIn,
-                      ),
                     ),
                   ),
                   _menuItem(
@@ -328,13 +324,9 @@ class _Header extends StatelessWidget {
                     'report',
                     'إبلاغ',
                     SvgPicture.asset(
-                      'assets/icons/ic_block.svg',
+                      'assets/icons/ic_menu_report.svg',
                       width: 20,
                       height: 20,
-                      colorFilter: ColorFilter.mode(
-                        colors.error,
-                        BlendMode.srcIn,
-                      ),
                     ),
                   ),
                 ],
@@ -679,11 +671,12 @@ class _Bubble extends StatelessWidget {
                 if (message.content == ChatContent.image &&
                     message.image != null) ...[
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                     child: Image.asset(
                       message.image!,
                       fit: BoxFit.cover,
-                      height: 260,
+                      width: 258,
+                      height: 258,
                     ),
                   ),
                   const SizedBox(height: 10),
