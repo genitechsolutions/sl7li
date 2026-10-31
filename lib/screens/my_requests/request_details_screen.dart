@@ -42,7 +42,10 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
       ),
       child: Scaffold(
         backgroundColor: colors.background,
-        bottomNavigationBar: _BottomBar(offersTab: _tab == 1),
+        bottomNavigationBar: _BottomBar(
+          request: widget.request,
+          offersTab: _tab == 1,
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -51,16 +54,18 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: AppSegmentedControl(
-                      options: ['التفاصيل', 'العروض (3)'],
-                      selected: _tab,
-                      onChanged: (i) => setState(() => _tab = i),
-                      height: 48,
-                      textStyle: AppTextStyles.body16,
+                  // الطلب اللي اتفقنا فيه مع مهني ما إله تاب عروض، بيعرض "العرض المعتمد".
+                  if (!widget.request.hasCraftsman)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      child: AppSegmentedControl(
+                        options: ['التفاصيل', 'العروض (3)'],
+                        selected: _tab,
+                        onChanged: (i) => setState(() => _tab = i),
+                        height: 48,
+                        textStyle: AppTextStyles.body16,
+                      ),
                     ),
-                  ),
                   if (_tab == 0) ..._details(context) else ..._offers(context),
                   const SizedBox(height: 24),
                 ],
@@ -90,9 +95,25 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
 
     return [
       Padding(
-        padding: const EdgeInsets.fromLTRB(40, 20, 40, 0),
+        padding: EdgeInsets.fromLTRB(
+          40,
+          widget.request.hasCraftsman ? 28 : 20,
+          40,
+          0,
+        ),
         child: RequestStepper(stage: widget.request.stage),
       ),
+      if (widget.request.hasCraftsman) ...[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 24, 32, 8),
+          child: Text('العرض المعتمد:', style: label),
+        ),
+        // TODO: navigate to offer / craftsman profile
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: OfferTile(offer: sampleOtherOffers[0], onOpen: () {}),
+        ),
+      ],
       Padding(
         padding: const EdgeInsets.fromLTRB(32, 24, 32, 0),
         child: Text('الصور المرفقة:', style: label),
@@ -295,8 +316,9 @@ class _Header extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.offersTab});
+  const _BottomBar({required this.request, required this.offersTab});
 
+  final MyRequest request;
   final bool offersTab;
 
   @override
@@ -330,6 +352,10 @@ class _BottomBar extends StatelessWidget {
       ),
     );
 
+    final noActions = request.hasCraftsman &&
+        (request.status == RequestStatus.canceled || (request.status == RequestStatus.done && request.rated));
+    if (noActions) return const SizedBox.shrink();
+
     return Container(
       decoration: BoxDecoration(
         color: colors.background,
@@ -343,7 +369,24 @@ class _BottomBar extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: 7,
-            children: offersTab
+            children: request.hasCraftsman
+                ? [
+                    if (request.status == RequestStatus.done && !request.rated)
+                      button(
+                        'تقييم الخدمة',
+                        bg: colors.accent,
+                        fg: colors.textOnAccent,
+                        onTap: () => showRatingDialog(context),
+                      )
+                    else if (request.status == RequestStatus.active)
+                      button(
+                        'تحديث الحالة',
+                        bg: colors.primary,
+                        fg: colors.textOnPrimary,
+                        onTap: () => runUpdateStatusFlow(context),
+                      ),
+                  ]
+                : offersTab
                 ? [
                     button(
                       'قبول العرض',
