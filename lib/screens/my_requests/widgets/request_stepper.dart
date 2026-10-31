@@ -64,7 +64,12 @@ class RequestStepper extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
-                      color: i <= stage ? stepColor(i) : colors.textHint,
+                      // المرحلة الحالية بنص primaryContent مشان تبين بالداكن.
+                      color: i < stage
+                          ? colors.successLight
+                          : i == stage
+                          ? colors.primaryContent
+                          : colors.textHint,
                     ),
                   ),
                 ),

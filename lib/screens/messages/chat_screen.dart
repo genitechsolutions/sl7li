@@ -430,7 +430,7 @@ class _Bubble extends StatelessWidget {
     final sent = message.sent;
     final bg = sent ? colors.primary : colors.background;
     final fg = sent ? colors.textOnPrimary : colors.textPrimary;
-    final timeColor = sent ? colors.disabled : colors.textHint;
+    final timeColor = sent ? colors.textOnPrimaryMuted : colors.textHint;
     const r = Radius.circular(12);
 
     return Align(
