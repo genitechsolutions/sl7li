@@ -26,7 +26,6 @@ class CraftsmanRequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isTask = request.stage != null;
     final urgencyColor = switch (request.urgency) {
       'طارئ' => colors.urgent,
       'عادي' => colors.link,
@@ -206,7 +205,8 @@ class CraftsmanRequestCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           photos(),
-          if (isTask) ...[
+          if (request.state == CraftsmanRequestState.task ||
+              request.state == CraftsmanRequestState.done) ...[
             const SizedBox(height: 20),
             RequestStepper(
               stage: request.stage!,
@@ -218,29 +218,92 @@ class CraftsmanRequestCard extends StatelessWidget {
               ],
             ),
           ],
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _Btn(
-                  label: isTask ? 'تحديث الحالة' : 'تقديم عرض',
-                  bg: isTask ? colors.primary : colors.success,
-                  fg: colors.textOnPrimary,
-                  onTap: onPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _Btn(
-                  label: 'التفاصيل',
-                  bg: colors.background,
-                  fg: colors.primaryContent,
-                  border: colors.border,
-                  onTap: onDetails,
+          if (request.state == CraftsmanRequestState.cancelled) ...[
+            const SizedBox(height: 16),
+            _StatusLine(text: 'تم إلغاء الطلب', color: colors.error),
+            if (request.note != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                request.note!,
+                style: AppTextStyles.body16.copyWith(
+                  color: colors.textSecondary,
                 ),
               ),
             ],
-          ),
+          ],
+          if (request.state == CraftsmanRequestState.withdrawn) ...[
+            const SizedBox(height: 16),
+            _StatusLine(text: 'قمت بسحب عرضك', color: colors.error),
+          ],
+          if (request.state == CraftsmanRequestState.done && request.rated) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: colors.star,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(
+                    'assets/icons/ic_star_rate.svg',
+                    width: 17,
+                    height: 16,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text.rich(
+                  TextSpan(
+                    style: AppTextStyles.body16,
+                    children: [
+                      const TextSpan(text: 'تم تقييم الخدمة, '),
+                      TextSpan(
+                        text: 'رؤية تقييمك',
+                        style: TextStyle(
+                          color: colors.link,
+                          decoration: TextDecoration.underline,
+                          decorationColor: colors.link,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (request.state == CraftsmanRequestState.open ||
+              request.state == CraftsmanRequestState.task ||
+              request.state == CraftsmanRequestState.withdrawn) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _Btn(
+                    label: request.state == CraftsmanRequestState.task
+                        ? 'تحديث الحالة'
+                        : 'تقديم عرض',
+                    bg: request.state == CraftsmanRequestState.task
+                        ? colors.primary
+                        : colors.success,
+                    fg: colors.textOnPrimary,
+                    onTap: onPrimary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _Btn(
+                    label: 'التفاصيل',
+                    bg: colors.background,
+                    fg: colors.primaryContent,
+                    border: colors.border,
+                    onTap: onDetails,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -283,6 +346,39 @@ class _Btn extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _StatusLine extends StatelessWidget {
+  const _StatusLine({required this.text, required this.color});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: colors.destructive,
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: SvgPicture.asset(
+            'assets/icons/ic_block.svg',
+            width: 20,
+            height: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(text, style: AppTextStyles.body16.copyWith(color: color)),
+      ],
     );
   }
 }

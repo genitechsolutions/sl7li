@@ -8,7 +8,9 @@ import '../../../core/widgets/app_icon_button.dart';
 import '../../../data/craftsman_data.dart';
 import '../../messages/chat_screen.dart';
 import '../../../data/dummy_data.dart';
+import '../../my_requests/widgets/request_stepper.dart';
 import 'offer_dialogs.dart';
+import 'task_dialogs.dart';
 
 /// تفاصيل طلب (عند المهني): صور، وصف، موقع، "تجاهل الطلب"، وأزرار "تقديم عرض" و"مراسلة الزبون".
 class CraftsmanRequestDetailsScreen extends StatefulWidget {
@@ -65,6 +67,9 @@ class _CraftsmanRequestDetailsScreenState
       color: colors.textSecondary,
     );
     final r = widget.request;
+    final isTask =
+        r.state == CraftsmanRequestState.task ||
+        r.state == CraftsmanRequestState.done;
 
     Widget box(Widget child) => Container(
       width: double.infinity,
@@ -134,7 +139,18 @@ class _CraftsmanRequestDetailsScreenState
                 children: [
                   if (!_offerSent)
                     wide('تقديم عرض', colors.success, onTap: _sendOffer),
-                  wide('مراسلة الزبون', colors.primary, onTap: _message),
+                  if (r.state == CraftsmanRequestState.task)
+                    wide(
+                      'تحديث الطلب',
+                      colors.primary,
+                      onTap: () => showTaskStatusDialog(context),
+                    ),
+                  wide(
+                    'مراسلة الزبون',
+                    isTask ? colors.accentButton : colors.primary,
+                    fg: isTask ? colors.textOnAccent : null,
+                    onTap: _message,
+                  ),
                 ],
               ),
             ),
@@ -186,6 +202,29 @@ class _CraftsmanRequestDetailsScreenState
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 children: [
+                  if (isTask) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: RequestStepper(
+                        stage: r.stage ?? 0,
+                        labels: const [
+                          'عرض\nمرسل',
+                          'تم الاتفاق',
+                          'قيد\nالتنفيذ',
+                          'مكتمل',
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 12,
+                        top: 20,
+                        bottom: 8,
+                      ),
+                      child: Text('العرض المقدم:', style: label),
+                    ),
+                    _MyOffer(),
+                  ],
                   Padding(
                     padding: const EdgeInsetsDirectional.only(
                       start: 12,
@@ -306,6 +345,74 @@ class _CraftsmanRequestDetailsScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MyOffer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final small = AppTextStyles.body12.copyWith(
+      fontSize: 13,
+      color: colors.textSecondary,
+    );
+    final green = AppTextStyles.body12.copyWith(
+      fontSize: 13,
+      color: colors.success,
+    );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: colors.fieldFill,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text('الكلفة الأولية التقديرية', style: AppTextStyles.body16),
+              const Spacer(),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '100 ',
+                      style: AppTextStyles.title20.copyWith(
+                        color: colors.success,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'ليرة جديدة',
+                      style: AppTextStyles.body16.copyWith(
+                        color: colors.success,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text('أجور الكشف والمواصلات', style: small),
+              const Spacer(),
+              Text('مجاني', style: green),
+            ],
+          ),
+          Row(
+            children: [
+              Text('أجور المواد والأدوات', style: small),
+              const Spacer(),
+              Text('20 ليرة جديدة', style: green),
+            ],
+          ),
+        ],
       ),
     );
   }

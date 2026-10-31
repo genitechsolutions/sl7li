@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/app_icon_button.dart';
 import '../../../data/craftsman_data.dart';
-import '../../notifications/notifications_screen.dart';
+import '../widgets/craftsman_header.dart';
 import '../widgets/craftsman_request_card.dart';
 import 'craftsman_request_details_screen.dart';
 import 'offer_dialogs.dart';
+import 'task_dialogs.dart';
 
-/// تاب "الطلبات" عند المهني: "مهامي الحالية" و"الطلبات المتاحة" مع فلتر بحسب الحالة/الخدمة.
+/// تاب "الطلبات" عند المهني: "مهامي الحالية" / "الطلبات المتاحة" مع فلتر بحسب الحالة.
 class CraftsmanRequestsTab extends StatefulWidget {
-  const CraftsmanRequestsTab({super.key});
+  const CraftsmanRequestsTab({super.key, this.empty = false});
+
+  /// للعرض بالحالة الفاضية (frames Empty status).
+  final bool empty;
 
   @override
   State<CraftsmanRequestsTab> createState() => _CraftsmanRequestsTabState();
@@ -23,66 +27,80 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
   int _filter = 0;
 
   static const _taskFilters = [
-    'الكل (9)',
-    'عرض مرسل (3)',
-    'تم الاتفاق (2)',
-    'قيد التنفيذ (2)',
-    'مكتملة (2)',
+    'الكل',
+    'عرض مرسل',
+    'تم الاتفاق',
+    'قيد التنفيذ',
+    'مكتملة',
+    'ملغاة',
   ];
   static const _availableFilters = [
-    'الكل (7)',
-    'خدمات إصلاحات الكهربائية (3)',
-    'التكييف (2)',
-    'السباكة (2)',
+    'الكل',
+    'خدمات إصلاحات الكهربائية',
+    'التكييف',
+    'السباكة',
   ];
+
+  List<CraftsmanRequest> get _items {
+    if (widget.empty) {
+      return const [];
+    }
+    if (_mode == 1) {
+      return _filter == 0
+          ? sampleAvailableRequests
+          : sampleAvailableRequests.take(1).toList();
+    }
+    final all = [
+      ...sampleCraftsmanTasks,
+      ...sampleDoneTasks,
+      ...sampleCancelledTasks,
+    ];
+    return switch (_filter) {
+      0 => all,
+      1 =>
+        all
+            .where((r) => r.state == CraftsmanRequestState.task && r.stage == 0)
+            .toList(),
+      2 =>
+        all
+            .where((r) => r.state == CraftsmanRequestState.task && r.stage == 1)
+            .toList(),
+      3 =>
+        all
+            .where((r) => r.state == CraftsmanRequestState.task && r.stage == 2)
+            .toList(),
+      4 => all.where((r) => r.state == CraftsmanRequestState.done).toList(),
+      _ =>
+        all
+            .where(
+              (r) =>
+                  r.state == CraftsmanRequestState.cancelled ||
+                  r.state == CraftsmanRequestState.withdrawn,
+            )
+            .toList(),
+    };
+  }
 
   void _open(CraftsmanRequest r) => Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (_) =>
-          CraftsmanRequestDetailsScreen(request: r, offerSent: r.stage != null),
+      builder: (_) => CraftsmanRequestDetailsScreen(
+        request: r,
+        offerSent: r.state != CraftsmanRequestState.open,
+      ),
     ),
   );
-
-  Future<void> _sendOffer(CraftsmanRequest r) =>
-      showSendOfferFlow(context, requestTitle: r.title);
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final filters = _mode == 0 ? _taskFilters : _availableFilters;
-    final items = _mode == 0 ? sampleCraftsmanTasks : sampleAvailableRequests;
+    final items = _items;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          color: colors.background,
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          child: SafeArea(
-            bottom: false,
-            child: Row(
-              children: [
-                Text(
-                  'الطلبات',
-                  style: AppTextStyles.title24Medium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                AppIconButton(
-                  icon: 'assets/icons/ic_bell.svg',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const NotificationsScreen(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        const CraftsmanHeader(),
         Expanded(
           child: ListView(
             padding: EdgeInsets.zero,
@@ -98,9 +116,9 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                   ),
                   child: Row(
                     children: [
-                      for (final (i, label) in const [
-                        'مهامي الحالية (9)',
-                        'الطلبات المتاحة (7)',
+                      for (final (i, label) in [
+                        'مهامي الحالية (${widget.empty ? 0 : 9})',
+                        'الطلبات المتاحة (${widget.empty ? 0 : 7})',
                       ].indexed)
                         Expanded(
                           child: GestureDetector(
@@ -157,7 +175,7 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                         ),
                       ),
                       child: Text(
-                        filters[i],
+                        '${filters[i]} (${widget.empty ? 0 : _countFor(i)})',
                         style: AppTextStyles.title18Medium.copyWith(
                           fontWeight: FontWeight.w600,
                           color: i == _filter
@@ -169,22 +187,105 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              for (final r in items)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                  child: CraftsmanRequestCard(
-                    request: r,
-                    onDetails: () => _open(r),
-                    onPrimary: () => r.stage == null ? _sendOffer(r) : _open(r),
-                    onMore: () {},
+              if (items.isEmpty)
+                _Empty(
+                  mode: _mode,
+                  onSeeAvailable: () => setState(() => _mode = 1),
+                )
+              else ...[
+                const SizedBox(height: 16),
+                for (final r in items)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: CraftsmanRequestCard(
+                      request: r,
+                      onDetails: () => _open(r),
+                      onPrimary: () => switch (r.state) {
+                        CraftsmanRequestState.task => showTaskStatusDialog(
+                          context,
+                        ),
+                        _ => showSendOfferFlow(context, requestTitle: r.title),
+                      },
+                      onMore: () {},
+                    ),
                   ),
-                ),
+              ],
               const SizedBox(height: 8),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  int _countFor(int i) {
+    final saved = _filter;
+    _filter = i;
+    final n = _items.length;
+    _filter = saved;
+    return n;
+  }
+}
+
+class _Empty extends StatelessWidget {
+  const _Empty({required this.mode, required this.onSeeAvailable});
+
+  final int mode;
+  final VoidCallback onSeeAvailable;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
+      child: Column(
+        children: [
+          SvgPicture.asset(
+            'assets/icons/cr_empty_offers.svg',
+            width: 178,
+            height: 178,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            mode == 0 ? 'لا توجد مهام حالية' : 'لا توجد طلبات متاحة حالياً',
+            style: AppTextStyles.title22Bold,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            mode == 0
+                ? 'ستظهر هنا الطلبات التي قدمت لها عروضا لمتابعتها'
+                : 'ستجد هنا الطلبات المناسبة لخبراتك وموقع عملك حين توفرها',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body16.copyWith(
+              color: colors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          if (mode == 0) ...[
+            const SizedBox(height: 28),
+            GestureDetector(
+              onTap: onSeeAvailable,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'رؤية الطلبات المتاحة',
+                  style: AppTextStyles.title18Medium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.textOnPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
