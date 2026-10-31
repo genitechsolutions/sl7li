@@ -25,6 +25,9 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
 
   final _phone = TextEditingController();
 
+  // بيبين خطأ الرقم بعد ما المستخدم يطلع من الحقل (متل التصميم).
+  bool _touched = false;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +41,8 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   }
 
   bool get _phoneValid => PhoneField.isValid(_phone.text);
+
+  bool get _showPhoneError => _touched && _phone.text.isNotEmpty && !_phoneValid;
 
   // TODO: إرسال رمز التحقق الحقيقي (API).
   void _sendCode() {
@@ -108,12 +113,26 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  PhoneField(
-                    controller: _phone,
-                    inline: true,
-                    restrictInput: true,
-                    onCountryTap: () {}, // TODO: pick country code
+                  Focus(
+                    onFocusChange: (focused) {
+                      if (!focused) setState(() => _touched = true);
+                    },
+                    child: PhoneField(
+                      controller: _phone,
+                      inline: true,
+                      restrictInput: true,
+                      hasError: _showPhoneError,
+                      onCountryTap: () {}, // TODO: pick country code
+                    ),
                   ),
+                  if (_showPhoneError)
+                    Padding(
+                      padding: _labelPadding.add(const EdgeInsetsDirectional.only(top: 4)),
+                      child: Text(
+                        'رقم الهاتف يجب أن يكون ${PhoneField.length} أرقام',
+                        style: AppTextStyles.body12.copyWith(color: context.colors.error),
+                      ),
+                    ),
                 ],
               ),
             ),

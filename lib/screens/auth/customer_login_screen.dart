@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/form/app_select_field.dart';
 import '../../core/widgets/form/app_text_field.dart';
@@ -151,7 +152,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
               const SizedBox(height: 8),
               FieldPopup(
                 above: true,
-                isOpen: _districtFocus.hasFocus && matches.isNotEmpty,
+                isOpen: _districtFocus.hasFocus && (matches.isNotEmpty || _district.text.trim().isNotEmpty),
                 onDismiss: _districtFocus.unfocus,
                 panel: FieldPopupPanel(
                   child: Padding(
@@ -161,6 +162,29 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                       children: [
                         for (final d in matches.take(4))
                           FieldPopupItem(label: d, height: 42, onTap: () => _pickDistrict(d)),
+                        if (matches.isEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Text(
+                              'لا توجد مناطق تطابق البحث',
+                              style: AppTextStyles.body16.copyWith(color: context.colors.textSecondary),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => _pickDistrict(_district.text.trim()),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Text(
+                                'إضغط هنا لإضافة “${_district.text.trim()}”',
+                                style: AppTextStyles.body16.copyWith(
+                                  color: context.colors.link,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: context.colors.link,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

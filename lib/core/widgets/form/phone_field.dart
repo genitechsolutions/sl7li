@@ -13,6 +13,7 @@ class PhoneField extends StatelessWidget {
     required this.onCountryTap,
     this.inline = false,
     this.restrictInput = false,
+    this.hasError = false,
   });
 
   /// رمز الدولة الوحيد هلق.
@@ -41,6 +42,9 @@ class PhoneField extends StatelessWidget {
   /// أرقام بس، أقصى شي [length]، وبدون صفر بالأول (صفحة تسجيل الدخول بس).
   final bool restrictInput;
 
+  /// حدود حمرا (رقم غير صحيح).
+  final bool hasError;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -49,6 +53,7 @@ class PhoneField extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.fieldFill,
         borderRadius: BorderRadius.circular(12),
+        border: hasError ? Border.all(color: context.colors.error) : null,
       ),
       child: Row(
         children: [
