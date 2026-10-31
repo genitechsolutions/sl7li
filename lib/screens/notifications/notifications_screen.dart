@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_icon_button.dart';
 import '../../data/chat_data.dart';
 import '../../data/dummy_data.dart';
+import '../my_requests/request_details_screen.dart';
 
 /// الإشعارات: مهمة / اليوم / الأسبوع الماضي، مع "تمييز الكل كمقروءة".
 class NotificationsScreen extends StatelessWidget {
@@ -223,21 +224,31 @@ class _NotificationCard extends StatelessWidget {
               ),
               if (item.actionLabel != null) ...[
                 const SizedBox(height: 12),
-                // TODO: navigate to request details
                 Center(
-                  child: Container(
-                    width: 160,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colors.accent,
-                      borderRadius: BorderRadius.circular(12),
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RequestDetailsScreen(
+                          request: sampleActiveRequests[2],
+                          completionPending: true,
+                        ),
+                      ),
                     ),
-                    child: Text(
-                      item.actionLabel!,
-                      style: AppTextStyles.title18Medium.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colors.textOnAccent,
+                    child: Container(
+                      width: 160,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: colors.accent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        item.actionLabel!,
+                        style: AppTextStyles.title18Medium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colors.textOnAccent,
+                        ),
                       ),
                     ),
                   ),

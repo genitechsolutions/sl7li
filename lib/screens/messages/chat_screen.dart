@@ -736,6 +736,9 @@ class _Composer extends StatelessWidget {
                       Expanded(
                         child: TextField(
                           controller: controller,
+                          minLines: 1,
+                          maxLines: 5,
+                          keyboardType: TextInputType.multiline,
                           style: AppTextStyles.body16,
                           decoration: InputDecoration(
                             hintText: 'اكتب رسالتك...',

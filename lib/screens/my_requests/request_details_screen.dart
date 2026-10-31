@@ -18,10 +18,14 @@ class RequestDetailsScreen extends StatefulWidget {
     super.key,
     required this.request,
     this.initialTab = 0,
+    this.completionPending = false,
   });
 
   final MyRequest request;
   final int initialTab;
+
+  /// المهني أبلغ عن إنجاز الطلب وبانتظار تأكيد الزبون (من الإشعارات).
+  final bool completionPending;
 
   @override
   State<RequestDetailsScreen> createState() => _RequestDetailsScreenState();
@@ -44,6 +48,7 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
         backgroundColor: colors.background,
         bottomNavigationBar: _BottomBar(
           request: widget.request,
+          completionPending: widget.completionPending,
           offersTab: _tab == 1,
         ),
         body: Column(
@@ -113,6 +118,48 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: OfferTile(offer: sampleOtherOffers[0], onOpen: () {}),
         ),
+        if (widget.completionPending)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colors.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 18,
+                        color: colors.warning,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'تأكيد إنجاز الطلب',
+                        style: AppTextStyles.body16.copyWith(
+                          color: colors.warning,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'أبلغ المهني Mevora عن إنجاز هذا الطلب, يرجى تأكيد الإنجاز أو الاعتراض في حال عدم إنجاز العمل مع المهني',
+                    style: AppTextStyles.body12.copyWith(
+                      fontSize: 13,
+                      color: colors.warning,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
       Padding(
         padding: const EdgeInsets.fromLTRB(32, 24, 32, 0),
@@ -316,10 +363,15 @@ class _Header extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.request, required this.offersTab});
+  const _BottomBar({
+    required this.request,
+    required this.offersTab,
+    required this.completionPending,
+  });
 
   final MyRequest request;
   final bool offersTab;
+  final bool completionPending;
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +425,21 @@ class _BottomBar extends StatelessWidget {
             spacing: 7,
             children: request.hasCraftsman
                 ? [
-                    if (request.status == RequestStatus.done && !request.rated)
+                    if (completionPending) ...[
+                      button(
+                        'تحديث حالة الطلب',
+                        bg: colors.primary,
+                        fg: colors.textOnPrimary,
+                        onTap: () => runUpdateStatusFlow(context),
+                      ),
+                      // TODO: الاعتراض على الإنجاز (ما في نافذة بالتصميم)
+                      button(
+                        'الاعتراض على إنجاز الطلب',
+                        bg: colors.error,
+                        fg: colors.textOnPrimary,
+                      ),
+                    ] else if (request.status == RequestStatus.done &&
+                        !request.rated)
                       button(
                         'تقييم الخدمة',
                         bg: colors.accent,
