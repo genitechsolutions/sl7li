@@ -42,6 +42,8 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _controller.addListener(() => setState(() {}));
     _scroll.addListener(_onScroll);
+    // قيّم زر النزول/العودة بعد أول رسم (قبل أي تمرير).
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
   }
 
   void _onScroll() {
