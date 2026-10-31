@@ -7,6 +7,7 @@ import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/craftsman_avatar.dart';
 import '../../../core/widgets/form/app_select_field.dart';
 import '../../../core/widgets/form/options_sheet.dart';
+import '../../new_request/new_request_screen.dart';
 
 // ───────────────────────── تحديث حالة الطلب ─────────────────────────
 
@@ -604,13 +605,16 @@ class _RatingDialogState extends State<_RatingDialog> {
 }
 
 /// مسار "تحديث حالة الطلب": النافذة الرئيسية ثم الاتفاق/الإلغاء حسب الاختيار.
-/// TODO: "تعديل الطلب" (frames Editing) لسا ما انبنت؛ "تم إنجاز المهمة" بدها تحديث الحالة فعلياً.
+/// TODO: "تم إنجاز المهمة" بدها تحديث الحالة فعلياً.
 Future<void> runUpdateStatusFlow(BuildContext context) async {
   final result = await showUpdateStatusDialog(context);
   if (!context.mounted) return;
   switch (result) {
     case 'agree':
       await showAgreementDialog(context);
+    case 'edit':
+      // TODO: تعبئة الطلب الحالي مسبقاً (ما في frames مخصصة)؛ هلق بيفتح خطوات الطلب.
+      await Navigator.push(context, NewRequestScreen.route());
     case 'cancel':
       await showCancelRequestDialog(context);
   }

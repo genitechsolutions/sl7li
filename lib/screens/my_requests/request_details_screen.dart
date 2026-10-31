@@ -448,7 +448,7 @@ class _BottomBar extends StatelessWidget {
                       )
                     else if (request.status == RequestStatus.active)
                       button(
-                        'تحديث الحالة',
+                        'تحديث حالة الطلب',
                         bg: colors.primary,
                         fg: colors.textOnPrimary,
                         onTap: () => runUpdateStatusFlow(context),
