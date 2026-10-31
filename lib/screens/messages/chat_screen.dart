@@ -105,9 +105,9 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             _Header(conversation: widget.conversation),
             Expanded(
-              // TODO: asset — نقشة الصواعق الخفيفة بخلفية الدردشة (Figma 327:900) محتاجة تصدير.
               child: Stack(
                 children: [
+                  const Positioned.fill(child: _ChatPattern()),
                   ListView(
                     controller: _scroll,
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
@@ -372,6 +372,46 @@ PopupMenuItem<String> _menuItem(
       ],
     ),
   );
+}
+
+/// نقشة صواعق خفيفة بخلفية الدردشة (Figma ما بيصدّرها كأصل، فبنرسمها من شكل الـ Bolt).
+class _ChatPattern extends StatelessWidget {
+  const _ChatPattern();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.colors.textHint.withValues(alpha: 0.06);
+
+    return IgnorePointer(
+      child: LayoutBuilder(
+        builder: (context, box) {
+          const cellW = 118.0;
+          const cellH = 104.0;
+          final cols = (box.maxWidth / cellW).ceil() + 1;
+          final rows = (box.maxHeight / cellH).ceil() + 1;
+
+          return ClipRect(
+            child: Stack(
+              children: [
+                for (var r = 0; r < rows; r++)
+                  for (var c = 0; c < cols; c++)
+                    Positioned(
+                      left: c * cellW + (r.isOdd ? cellW / 2 : 0) - 20,
+                      top: r * cellH,
+                      child: SvgPicture.asset(
+                        'assets/icons/onboarding_bolt.svg',
+                        width: 44,
+                        height: 35,
+                        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _Pill extends StatelessWidget {
