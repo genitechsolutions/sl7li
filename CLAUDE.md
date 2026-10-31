@@ -65,6 +65,7 @@
 - `form/`: `PhoneField` (رمز +963، `inline` = شكل التصميم: الرقم جنب الرمز — مستعمل بالدخول وطلب الخدمة، `restrictInput` للتحقق، `PhoneField.format()`)، `FormLabel(starAfterNote, noteSize)`، `FormLabel` (نجمة حمرا / ملاحظة "(اختياري)")، `AppTextField`، `AppSelectField` (معطّل لما `onTap: null`، `hasError`)، `AppToggle` (أحمر مطفي/أخضر شغّال)، `FieldIcons`، `showOptionsSheet()`.
 
 ## الثيم (فاتح + داكن)
+- **ألوان الداكن بالتصميم نفسه** (مأخوذة من `get_variable_defs` على إطارات Figma الداكنة): فيها توكنات إضافية بـ `AppColors`: `urgent`، `destructive` (زر التحذير)، `accentButton` (الأصفر كأزرار: داكن #EBB409)، `stepNextIcon`، `barrier`، `chatSent`/`chatBarrier`، `notice*`، `chipText`، و**`pageAlt`/`cardAlt`** لصفحات "المعكوسة" (طلباتي، الإشعارات، الإعدادات): بالداكن الصفحة أغمق (#171922) والكروت أفتح (#1F222E).
 - **Dark mode حسب إعداد الجهاز** (`ThemeMode.system` بـ `main.dart`). زر التبديل موجود بالإعدادات (الوضع المظلم).
 - ألوان: [app_colors.dart](lib/core/theme/app_colors.dart) — `ThemeExtension` فيها `AppColors.light` و`AppColors.dark`. **بالكود دايماً `context.colors.x`** (مش ثابتة → ما بتنحط جوا `const`، وأي helper بدو `BuildContext`).
   - فاتح: `primary #36407E`، `accent #F7C425`، `background #F9F9FB`، `surface #F0F0F5`، `border #C8CDDA`، `textPrimary #171922`، `textSecondary #68719A`، `textHint #989FBA`، `link #2695D0`، `error #EB1809`.

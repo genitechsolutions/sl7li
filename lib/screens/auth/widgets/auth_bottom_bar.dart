@@ -26,6 +26,8 @@ class AuthBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // الكيبورد مفتوح: بيضل الزر الرئيسي بس (متل تصميم Focus).
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return SafeArea(
       top: false,
       child: Padding(
@@ -44,7 +46,9 @@ class AuthBottomBar extends StatelessWidget {
                   foregroundColor: context.colors.textOnPrimary,
                   disabledBackgroundColor: context.colors.disabled,
                   disabledForegroundColor: context.colors.textOnPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   textStyle: AppTextStyles.title16,
                 ),
                 child: Row(
@@ -64,7 +68,7 @@ class AuthBottomBar extends StatelessWidget {
                 ),
               ),
             ),
-            if (secondaryLabel != null)
+            if (secondaryLabel != null && !keyboardOpen)
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -73,16 +77,19 @@ class AuthBottomBar extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: context.colors.accent,
                     foregroundColor: context.colors.textPrimary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     textStyle: AppTextStyles.title16,
                   ),
                   child: Text(secondaryLabel!),
                 ),
               ),
-            Padding(
-              padding: EdgeInsets.only(top: secondaryLabel != null ? 9 : 0),
-              child: note,
-            ),
+            if (!keyboardOpen)
+              Padding(
+                padding: EdgeInsets.only(top: secondaryLabel != null ? 9 : 0),
+                child: note,
+              ),
           ],
         ),
       ),
@@ -96,11 +103,12 @@ class AuthNote extends StatelessWidget {
 
   final List<InlineSpan> spans;
 
-  static TextStyle linkStyle(BuildContext context) => AppTextStyles.body14.copyWith(
-    color: context.colors.link,
-    decoration: TextDecoration.underline,
-    decorationColor: context.colors.link,
-  );
+  static TextStyle linkStyle(BuildContext context) =>
+      AppTextStyles.body14.copyWith(
+        color: context.colors.link,
+        decoration: TextDecoration.underline,
+        decorationColor: context.colors.link,
+      );
 
   @override
   Widget build(BuildContext context) {

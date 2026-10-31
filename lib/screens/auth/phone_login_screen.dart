@@ -122,6 +122,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                       inline: true,
                       restrictInput: true,
                       hasError: _showPhoneError,
+                      showFocusBorder: true,
                       onCountryTap: () {}, // TODO: pick country code
                     ),
                   ),

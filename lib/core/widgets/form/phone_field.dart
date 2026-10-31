@@ -6,7 +6,7 @@ import '../../theme/app_text_styles.dart';
 
 /// حقل رقم الواتساب: الرقم، ورمز الدولة (+963) مع العلم.
 /// [inline]: شكل التصميم (تسجيل الدخول وطلب الخدمة) — الرقم لاصق برمز الدولة (عاليسار).
-class PhoneField extends StatelessWidget {
+class PhoneField extends StatefulWidget {
   const PhoneField({
     super.key,
     this.controller,
@@ -14,6 +14,7 @@ class PhoneField extends StatelessWidget {
     this.inline = false,
     this.restrictInput = false,
     this.hasError = false,
+    this.showFocusBorder = false,
   });
 
   /// رمز الدولة الوحيد هلق.
@@ -23,11 +24,14 @@ class PhoneField extends StatelessWidget {
   static const length = 9;
 
   /// الرقم صحيح إذا كان [length] أرقام بالضبط.
-  static bool isValid(String number) => RegExp('^[1-9][0-9]{${length - 1}}\$').hasMatch(number);
+  static bool isValid(String number) =>
+      RegExp('^[1-9][0-9]{${length - 1}}\$').hasMatch(number);
 
   /// "993930716" → "+963 993 930 716" (بيشيل الصفر بالأول إذا انكتب).
   static String format(String number) {
-    final digits = number.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^0+'), '');
+    final digits = number
+        .replaceAll(RegExp(r'\D'), '')
+        .replaceFirst(RegExp(r'^0+'), '');
     final groups = [
       for (var i = 0; i < digits.length; i += 3)
         digits.substring(i, (i + 3).clamp(0, digits.length)),
@@ -45,27 +49,59 @@ class PhoneField extends StatelessWidget {
   /// حدود حمرا (رقم غير صحيح).
   final bool hasError;
 
+  /// حدود كحلي 2px برّا لما الحقل يتفعّل (صفحة تسجيل الدخول).
+  final bool showFocusBorder;
+
+  @override
+  State<PhoneField> createState() => _PhoneFieldState();
+}
+
+class _PhoneFieldState extends State<PhoneField> {
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final inline = widget.inline;
     return Container(
       height: 52,
       padding: EdgeInsetsDirectional.fromSTEB(20, 0, inline ? 12 : 20, 0),
       decoration: BoxDecoration(
         color: context.colors.fieldFill,
         borderRadius: BorderRadius.circular(12),
-        border: hasError ? Border.all(color: context.colors.error) : null,
+        border: widget.hasError
+            ? Border.all(color: context.colors.error)
+            : widget.showFocusBorder && _focus.hasFocus
+            ? Border.all(
+                color: context.colors.primaryContent,
+                width: 2,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              )
+            : null,
       ),
       child: Row(
         children: [
           Expanded(
             child: TextField(
-              controller: controller,
+              controller: widget.controller,
+              focusNode: _focus,
               keyboardType: TextInputType.phone,
-              inputFormatters: restrictInput
+              inputFormatters: widget.restrictInput
                   ? [
                       FilteringTextInputFormatter.digitsOnly,
                       FilteringTextInputFormatter.deny(RegExp('^0+')),
-                      LengthLimitingTextInputFormatter(length),
+                      LengthLimitingTextInputFormatter(PhoneField.length),
                     ]
                   : null,
               // الرقم بينكتب من اليسار لليمين، بس بيضل على يمين الحقل متل التصميم
@@ -78,7 +114,9 @@ class PhoneField extends StatelessWidget {
                 isCollapsed: true,
                 border: InputBorder.none,
                 hintText: inline ? 'XXX XXX XXX' : '993 930 716',
-                hintStyle: AppTextStyles.body16.copyWith(color: context.colors.textHint),
+                hintStyle: AppTextStyles.body16.copyWith(
+                  color: context.colors.textHint,
+                ),
               ),
             ),
           ),
@@ -86,7 +124,7 @@ class PhoneField extends StatelessWidget {
           Container(width: 1, height: 28, color: context.colors.primary),
           SizedBox(width: inline ? 9 : 10),
           GestureDetector(
-            onTap: onCountryTap,
+            onTap: widget.onCountryTap,
             child: Row(
               children: [
                 Icon(
@@ -95,7 +133,11 @@ class PhoneField extends StatelessWidget {
                   color: context.colors.textSecondary,
                 ),
                 SizedBox(width: inline ? 4 : 6),
-                Text(countryCode, textDirection: TextDirection.ltr, style: AppTextStyles.body16),
+                Text(
+                  PhoneField.countryCode,
+                  textDirection: TextDirection.ltr,
+                  style: AppTextStyles.body16,
+                ),
                 SizedBox(width: inline ? 8 : 6),
                 const _SyrianFlag(),
               ],
