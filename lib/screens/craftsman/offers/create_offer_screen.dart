@@ -203,25 +203,45 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
               ], (v) => _offerType = v),
             ),
             if (_offerType == 'سعر خاص') ...[
-              label(const FormLabel('السعر', isRequired: true)),
               Row(
                 spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 2,
-                    child: AppTextField(
-                      hint: 'سعر العرض',
-                      controller: _price,
-                      keyboardType: TextInputType.number,
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        label(const FormLabel('السعر', isRequired: true)),
+                        AppTextField(
+                          hint: 'سعر العرض',
+                          controller: _price,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ],
                     ),
                   ),
                   Expanded(
-                    child: IgnorePointer(
-                      child: AppSelectField(
-                        hint: 'العملة',
-                        value: 'ليرة سورية',
-                        onTap: () {},
-                      ),
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        label(
+                          Text(
+                            'العملة',
+                            style: AppTextStyles.body14.copyWith(
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        IgnorePointer(
+                          child: AppSelectField(
+                            hint: 'العملة',
+                            value: 'ليرة سورية',
+                            onTap: () {},
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -382,14 +402,14 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  AppCheckbox(value: _confirmed),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'أؤكد أن العنوان والوصف والصور لا تحتوي على أي رقم هاتف ظاهر *',
                       style: AppTextStyles.body16.copyWith(height: 1.5),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  AppCheckbox(value: _confirmed),
                 ],
               ),
             ),
@@ -500,6 +520,31 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                   ),
                 ),
               ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text.rich(
+                TextSpan(
+                  style: AppTextStyles.body16.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                  children: [
+                    const TextSpan(text: 'يمكنك التواصل مع '),
+                    TextSpan(
+                      text: 'خدمة العملاء',
+                      style: TextStyle(
+                        color: colors.link,
+                        decoration: TextDecoration.underline,
+                        decorationColor: colors.link,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: ' في حال تأخر تأكيد العرض أكثر من ذلك',
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
         );
     }

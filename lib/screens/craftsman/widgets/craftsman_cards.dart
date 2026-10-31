@@ -68,7 +68,7 @@ class CraftsmanProgressCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
@@ -94,7 +94,7 @@ class CraftsmanProgressCard extends StatelessWidget {
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
                       color: colors.verified,
-                      height: 1.5,
+                      height: 1.85,
                     ),
                   ),
               ],

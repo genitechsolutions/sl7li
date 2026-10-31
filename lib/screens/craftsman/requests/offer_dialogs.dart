@@ -296,6 +296,17 @@ class _OfferSheetState extends State<_OfferSheet> {
           ],
         );
 
+    Widget labeled(String text, Widget field) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: 12, bottom: 8),
+          child: Text(text, style: small.copyWith(fontSize: 14)),
+        ),
+        field,
+      ],
+    );
+
     Widget moneyField(String hint, String initial, ValueChanged<String> on) =>
         AppTextField(
           hint: hint,
@@ -361,36 +372,46 @@ class _OfferSheetState extends State<_OfferSheet> {
               const SizedBox(height: 12),
               Row(
                 spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_d.pricing == 'نطاق سعري') ...[
                     Expanded(
-                      child: moneyField('من', _d.price, (v) => _d.price = v),
+                      child: labeled(
+                        'من',
+                        moneyField('من', _d.price, (v) => _d.price = v),
+                      ),
                     ),
                     Expanded(
-                      child: moneyField(
+                      child: labeled(
                         'إلى',
-                        _d.priceTo,
-                        (v) => _d.priceTo = v,
+                        moneyField('إلى', _d.priceTo, (v) => _d.priceTo = v),
                       ),
                     ),
                   ] else
                     Expanded(
-                      flex: 2,
-                      child: moneyField(
-                        _d.pricing == 'سعر بالساعة'
-                            ? 'السعر / ساعة'
-                            : 'السعر التقديري',
-                        _d.price,
-                        (v) => _d.price = v,
+                      flex: 3,
+                      child: labeled(
+                        'السعر',
+                        moneyField(
+                          _d.pricing == 'سعر بالساعة'
+                              ? 'السعر / ساعة'
+                              : 'السعر التقديري',
+                          _d.price,
+                          (v) => _d.price = v,
+                        ),
                       ),
                     ),
                   Expanded(
-                    child: IgnorePointer(
-                      // TODO: عملات تانية (ما في تصميم)؛ ليرة سورية بس.
-                      child: AppSelectField(
-                        hint: 'العملة',
-                        value: 'ليرة سورية',
-                        onTap: () {},
+                    flex: 2,
+                    child: labeled(
+                      'العملة',
+                      IgnorePointer(
+                        // TODO: عملات تانية (ما في تصميم)؛ ليرة سورية بس.
+                        child: AppSelectField(
+                          hint: 'العملة',
+                          value: 'ليرة سورية',
+                          onTap: () {},
+                        ),
                       ),
                     ),
                   ),

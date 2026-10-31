@@ -4,6 +4,9 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:khaled_flutter/core/widgets/form/app_checkbox.dart';
+import 'package:khaled_flutter/data/craftsman_verification.dart';
+import 'package:khaled_flutter/screens/craftsman/offers/create_offer_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,7 +42,6 @@ import 'package:khaled_flutter/screens/offer_details/offer_details_screen.dart';
 import 'package:khaled_flutter/screens/service_details/service_details_screen.dart';
 import 'package:khaled_flutter/screens/settings/notification_settings_screen.dart';
 import 'package:khaled_flutter/screens/auth/customer_login_screen.dart';
-import 'package:khaled_flutter/screens/craftsman/offers/create_offer_screen.dart';
 import 'package:khaled_flutter/screens/craftsman/offers/my_offers_tab.dart';
 import 'package:khaled_flutter/screens/craftsman/profile/edit_profile_screen.dart';
 import 'package:khaled_flutter/screens/craftsman/signup/signup_step2_screen.dart';
@@ -80,8 +82,79 @@ Future<void> _tap(
   await t.pumpAndSettle();
 }
 
+Future<void> _tapExact(WidgetTester t, String text) async {
+  await t.tap(find.text(text).first);
+  await t.pumpAndSettle();
+}
+
+Future<void> _field(WidgetTester t, int i, String v) async {
+  await t.enterText(find.byType(TextField).at(i), v);
+  await t.pump();
+}
+
+Future<void> _coStep1(WidgetTester t) async {
+  await _field(t, 0, 'عرض خاص');
+  await _field(t, 1, 'وصف العرض');
+  await _tapExact(t, 'اختر نوع الخدمة');
+  await t.tap(find.text('الكهرباء').last);
+  await t.pumpAndSettle();
+  await _tapExact(t, 'المتابعة');
+}
+
+Future<void> _coStep2(WidgetTester t) async {
+  await _coStep1(t);
+  await _field(t, 0, '100');
+  await _tapExact(t, 'إضغط لإضافة صور');
+  await _tapExact(t, 'المتابعة');
+}
+
+Future<void> _coStep3(WidgetTester t) async {
+  await _coStep2(t);
+  await t.tap(find.byType(AppCheckbox).first);
+  await t.pumpAndSettle();
+  await _tapExact(t, 'المتابعة');
+}
+
+Future<void> _sendOfferSheet(WidgetTester t) async {
+  verificationNotifier.value = VerificationStatus.verified;
+  await _tapExact(t, 'تقديم عرض');
+}
+
 /// خطوات بعد فتح الشاشة (تابات/فلاتر)، بالاسم.
 final _prep = <String, Future<void> Function(WidgetTester)>{
+  '24_dark_craftsman_profile': (t) => _tap(t, 'معرض الأعمال'),
+  '41_cr_sending_offer': _sendOfferSheet,
+  '42_cr_confirm_offer': (t) async {
+    await _sendOfferSheet(t);
+    await _field(t, 0, '100');
+    await _tapExact(t, 'إرسال العرض');
+  },
+  '60_cr_ignore_dialog': (t) => _tapExact(t, 'التواصل عبر واتساب'),
+  '47_cr_update_status': (t) => _tapExact(t, 'تحديث الحالة'),
+  '56_cr_verification_needed': (t) => _tapExact(t, 'توثيق حسابي'),
+  '57_cr_verification_uploaded': (t) async {
+    await _tapExact(t, 'توثيق حسابي');
+    await _tapExact(t, 'ارفع صورة الوجه الأمامي للهوية');
+    await t.pump(const Duration(seconds: 3));
+    await t.pumpAndSettle();
+  },
+  '58_cr_logout': (t) => _tapExact(t, 'تسجيل الخروج'),
+  '48_cr_create_offer_step2': _coStep1,
+  '49_cr_create_offer_step3': _coStep2,
+  '50_cr_date_picking': (t) async {
+    await _coStep1(t);
+    await _tapExact(t, 'يوم / شهر / سنة');
+  },
+  '51_cr_create_offer_done': (t) async {
+    await _coStep3(t);
+    await _tapExact(t, 'إنشاء العرض');
+  },
+  '72_rating_dialog': (t) => _tapExact(t, 'تقييم الخدمة'),
+  '75_update_status_dialog': (t) => _tapExact(t, 'تحديث الحالة'),
+  '73_cancel_request_dialog': (t) async {
+    await _tapExact(t, 'تحديث الحالة');
+    await _tapExact(t, 'إلغاء الطلب');
+  },
   '68_my_requests_done': (t) => _tap(t, 'مكتملة', scrollChips: true),
   '69_my_requests_canceled': (t) => _tap(t, 'ملغاة', scrollChips: true),
   '06_craftsman_profile_works': (t) => _tap(t, 'معرض الأعمال'),
@@ -142,7 +215,55 @@ final _screens = <(String, Widget Function())>[
     '71_request_details_open',
     () => mr.RequestDetailsScreen(request: sampleActiveRequests[0]),
   ),
+  (
+    '72_rating_dialog',
+    () => mr.RequestDetailsScreen(request: sampleDoneRequests[0]),
+  ),
+  ('75_update_status_dialog', () => const MyRequestsScreen()),
+  ('73_cancel_request_dialog', () => const MyRequestsScreen()),
+  (
+    '24_dark_craftsman_profile',
+    () => const CraftsmanProfileScreen(profile: sampleCraftsmanProfile),
+  ),
+  ('25_dark_request_step1', () => const NewRequestScreen()),
   // مهني
+  (
+    '41_cr_sending_offer',
+    () => CraftsmanRequestDetailsScreen(request: sampleAvailableRequests.first),
+  ),
+  (
+    '42_cr_confirm_offer',
+    () => CraftsmanRequestDetailsScreen(request: sampleAvailableRequests.first),
+  ),
+  (
+    '60_cr_ignore_dialog',
+    () => CraftsmanRequestDetailsScreen(request: sampleAvailableRequests.first),
+  ),
+  ('47_cr_update_status', () => const CraftsmanHomeScreen(initialTab: 1)),
+  (
+    '56_cr_verification_needed',
+    () => Builder(
+      builder: (c) => Scaffold(
+        backgroundColor: Theme.of(c).extension<AppColors>()!.pageAlt,
+        body: const CraftsmanProfileTab(),
+      ),
+    ),
+  ),
+  (
+    '57_cr_verification_uploaded',
+    () => Builder(
+      builder: (c) => Scaffold(
+        backgroundColor: Theme.of(c).extension<AppColors>()!.pageAlt,
+        body: const CraftsmanProfileTab(),
+      ),
+    ),
+  ),
+  ('58_cr_logout', () => const SettingsScreen(craftsmanMode: true)),
+  ('48_cr_create_offer_step2', () => const CreateOfferScreen()),
+  ('49_cr_create_offer_step3', () => const CreateOfferScreen()),
+  ('50_cr_date_picking', () => const CreateOfferScreen()),
+  ('51_cr_create_offer_done', () => const CreateOfferScreen()),
+  ('74_cr_home', () => const CraftsmanHomeScreen()),
   ('34_cr_signup1', () => const SignupStep1Screen()),
   ('36_cr_signup3', () => SignupStep3Screen(draft: _draft())),
   ('37_cr_signup4', () => SignupStep4Screen(draft: _draft())),
@@ -243,6 +364,7 @@ void main() {
         plex.addFont(rootBundle.load('assets/fonts/IBMPlexSansArabic-$w.ttf'));
       }
       await plex.load();
+      verificationNotifier.value = VerificationStatus.none;
       final root = Platform.environment['FLUTTER_ROOT']!;
       final icons = FontLoader('MaterialIcons')
         ..addFont(
@@ -262,7 +384,7 @@ void main() {
       await tester.runAsync(
         () => tester.pumpWidget(
           MaterialApp(
-            theme: AppTheme.light,
+            theme: name.contains('_dark_') ? AppTheme.dark : AppTheme.light,
             locale: const Locale('ar'),
             supportedLocales: const [Locale('ar')],
             localizationsDelegates: GlobalMaterialLocalizations.delegates,

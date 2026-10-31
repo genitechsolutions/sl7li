@@ -67,7 +67,7 @@ class _HomeTab extends StatelessWidget {
     final label = AppTextStyles.body16.copyWith(color: colors.textSecondary);
     final num = AppTextStyles.title24Medium.copyWith(
       fontWeight: FontWeight.w600,
-      height: 1.5,
+      height: 1.1,
     );
 
     Widget card({
@@ -103,7 +103,7 @@ class _HomeTab extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             value,
           ],
         ),
@@ -196,7 +196,10 @@ class _HomeTab extends StatelessWidget {
                 ],
               ),
               card(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -219,7 +222,7 @@ class _HomeTab extends StatelessWidget {
                         color: colors.textHint,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     money('100000'),
                   ],
                 ),
