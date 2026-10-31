@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../../data/craftsman_verification.dart';
+import '../profile/verification_dialog.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -207,6 +211,11 @@ Future<bool?> showSendOfferFlow(
   BuildContext context, {
   required String requestTitle,
 }) async {
+  // لازم يكون الحساب موثّق (أو بانتظار المراجعة) قبل إرسال عروض.
+  if (verificationNotifier.value == VerificationStatus.none) {
+    await showVerificationDialog(context);
+    return false;
+  }
   final draft = OfferDraft();
   while (true) {
     final proceed = await showModalBottomSheet<bool>(

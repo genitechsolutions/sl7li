@@ -18,9 +18,16 @@ import 'widgets/profile_top_bar.dart';
 import 'widgets/review_card.dart';
 
 class CraftsmanProfileScreen extends StatefulWidget {
-  const CraftsmanProfileScreen({super.key, required this.profile});
+  const CraftsmanProfileScreen({
+    super.key,
+    required this.profile,
+    this.selfView = false,
+  });
 
   final CraftsmanProfile profile;
+
+  /// المهني بيشوف صفحته العامة: الزر السفلي بيرجّعه للملف الشخصي.
+  final bool selfView;
 
   @override
   State<CraftsmanProfileScreen> createState() => _CraftsmanProfileScreenState();
@@ -42,8 +49,12 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
       child: Scaffold(
         backgroundColor: context.colors.background,
         bottomNavigationBar: AppBottomActionBar(
-          label: 'اطلب عرض سعر من المهني',
-          onPressed: () => Navigator.push(context, NewRequestScreen.route()),
+          label: widget.selfView
+              ? 'العودة للملف الشخصي'
+              : 'اطلب عرض سعر من المهني',
+          onPressed: () => widget.selfView
+              ? Navigator.pop(context)
+              : Navigator.push(context, NewRequestScreen.route()),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.only(bottom: 24),
@@ -75,7 +86,10 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
                           size: 22,
                           color: context.colors.textPrimary,
                         ),
-                        Text(profile.craftsman.location, style: AppTextStyles.body18),
+                        Text(
+                          profile.craftsman.location,
+                          style: AppTextStyles.body18,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -87,18 +101,26 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
                     const SizedBox(height: 36),
                     const Padding(
                       padding: _labelPadding,
-                      child: Text('التخصصات المتاحة', style: AppTextStyles.title18Medium),
+                      child: Text(
+                        'التخصصات المتاحة',
+                        style: AppTextStyles.title18Medium,
+                      ),
                     ),
                     const SizedBox(height: 14),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: [for (final s in profile.specialties) AppChip(label: s)],
+                      children: [
+                        for (final s in profile.specialties) AppChip(label: s),
+                      ],
                     ),
                     const SizedBox(height: 28),
                     const Padding(
                       padding: _labelPadding,
-                      child: Text('العروض الخاصة', style: AppTextStyles.title18Medium),
+                      child: Text(
+                        'العروض الخاصة',
+                        style: AppTextStyles.title18Medium,
+                      ),
                     ),
                   ],
                 ),
@@ -116,7 +138,9 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const OfferDetailsScreen(details: sampleOfferDetails),
+                        builder: (_) => const OfferDetailsScreen(
+                          details: sampleOfferDetails,
+                        ),
                       ),
                     ),
                   ),
@@ -134,7 +158,10 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
                       onChanged: (tab) => setState(() => _tab = tab),
                     ),
                     const SizedBox(height: 14),
-                    if (_tab == 0) _works(profile.works) else ..._reviews(profile),
+                    if (_tab == 0)
+                      _works(profile.works)
+                    else
+                      ..._reviews(profile),
                   ],
                 ),
               ),
@@ -155,7 +182,10 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
             Icon(Icons.star_rounded, size: 22, color: context.colors.star),
             Text('${profile.craftsman.rating}', style: AppTextStyles.body18),
             const Spacer(),
-            Text('${profile.reviews.length} مراجعات', style: AppTextStyles.body18),
+            Text(
+              '${profile.reviews.length} مراجعات',
+              style: AppTextStyles.body18,
+            ),
           ],
         ),
       ),

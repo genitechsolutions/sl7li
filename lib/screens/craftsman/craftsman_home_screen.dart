@@ -7,11 +7,12 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/craftsman_data.dart';
 import '../messages/messages_screen.dart';
-import '../settings/settings_screen.dart';
 import 'offers/my_offers_tab.dart';
+import 'profile/craftsman_profile_tab.dart';
 import 'requests/craftsman_request_details_screen.dart';
 import 'requests/craftsman_requests_tab.dart';
 import 'widgets/craftsman_bottom_nav.dart';
+import 'widgets/craftsman_cards.dart';
 import 'widgets/craftsman_header.dart';
 import 'widgets/craftsman_request_card.dart';
 
@@ -28,24 +29,7 @@ class CraftsmanHomeScreen extends StatefulWidget {
 class _CraftsmanHomeScreenState extends State<CraftsmanHomeScreen> {
   late int _tab = widget.initialTab;
 
-  void _select(int i) {
-    // TODO: الرسائل والملف الشخصي للمهني (frames Messages / Profile) لسا ما انبنت بشريط المهني؛ مؤقتاً بنفتح شاشات الزبون.
-    if (i == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const MessagesScreen()),
-      );
-      return;
-    }
-    if (i == 4) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const SettingsScreen()),
-      );
-      return;
-    }
-    setState(() => _tab = i);
-  }
+  void _select(int i) => setState(() => _tab = i);
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +47,8 @@ class _CraftsmanHomeScreenState extends State<CraftsmanHomeScreen> {
             _HomeTab(onSeeRequests: () => setState(() => _tab = 1)),
             const CraftsmanRequestsTab(),
             const MyOffersTab(),
+            const MessagesScreen(craftsmanMode: true),
+            const CraftsmanProfileTab(),
           ],
         ),
       ),
@@ -238,7 +224,7 @@ class _HomeTab extends StatelessWidget {
                   ],
                 ),
               ),
-              _ProgressCard(),
+              const CraftsmanProgressCard(),
             ],
           ),
         ),
@@ -295,14 +281,14 @@ class _HomeTab extends StatelessWidget {
                       spacing: 12,
                       children: [
                         Expanded(
-                          child: _WalletBtn(
+                          child: WalletBtn(
                             label: 'شحن الرصيد',
                             icon: 'assets/icons/cr_charge.svg',
                             filled: true,
                           ),
                         ),
                         Expanded(
-                          child: _WalletBtn(
+                          child: WalletBtn(
                             label: 'سحب رصيد',
                             icon: 'assets/icons/cr_withdraw.svg',
                             filled: false,
@@ -313,13 +299,13 @@ class _HomeTab extends StatelessWidget {
                   ],
                 ),
               ),
-              _TxRow(
+              CraftsmanTxRow(
                 title: 'أرباح خدمة - تنظيف مكيفات',
                 value: '+1000',
                 color: colors.success,
                 icon: 'assets/icons/cr_arrow_in.svg',
               ),
-              _TxRow(
+              CraftsmanTxRow(
                 title: 'سحب رصيد',
                 value: '-1000',
                 color: colors.error,
@@ -459,220 +445,6 @@ class _MiniRequest extends StatelessWidget {
                 style: AppTextStyles.body16.copyWith(color: colors.chipText),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProgressCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.cardAlt,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 68,
-                height: 68,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SvgPicture.asset('assets/icons/cr_ring_a.svg', width: 68),
-                    SvgPicture.asset('assets/icons/cr_ring_b.svg', width: 58),
-                    SvgPicture.asset(
-                      'assets/icons/cr_medal.svg',
-                      width: 24,
-                      height: 24,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'مسار التطور',
-                      style: AppTextStyles.body12.copyWith(
-                        fontSize: 13,
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                    Text(
-                      'المسار الحالي: 1 - بداية الرحلة',
-                      style: AppTextStyles.body16Medium,
-                    ),
-                    Text(
-                      'المسار التالي: 2 - حرفي موثق',
-                      style: AppTextStyles.body16.copyWith(
-                        color: colors.success,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colors.noticeInfo.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'الخطوات الموصى بها لرفع المستوى',
-                  style: AppTextStyles.body16.copyWith(color: colors.verified),
-                ),
-                const SizedBox(height: 8),
-                for (final t in const [
-                  'أضف صورة لبروفايلك (من الملف الشخصي)',
-                  'أضف صور في معرض أعمالك (من الملف الشخصي)',
-                  'ارفع صورة هويتك لتوثيق حسابك (من الملف الشخصي)',
-                ])
-                  Text(
-                    '•  $t',
-                    style: AppTextStyles.body12.copyWith(
-                      fontSize: 13,
-                      color: colors.verified,
-                      height: 1.5,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WalletBtn extends StatelessWidget {
-  const _WalletBtn({
-    required this.label,
-    required this.icon,
-    required this.filled,
-  });
-
-  final String label;
-  final String icon;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: filled ? colors.primaryContent : colors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: filled ? null : Border.all(color: colors.border),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.title18Medium.copyWith(
-              fontWeight: FontWeight.w600,
-              color: filled ? colors.primary : colors.primaryContent,
-            ),
-          ),
-          const SizedBox(width: 8),
-          SvgPicture.asset(
-            icon,
-            width: 24,
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              filled ? colors.primary : colors.primaryContent,
-              BlendMode.srcIn,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TxRow extends StatelessWidget {
-  const _TxRow({
-    required this.title,
-    required this.value,
-    required this.color,
-    required this.icon,
-  });
-
-  final String title;
-  final String value;
-  final Color color;
-  final String icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colors.cardAlt,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          SvgPicture.asset(icon, width: 32, height: 32),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTextStyles.body16),
-                Text(
-                  'منذ 3 أيام',
-                  style: AppTextStyles.body12.copyWith(
-                    fontSize: 13,
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text.rich(
-            textDirection: TextDirection.ltr,
-            TextSpan(
-              style: AppTextStyles.title24Medium.copyWith(
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-              children: [
-                TextSpan(text: '$value '),
-                TextSpan(
-                  text: 'ل.س',
-                  style: AppTextStyles.body12.copyWith(
-                    fontSize: 13,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

@@ -18,7 +18,13 @@ import 'widgets/message_status_icon.dart';
 
 /// "محادثاتي" — قائمة المحادثات مع الحرفيين (تاب "الرسائل").
 class MessagesScreen extends StatelessWidget {
-  const MessagesScreen({super.key});
+  const MessagesScreen({super.key, this.craftsmanMode = false});
+
+  /// رسائل المهني: بدون الشريط السفلي، ومحادثات مع الزبائن.
+  final bool craftsmanMode;
+
+  List<Conversation> get _list =>
+      craftsmanMode ? sampleCustomerConversations : sampleConversations;
 
   @override
   Widget build(BuildContext context) {
@@ -28,20 +34,25 @@ class MessagesScreen extends StatelessWidget {
       value: AppTheme.overlayStyle(context),
       child: Scaffold(
         backgroundColor: colors.background,
-        bottomNavigationBar: AppBottomNavBar(
-          currentIndex: 2,
-          onTap: (index) {
-            if (index == 0) Navigator.of(context).popUntil((r) => r.isFirst);
-            if (index == 1) Navigator.of(context).pop();
-            if (index == 3) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            }
-          },
-          onAddTap: () => Navigator.push(context, NewRequestScreen.route()),
-        ),
+        bottomNavigationBar: craftsmanMode
+            ? null
+            : AppBottomNavBar(
+                currentIndex: 2,
+                onTap: (index) {
+                  if (index == 0) {
+                    Navigator.of(context).popUntil((r) => r.isFirst);
+                  }
+                  if (index == 1) Navigator.of(context).pop();
+                  if (index == 3) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                    );
+                  }
+                },
+                onAddTap: () =>
+                    Navigator.push(context, NewRequestScreen.route()),
+              ),
         body: SafeArea(
           bottom: false,
           child: Column(
@@ -109,14 +120,16 @@ class MessagesScreen extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: sampleConversations.length,
+                  itemCount: _list.length,
                   itemBuilder: (context, i) => _ConversationRow(
-                    conversation: sampleConversations[i],
+                    conversation: _list[i],
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            ChatScreen(conversation: sampleConversations[i]),
+                        builder: (_) => ChatScreen(
+                          conversation: _list[i],
+                          craftsmanMode: craftsmanMode,
+                        ),
                       ),
                     ),
                   ),

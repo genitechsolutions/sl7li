@@ -17,9 +17,13 @@ class ChatScreen extends StatefulWidget {
     super.key,
     required this.conversation,
     this.firstTime = false,
+    this.craftsmanMode = false,
   });
 
   final Conversation conversation;
+
+  /// المهني بيحكي مع زبون: بدون شارات Pro/توثيق، وقائمة الخيارات فيها "إبلاغ" بس.
+  final bool craftsmanMode;
 
   /// أول مرة بتفتح المحادثة: بتبيّن بطاقة الحرفي و"رسائل غير مقروءة".
   final bool firstTime;
@@ -105,7 +109,10 @@ class _ChatScreenState extends State<ChatScreen> {
         resizeToAvoidBottomInset: true,
         body: Column(
           children: [
-            _Header(conversation: widget.conversation),
+            _Header(
+              conversation: widget.conversation,
+              craftsmanMode: widget.craftsmanMode,
+            ),
             Expanded(
               child: Stack(
                 children: [
@@ -225,9 +232,10 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.conversation});
+  const _Header({required this.conversation, this.craftsmanMode = false});
 
   final Conversation conversation;
+  final bool craftsmanMode;
 
   @override
   Widget build(BuildContext context) {
@@ -255,9 +263,9 @@ class _Header extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const CraftsmanAvatar(
+              CraftsmanAvatar(
                 image: 'assets/images/chat_header_avatar.png',
-                isPro: true,
+                isPro: !craftsmanMode,
                 size: 40,
               ),
               const SizedBox(width: 12),
@@ -272,12 +280,14 @@ class _Header extends StatelessWidget {
                         style: AppTextStyles.body16Medium,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    SvgPicture.asset(
-                      'assets/icons/ic_verified.svg',
-                      width: 20,
-                      height: 20,
-                    ),
+                    if (!craftsmanMode) ...[
+                      const SizedBox(width: 6),
+                      SvgPicture.asset(
+                        'assets/icons/ic_verified.svg',
+                        width: 20,
+                        height: 20,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -301,26 +311,28 @@ class _Header extends StatelessWidget {
                   }
                 },
                 itemBuilder: (context) => [
-                  _menuItem(
-                    context,
-                    'agree',
-                    'الاتفاق مع المهني',
-                    SvgPicture.asset(
-                      'assets/icons/ic_menu_agree.svg',
-                      width: 20,
-                      height: 20,
+                  if (!craftsmanMode)
+                    _menuItem(
+                      context,
+                      'agree',
+                      'الاتفاق مع المهني',
+                      SvgPicture.asset(
+                        'assets/icons/ic_menu_agree.svg',
+                        width: 20,
+                        height: 20,
+                      ),
                     ),
-                  ),
-                  _menuItem(
-                    context,
-                    'rate',
-                    'تقييم المهني',
-                    SvgPicture.asset(
-                      'assets/icons/ic_menu_star.svg',
-                      width: 20,
-                      height: 20,
+                  if (!craftsmanMode)
+                    _menuItem(
+                      context,
+                      'rate',
+                      'تقييم المهني',
+                      SvgPicture.asset(
+                        'assets/icons/ic_menu_star.svg',
+                        width: 20,
+                        height: 20,
+                      ),
                     ),
-                  ),
                   _menuItem(
                     context,
                     'report',

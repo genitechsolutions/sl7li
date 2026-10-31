@@ -12,7 +12,14 @@ import 'signup_step3_screen.dart';
 
 /// تسجيل المهني 2/4: الخدمات (حتى 3) والتخصصات لكل خدمة.
 class SignupStep2Screen extends StatefulWidget {
-  const SignupStep2Screen({super.key, required this.draft});
+  const SignupStep2Screen({
+    super.key,
+    required this.draft,
+    this.editing = false,
+  });
+
+  /// تعديل من الملف الشخصي: بيرجع بدل ما يكمّل للخطوة 3.
+  final bool editing;
 
   final CraftsmanSignupDraft draft;
 
@@ -60,11 +67,16 @@ class _SignupStep2ScreenState extends State<SignupStep2Screen> {
       step: 2,
       title: 'الخدمات والتخصصات',
       subtitle: 'اختر الخدمات التي تقدمها وحدد التخصصات',
+      nextLabel: widget.editing ? 'حفظ التغييرات' : 'التالي',
       onNext: _d.step2Valid
-          ? () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => SignupStep3Screen(draft: _d)),
-            )
+          ? widget.editing
+                ? () => Navigator.pop(context)
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SignupStep3Screen(draft: _d),
+                    ),
+                  )
           : null,
       children: [
         ...signupField(

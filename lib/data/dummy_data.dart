@@ -707,3 +707,17 @@ const sampleLastWeekNotifications = [
     unread: true,
   ),
 ];
+
+/// محادثات المهني مع الزبائن (بدون شارة Pro).
+final sampleCustomerConversations = [
+  for (final c in sampleConversations)
+    Conversation(
+      name: 'فلان الفلاني',
+      lastMessage: c.lastMessage,
+      time: c.time,
+      isPro: false,
+      verified: false,
+      unread: c.unread,
+      sentStatus: c.sentStatus,
+    ),
+];

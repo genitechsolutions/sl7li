@@ -11,6 +11,7 @@ import '../../core/widgets/app_icon_button.dart';
 import '../../core/widgets/form/app_select_field.dart';
 import '../../core/widgets/form/app_toggle.dart';
 import '../auth/phone_login_screen.dart';
+import '../home/home_screen.dart';
 import '../messages/messages_screen.dart';
 import '../my_requests/my_requests_screen.dart';
 import '../new_request/new_request_screen.dart';
@@ -20,7 +21,10 @@ import 'profile_screen.dart';
 
 /// "الإعدادات": الملف الشخصي، الوضع المظلم، الإشعارات، المساعدة، وإدارة الحساب.
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.craftsmanMode = false});
+
+  /// إعدادات المهني: بدون الشريط السفلي، وفيها "التبديل لوضع الزبون".
+  final bool craftsmanMode;
 
   void _push(BuildContext context, Widget screen) =>
       Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
@@ -75,15 +79,20 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: Scaffold(
         backgroundColor: colors.pageAlt,
-        bottomNavigationBar: AppBottomNavBar(
-          currentIndex: 3,
-          onTap: (index) {
-            if (index == 0) Navigator.of(context).popUntil((r) => r.isFirst);
-            if (index == 1) _push(context, const MyRequestsScreen());
-            if (index == 2) _push(context, const MessagesScreen());
-          },
-          onAddTap: () => Navigator.push(context, NewRequestScreen.route()),
-        ),
+        bottomNavigationBar: craftsmanMode
+            ? null
+            : AppBottomNavBar(
+                currentIndex: 3,
+                onTap: (index) {
+                  if (index == 0) {
+                    Navigator.of(context).popUntil((r) => r.isFirst);
+                  }
+                  if (index == 1) _push(context, const MyRequestsScreen());
+                  if (index == 2) _push(context, const MessagesScreen());
+                },
+                onAddTap: () =>
+                    Navigator.push(context, NewRequestScreen.route()),
+              ),
         body: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -122,7 +131,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             _Row(
               icon: 'assets/icons/ic_set_bell.svg',
-              title: 'تخصيص الإشعارات',
+              title: craftsmanMode ? 'الإشعارات' : 'تخصيص الإشعارات',
               onTap: () => _push(context, const NotificationSettingsScreen()),
             ),
             sectionTitle('المساعدة والدعم'),
@@ -137,11 +146,21 @@ class SettingsScreen extends StatelessWidget {
               title: 'الأمان والخصوصية',
               onTap: () {},
             ),
-            _Row(
-              icon: 'assets/icons/ic_set_tools.svg',
-              title: 'انضم كحرفي',
-              onTap: () {},
-            ),
+            if (craftsmanMode)
+              _Row(
+                icon: 'assets/icons/ic_set_profile.svg',
+                title: 'التبديل لوضع الزبون',
+                onTap: () => Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  (_) => false,
+                ),
+              )
+            else
+              _Row(
+                icon: 'assets/icons/ic_set_tools.svg',
+                title: 'انضم كحرفي',
+                onTap: () {},
+              ),
             sectionTitle('إدارة الحساب'),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -542,6 +561,28 @@ class _DeleteDialog extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// تأكيد تسجيل الخروج ثم الرجوع لصفحة الرقم (بيستعملها الإعدادات وبروفايل المهني).
+Future<void> confirmLogout(BuildContext context) async {
+  final ok = await showAppModal<bool>(context, (context) => const _LogoutDialog());
+  if (ok == true && context.mounted) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
+      (_) => false,
+    );
+  }
+}
+
+/// تأكيد حذف الحساب ثم الرجوع لصفحة الرقم.
+Future<void> confirmDeleteAccount(BuildContext context) async {
+  final ok = await showAppModal<bool>(context, (context) => const _DeleteDialog());
+  if (ok == true && context.mounted) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
+      (_) => false,
     );
   }
 }
