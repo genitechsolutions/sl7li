@@ -1,0 +1,125 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/form/form_label.dart';
+import '../../core/widgets/form/phone_field.dart';
+import '../home/home_screen.dart';
+import 'otp_screen.dart';
+import 'widgets/auth_bottom_bar.dart';
+import 'widgets/auth_hero_image.dart';
+
+/// "تسجيل الدخول" — إدخال رقم الواتساب. أول صفحة بالتطبيق.
+class PhoneLoginScreen extends StatefulWidget {
+  const PhoneLoginScreen({super.key});
+
+  @override
+  State<PhoneLoginScreen> createState() => _PhoneLoginScreenState();
+}
+
+class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
+  // العناوين الفرعية بالتصميم داخلة 12.
+  static const _labelPadding = EdgeInsetsDirectional.symmetric(horizontal: 12);
+
+  final _phone = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _phone.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _phone.dispose();
+    super.dispose();
+  }
+
+  bool get _phoneValid => PhoneField.isValid(_phone.text);
+
+  // TODO: إرسال رمز التحقق الحقيقي (API).
+  void _sendCode() {
+    FocusScope.of(context).unfocus();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => OtpScreen(phone: PhoneField.format(_phone.text))),
+    );
+  }
+
+  void _continueAsGuest() {
+    Navigator.of(context)
+        .pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const HomeScreen()), (_) => false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: AppTheme.overlayStyle(context),
+      child: Scaffold(
+        backgroundColor: context.colors.background,
+        bottomNavigationBar: AuthBottomBar(
+          label: 'إرسال رمز التحقق',
+          onPressed: _phoneValid ? _sendCode : null,
+          secondaryLabel: 'مشاهدة فيديو توضيحي',
+          onSecondaryPressed: () {}, // TODO: open intro video
+          note: GestureDetector(
+            onTap: _continueAsGuest,
+            child: Text(
+              'الدخول كضيف',
+              style: AppTextStyles.title18.copyWith(
+                color: context.colors.link,
+                decoration: TextDecoration.underline,
+                decorationColor: context.colors.link,
+              ),
+            ),
+          ),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.only(bottom: 24),
+          children: [
+            const AuthHeroImage(),
+            const SizedBox(height: 16),
+            const Text(
+              'تسجيل الدخول',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.title30Bold,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'أدخل رقمك للمتابعة',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.title20Medium.copyWith(color: context.colors.textSecondary),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 33, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Padding(
+                    padding: _labelPadding,
+                    child: FormLabel(
+                      'رقم الواتساب',
+                      isRequired: true,
+                      note: '(بدون صفر)',
+                      starAfterNote: true,
+                      noteSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  PhoneField(
+                    controller: _phone,
+                    inline: true,
+                    restrictInput: true,
+                    onCountryTap: () {}, // TODO: pick country code
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
