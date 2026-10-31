@@ -7,12 +7,15 @@ import '../../../core/theme/app_text_styles.dart';
 /// شريط مراحل الطلب: مفتوح ← تم الاتفاق ← قيد التنفيذ ← مكتمل (من اليمين).
 /// [stage] المرحلة الحالية (0..3). اللي قبلها مكتملة (أخضر)، واللي بعدها رمادي. 4 = الكل مكتمل.
 class RequestStepper extends StatelessWidget {
-  const RequestStepper({super.key, required this.stage});
+  const RequestStepper({super.key, required this.stage, this.labels = _labels});
 
   static const _labels = ['مفتوح', 'تم الاتفاق', 'قيد\nالتنفيذ', 'مكتمل'];
+
+  /// أسماء المراحل (المهني: "عرض مرسل" بدل "مفتوح").
   static const _circle = 36.0;
 
   final int stage;
+  final List<String> labels;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +63,7 @@ class RequestStepper extends StatelessWidget {
                   top: 40,
                   width: 80,
                   child: Text(
-                    _labels[i],
+                    labels[i],
                     textAlign: TextAlign.center,
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,

@@ -14,6 +14,7 @@ class RequestStepHeader extends StatelessWidget {
     required this.onCancel,
     this.subtitle,
     this.actionLabel = 'إلغاء',
+    this.title = 'طلب خدمة',
   });
 
   final int step;
@@ -21,6 +22,7 @@ class RequestStepHeader extends StatelessWidget {
   final VoidCallback onCancel;
   final String? subtitle;
   final String actionLabel;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class RequestStepHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('طلب خدمة', style: AppTextStyles.title22Bold),
+                  Text(title, style: AppTextStyles.title22Bold),
                   Text(
                     subtitle ?? 'الخطوة $step من $totalSteps',
                     style: AppTextStyles.body14.copyWith(color: context.colors.textSecondary),
