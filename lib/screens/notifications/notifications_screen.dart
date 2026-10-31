@@ -46,12 +46,12 @@ class NotificationsScreen extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.overlayStyle(context),
       child: Scaffold(
-        backgroundColor: colors.surface,
+        backgroundColor: colors.pageAlt,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: colors.background,
+              color: colors.cardAlt,
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: SafeArea(
                 bottom: false,
@@ -146,26 +146,26 @@ class _NotificationCard extends StatelessWidget {
     final (icon, tint) = switch (item.kind) {
       NotificationKind.offer => (
         'assets/icons/ic_notif_offer.svg',
-        colors.successLight,
+        colors.noticeSuccess,
       ),
       NotificationKind.completion => (
         'assets/icons/ic_notif_done.svg',
-        colors.verified,
+        colors.noticeInfo,
       ),
       NotificationKind.withdrawn => (
         'assets/icons/ic_notif_warning.svg',
-        colors.warning,
+        colors.noticeWarning,
       ),
       NotificationKind.message => (
         'assets/icons/ic_notif_message.svg',
-        colors.verified,
+        colors.noticeInfo,
       ),
     };
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.background,
+        color: colors.cardAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Stack(
@@ -240,7 +240,7 @@ class _NotificationCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: colors.accent,
+                        color: colors.accentButton,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(

@@ -72,7 +72,7 @@ class SettingsScreen extends StatelessWidget {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: colors.surface,
+        backgroundColor: colors.pageAlt,
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: 3,
           onTap: (index) {
@@ -285,7 +285,7 @@ class _Row extends StatelessWidget {
         child: Container(
           padding: const EdgeInsetsDirectional.fromSTEB(12, 20, 20, 20),
           decoration: BoxDecoration(
-            color: colors.background,
+            color: colors.cardAlt,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -336,7 +336,7 @@ class _AccountButton extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: filled ? colors.error : colors.background,
+          color: filled ? colors.destructive : colors.background,
           borderRadius: BorderRadius.circular(12),
           border: filled ? null : Border.all(color: colors.border),
         ),
@@ -513,7 +513,7 @@ class _DeleteDialog extends StatelessWidget {
               Expanded(
                 child: AppDialogButton(
                   label: 'حذف الحساب',
-                  background: colors.error,
+                  background: colors.destructive,
                   foreground: colors.textOnPrimary,
                   onTap: () => Navigator.of(context).pop(true),
                 ),

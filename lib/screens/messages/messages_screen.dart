@@ -209,7 +209,7 @@ class _ConversationRow extends StatelessWidget {
                 Text(
                   conversation.time,
                   style: small.copyWith(
-                    color: unread ? colors.verified : colors.textHint,
+                    color: unread ? colors.link : colors.textHint,
                   ),
                 ),
                 if (unread)
@@ -217,7 +217,7 @@ class _ConversationRow extends StatelessWidget {
                     margin: const EdgeInsets.only(top: 4),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
-                      color: colors.verified,
+                      color: colors.link,
                       borderRadius: BorderRadius.circular(60),
                     ),
                     child: Text(

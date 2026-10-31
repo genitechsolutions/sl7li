@@ -435,14 +435,14 @@ class _BottomBar extends StatelessWidget {
                       // TODO: الاعتراض على الإنجاز (ما في نافذة بالتصميم)
                       button(
                         'الاعتراض على إنجاز الطلب',
-                        bg: colors.error,
+                        bg: colors.destructive,
                         fg: colors.textOnPrimary,
                       ),
                     ] else if (request.status == RequestStatus.done &&
                         !request.rated)
                       button(
                         'تقييم الخدمة',
-                        bg: colors.accent,
+                        bg: colors.accentButton,
                         fg: colors.textOnAccent,
                         onTap: () => showRatingDialog(context),
                       )

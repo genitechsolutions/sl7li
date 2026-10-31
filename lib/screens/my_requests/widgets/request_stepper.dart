@@ -22,7 +22,7 @@ class RequestStepper extends StatelessWidget {
         ? colors.successLight
         : i == stage
         ? colors.stepActive
-        : colors.border;
+        : colors.stepInactive;
 
     return SizedBox(
       height: 79,
@@ -64,12 +64,11 @@ class RequestStepper extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
-                      // المرحلة الحالية بنص primaryContent مشان تبين بالداكن.
-                      color: i < stage
+                                            color: i < stage
                           ? colors.successLight
                           : i == stage
-                          ? colors.primaryContent
-                          : colors.textHint,
+                          ? colors.stepActive
+                          : colors.stepNextIcon,
                     ),
                   ),
                 ),
@@ -111,7 +110,7 @@ class _Dot extends StatelessWidget {
             : Text(
                 '${index + 1}',
                 style: AppTextStyles.body16Medium.copyWith(
-                  color: colors.textHint,
+                  color: colors.stepNextIcon,
                 ),
               ),
       ),

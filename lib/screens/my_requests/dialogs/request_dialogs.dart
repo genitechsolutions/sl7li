@@ -49,8 +49,8 @@ Future<String?> showUpdateStatusDialog(BuildContext context) {
             colors.success,
             colors.textOnPrimary,
           ),
-          action('تعديل الطلب', 'edit', colors.accent, colors.textOnAccent),
-          action('إلغاء الطلب', 'cancel', colors.error, colors.textOnPrimary),
+          action('تعديل الطلب', 'edit', colors.accentButton, colors.textOnAccent),
+          action('إلغاء الطلب', 'cancel', colors.destructive, colors.textOnPrimary),
           AppDialogButton(
             label: 'رجوع',
             background: colors.background,
@@ -377,7 +377,7 @@ class _CancelDialogState extends State<_CancelDialog> {
             const SizedBox(height: 8),
             AppDialogButton(
               label: 'تعليق الطلب مؤقتاً',
-              background: colors.accent,
+              background: colors.accentButton,
               foreground: colors.textOnAccent,
               onTap: () {},
             ),
@@ -397,7 +397,7 @@ class _CancelDialogState extends State<_CancelDialog> {
                   opacity: _reason == null ? 0.5 : 1,
                   child: AppDialogButton(
                     label: 'تأكيد الإلغاء',
-                    background: colors.error,
+                    background: colors.destructive,
                     foreground: colors.textOnPrimary,
                     onTap: _reason == null
                         ? null
@@ -570,7 +570,7 @@ class _RatingDialogState extends State<_RatingDialog> {
               Expanded(
                 child: AppDialogButton(
                   label: 'إرسال التقييم',
-                  background: colors.accent,
+                  background: colors.accentButton,
                   foreground: colors.textOnAccent,
                   onTap: () => Navigator.of(context).pop(_stars),
                 ),

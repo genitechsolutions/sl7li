@@ -56,7 +56,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
       value: AppTheme.overlayStyle(context),
       child: Scaffold(
         // الصفحة بالخلفية الرمادية والكروت فاتحة.
-        backgroundColor: colors.surface,
+        backgroundColor: colors.pageAlt,
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: 1,
           onTap: (index) {

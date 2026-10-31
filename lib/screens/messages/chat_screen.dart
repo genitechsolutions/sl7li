@@ -147,7 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: colors.accent,
+                              color: colors.accentButton,
                               borderRadius: BorderRadius.circular(40),
                             ),
                             child: Row(
@@ -538,7 +538,7 @@ class _RequestCardBubble extends StatelessWidget {
                     width: 1,
                     height: 20,
                     margin: const EdgeInsets.symmetric(horizontal: 12),
-                    color: colors.border,
+                    color: colors.chatBarrier,
                   ),
                   Flexible(
                     child: Text(
@@ -608,7 +608,7 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final sent = message.sent;
-    final bg = sent ? colors.primary : colors.background;
+    final bg = sent ? colors.chatSent : colors.background;
     final fg = sent ? colors.textOnPrimary : colors.textPrimary;
     final timeColor = sent ? colors.textOnPrimaryMuted : colors.textHint;
     const r = Radius.circular(12);

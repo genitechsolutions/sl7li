@@ -37,6 +37,19 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.warning,
     required this.textOnAccent,
     required this.successDisabled,
+    required this.urgent,
+    required this.destructive,
+    required this.accentButton,
+    required this.stepNextIcon,
+    required this.barrier,
+    required this.chatSent,
+    required this.chatBarrier,
+    required this.noticeSuccess,
+    required this.noticeWarning,
+    required this.noticeInfo,
+    required this.chipText,
+    required this.pageAlt,
+    required this.cardAlt,
   });
 
   /// الكحلي: خلفية الأزرار والتابات المختارة.
@@ -89,6 +102,45 @@ class AppColors extends ThemeExtension<AppColors> {
   /// زر النجاح المعطّل ("قبول العرض"). بالداكن مشتق (مش بالتصميم).
   final Color successDisabled;
 
+  /// نص "طارئ" (بالداكن أفتح).
+  final Color urgent;
+
+  /// زر التحذير (حذف/إلغاء/اعتراض).
+  final Color destructive;
+
+  /// الأصفر كخلفية أزرار (بالداكن أغمق شوي).
+  final Color accentButton;
+
+  /// نص/رقم المراحل القادمة بشريط الطلب.
+  final Color stepNextIcon;
+
+  /// الفواصل الرفيعة بين النصوص (تاريخ | أولوية).
+  final Color barrier;
+
+  /// فقاعة الرسالة المرسلة بالدردشة.
+  final Color chatSent;
+
+  /// فاصل بطاقة الطلب داخل الدردشة.
+  final Color chatBarrier;
+
+  /// لون خلفية إشعار نجاح (10%).
+  final Color noticeSuccess;
+
+  /// لون خلفية إشعار تحذير (10%).
+  final Color noticeWarning;
+
+  /// لون خلفية إشعار معلومات (10%).
+  final Color noticeInfo;
+
+  /// نص التاغ/الشيبس (كحلي بالفاتح، رمادي فاتح بالداكن).
+  final Color chipText;
+
+  /// خلفية الصفحات "المعكوسة" (طلباتي، الإشعارات، الإعدادات…): رمادي بالفاتح، والأغمق بالداكن.
+  final Color pageAlt;
+
+  /// كروت الصفحات "المعكوسة": الفاتح بالفاتح، والأفتح (surface) بالداكن.
+  final Color cardAlt;
+
   static const light = AppColors(
     primary: Color(0xFF36407E),
     primaryContent: Color(0xFF36407E),
@@ -122,6 +174,19 @@ class AppColors extends ThemeExtension<AppColors> {
     warning: Color(0xFFE86F0C),
     textOnAccent: Color(0xFF171922),
     successDisabled: Color(0xFFAFE7C4),
+    urgent: Color(0xFFEB1809),
+    destructive: Color(0xFFEB1809),
+    accentButton: Color(0xFFF7C425),
+    stepNextIcon: Color(0xFF989FBA),
+    barrier: Color(0xFFC8CDDA),
+    chatSent: Color(0xFF36407E),
+    chatBarrier: Color(0xFFC8CDDA),
+    noticeSuccess: Color(0xFF51CC7E),
+    noticeWarning: Color(0xFFF48429),
+    noticeInfo: Color(0xFF43A8DE),
+    chipText: Color(0xFF36407E),
+    pageAlt: Color(0xFFF0F0F5),
+    cardAlt: Color(0xFFF9F9FB),
   );
 
   static const dark = AppColors(
@@ -140,23 +205,36 @@ class AppColors extends ThemeExtension<AppColors> {
     textOnPrimary: Color(0xFFF9F9FB),
     textOnPrimaryMuted: Color(0xFFC8CDDA),
     link: Color(0xFF43A8DE),
-    success: Color(0xFF37BD68),
+    success: Color(0xFF2E9D57),
     error: Color(0xFFDB3126),
     textHint: Color(0xFF989FBA),
-    disabled: Color(0xFF262B4D),
+    disabled: Color(0xFF373B52),
     successLight: Color(0xFF2E9D57),
     successPale: Color(0xFF1C3326),
     successRing: Color(0xFF2E7D4D),
     successDark: Color(0xFF71D595),
     tag: Color(0xFF2B3262),
     tagText: Color(0xFFDDDFEB),
-    navActive: Color(0xFF2B3262),
+    navActive: Color(0x268B94CD),
     verified: Color(0xFF2596D3),
     star: Color(0xFFF7C425),
     pro: Color(0xFFF8594D),
-    warning: Color(0xFFE86F0C),
+    warning: Color(0xFFF48429),
     textOnAccent: Color(0xFF171922),
     successDisabled: Color(0xFF2A5A3D),
+    urgent: Color(0xFFF73426),
+    destructive: Color(0xFFC41407),
+    accentButton: Color(0xFFEBB409),
+    stepNextIcon: Color(0xFF575F82),
+    barrier: Color(0xFF27293A),
+    chatSent: Color(0xFF1E2345),
+    chatBarrier: Color(0xFF474D6A),
+    noticeSuccess: Color(0xFF2E9D57),
+    noticeWarning: Color(0xFFC15C0A),
+    noticeInfo: Color(0xFF1F7DB0),
+    chipText: Color(0xFFB0B6CA),
+    pageAlt: Color(0xFF171922),
+    cardAlt: Color(0xFF1F222E),
   );
 
   @override
@@ -199,6 +277,19 @@ class AppColors extends ThemeExtension<AppColors> {
       warning: c(warning, other.warning),
       textOnAccent: c(textOnAccent, other.textOnAccent),
       successDisabled: c(successDisabled, other.successDisabled),
+      urgent: c(urgent, other.urgent),
+      destructive: c(destructive, other.destructive),
+      accentButton: c(accentButton, other.accentButton),
+      stepNextIcon: c(stepNextIcon, other.stepNextIcon),
+      barrier: c(barrier, other.barrier),
+      chatSent: c(chatSent, other.chatSent),
+      chatBarrier: c(chatBarrier, other.chatBarrier),
+      noticeSuccess: c(noticeSuccess, other.noticeSuccess),
+      noticeWarning: c(noticeWarning, other.noticeWarning),
+      noticeInfo: c(noticeInfo, other.noticeInfo),
+      chipText: c(chipText, other.chipText),
+      pageAlt: c(pageAlt, other.pageAlt),
+      cardAlt: c(cardAlt, other.cardAlt),
     );
   }
 }

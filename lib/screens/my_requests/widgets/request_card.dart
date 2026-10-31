@@ -31,14 +31,14 @@ class RequestCard extends StatelessWidget {
     final colors = context.colors;
     final (priorityText, priorityColor) = switch (request.priority) {
       RequestPriority.urgent => ('عاجل', colors.warning),
-      RequestPriority.emergency => ('طارئ', colors.error),
-      RequestPriority.normal => ('عادي', colors.verified),
+      RequestPriority.emergency => ('طارئ', colors.urgent),
+      RequestPriority.normal => ('عادي', colors.link),
     };
 
     return Container(
       padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 10),
       decoration: BoxDecoration(
-        color: colors.background,
+        color: colors.cardAlt,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           for (final (dy, blur) in const [
@@ -74,7 +74,7 @@ class RequestCard extends StatelessWidget {
                   height: 20,
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: colors.border,
+                    color: colors.barrier,
                     borderRadius: BorderRadius.circular(1),
                   ),
                 ),
@@ -158,7 +158,7 @@ class RequestCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: colors.accent,
+                color: colors.accentButton,
                 borderRadius: BorderRadius.circular(40),
               ),
               child: Row(
@@ -257,7 +257,7 @@ class RequestCard extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: colors.error,
+                    color: colors.destructive,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -419,7 +419,7 @@ class _ActionButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: accent
-              ? colors.accent
+              ? colors.accentButton
               : filled
               ? colors.primary
               : colors.background,

@@ -23,7 +23,7 @@ class AppChip extends StatelessWidget {
         widthFactor: 1,
         child: Text(
           label,
-          style: AppTextStyles.body14.copyWith(color: context.colors.primaryContent),
+          style: AppTextStyles.body14.copyWith(color: context.colors.chipText),
         ),
       ),
     );
