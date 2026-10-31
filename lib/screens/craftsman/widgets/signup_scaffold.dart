@@ -19,7 +19,13 @@ class SignupScaffold extends StatelessWidget {
     this.nextLabel = 'التالي',
     this.stepSubtitle,
     this.bottomNote,
+    this.editTitle,
+    this.onCancel,
   });
+
+  /// وضع التعديل (من الملف الشخصي): عنوان بسيط بدل الشريط، وزر "إلغاء" جنب الحفظ.
+  final String? editTitle;
+  final VoidCallback? onCancel;
 
   /// رقم الخطوة (1..4)، و5 = المراجعة (كل الخطوات خضرا).
   final int step;
@@ -43,6 +49,9 @@ class SignupScaffold extends StatelessWidget {
           label: nextLabel,
           onPressed: onNext,
           note: bottomNote,
+          secondaryLabel: editTitle == null ? null : 'إلغاء',
+          sideBySide: true,
+          onSecondaryPressed: onCancel,
         ),
         body: SafeArea(
           bottom: false,
@@ -50,16 +59,20 @@ class SignupScaffold extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 15, 20, 24),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
-              RequestStepHeader(
-                title: 'دخول المهنيين',
-                step: step,
-                totalSteps: 4,
-                subtitle: stepSubtitle,
-                actionLabel: 'العودة',
-                onCancel: () => Navigator.pop(context),
-              ),
-              const SizedBox(height: 22),
-              Center(child: Text(title, style: AppTextStyles.title24Bold)),
+              if (editTitle != null)
+                Text(editTitle!, style: AppTextStyles.title24Bold)
+              else ...[
+                RequestStepHeader(
+                  title: 'دخول المهنيين',
+                  step: step,
+                  totalSteps: 4,
+                  subtitle: stepSubtitle,
+                  actionLabel: 'العودة',
+                  onCancel: () => Navigator.pop(context),
+                ),
+                const SizedBox(height: 22),
+                Center(child: Text(title, style: AppTextStyles.title24Bold)),
+              ],
               if (subtitle != null) ...[
                 const SizedBox(height: 8),
                 Center(

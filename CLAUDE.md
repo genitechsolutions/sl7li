@@ -114,3 +114,5 @@
 - ملخص الخطوة 4 بيختلف عن التصميم: شلنا "حجم العمل" (ما في خطوة بتسأل عنه) وضفنا مدى الإلحاح/الوقت/بالنيابة عن/التواصل.
 
 - **المهني (تحديث):** انضاف تاب الرسائل (`MessagesScreen(craftsmanMode)`) وتاب "حسابي" (`craftsman/profile/`: بطاقة التوثيق عبر `verificationNotifier`، تعديل الملف `EditCraftsmanProfileScreen`، تعديل الخدمات عبر `SignupStep2Screen(editing)`). إرسال عرض بدون توثيق بيفتح `showVerificationDialog`. ناقص: إشعارات المهني، قائمة الثلاث نقاط بكرت الطلب، فحص بصري للتابات الجديدة.
+
+- **المهني (تحديث 2):** الإشعارات = نفس شاشة الزبون (مطابقة للتصميم). `EditCraftsmanProfileScreen` وتعديل الخدمات (`SignupStep2Screen(editing)` + `SignupScaffold(editTitle)`) طابقوا Figma 701:2396/701:2620؛ `AppBottomActionBar(sideBySide)` للزر الثانوي جنب الرئيسي. قائمة ثلاث نقاط بكرت الطلب (`showRequestMoreMenu`، بدون تصميم دقيق). قائمة خيارات دردشة المهني (549:5929) = "إبلاغ" فقط (موجودة).

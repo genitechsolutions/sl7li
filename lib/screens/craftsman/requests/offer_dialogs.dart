@@ -642,3 +642,38 @@ class _OfferSent extends StatelessWidget {
     );
   }
 }
+
+/// قائمة "المزيد" بكرت الطلب (ثلاث نقاط): واتساب / مراسلة الزبون / تجاهل.
+Future<void> showRequestMoreMenu(BuildContext context) async {
+  final choice = await showAppModal<String>(context, (context) {
+    final colors = context.colors;
+    Widget row(String label, String value, {Color? color}) => GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.of(context).pop(value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Text(
+          label,
+          style: AppTextStyles.body16Medium.copyWith(
+            color: color ?? colors.textPrimary,
+          ),
+        ),
+      ),
+    );
+    return AppDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          row('تواصل عبر واتساب', 'whatsapp'),
+          row('مراسلة الزبون', 'message'),
+          row('تجاهل العرض', 'ignore', color: colors.error),
+        ],
+      ),
+    );
+  });
+  if (choice == 'ignore' && context.mounted) {
+    await showIgnoreRequestDialog(context);
+  }
+  // TODO: واتساب ومراسلة الزبون (ما في وجهة بدون backend).
+}

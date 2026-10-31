@@ -206,7 +206,7 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                         ),
                         _ => showSendOfferFlow(context, requestTitle: r.title),
                       },
-                      onMore: () {},
+                      onMore: () => showRequestMoreMenu(context),
                     ),
                   ),
               ],

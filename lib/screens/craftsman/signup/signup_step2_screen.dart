@@ -66,7 +66,11 @@ class _SignupStep2ScreenState extends State<SignupStep2Screen> {
     return SignupScaffold(
       step: 2,
       title: 'الخدمات والتخصصات',
-      subtitle: 'اختر الخدمات التي تقدمها وحدد التخصصات',
+      subtitle: widget.editing
+          ? null
+          : 'اختر الخدمات التي تقدمها وحدد التخصصات',
+      editTitle: widget.editing ? 'تعديل الخدمات' : null,
+      onCancel: () => Navigator.pop(context),
       nextLabel: widget.editing ? 'حفظ التغييرات' : 'التالي',
       onNext: _d.step2Valid
           ? widget.editing

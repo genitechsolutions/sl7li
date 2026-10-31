@@ -15,7 +15,11 @@ class AppBottomActionBar extends StatelessWidget {
     this.secondaryLabel,
     this.onSecondaryPressed,
     this.note,
+    this.sideBySide = false,
   });
+
+  /// الزر الثانوي جنب الرئيسي بنفس الصف (تعديل الملف/الخدمات) بدل ما يكون تحته.
+  final bool sideBySide;
 
   final String label;
   final VoidCallback? onPressed;
@@ -25,7 +29,41 @@ class AppBottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    );
+
+    final primaryButton = SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: context.colors.primary,
+          foregroundColor: context.colors.textOnPrimary,
+          disabledBackgroundColor: context.colors.disabled,
+          disabledForegroundColor: context.colors.textOnPrimary,
+          shape: shape,
+          textStyle: AppTextStyles.title16,
+        ),
+        child: Text(label),
+      ),
+    );
+    final secondaryButton = SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton(
+        onPressed: onSecondaryPressed,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: context.colors.background,
+          foregroundColor: context.colors.primaryContent,
+          side: BorderSide(color: context.colors.border),
+          shape: shape,
+          textStyle: AppTextStyles.title16,
+        ),
+        child: Text(secondaryLabel!),
+      ),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -47,39 +85,20 @@ class AppBottomActionBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 9,
             children: [
-              if (note != null) Padding(padding: const EdgeInsets.only(bottom: 4), child: note),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: FilledButton(
-                  onPressed: onPressed,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colors.primary,
-                    foregroundColor: context.colors.textOnPrimary,
-                    disabledBackgroundColor: context.colors.disabled,
-                    disabledForegroundColor: context.colors.textOnPrimary,
-                    shape: shape,
-                    textStyle: AppTextStyles.title16,
-                  ),
-                  child: Text(label),
-                ),
-              ),
-              if (secondaryLabel != null)
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: OutlinedButton(
-                    onPressed: onSecondaryPressed,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: context.colors.background,
-                      foregroundColor: context.colors.primaryContent,
-                      side: BorderSide(color: context.colors.border),
-                      shape: shape,
-                      textStyle: AppTextStyles.title16,
-                    ),
-                    child: Text(secondaryLabel!),
-                  ),
-                ),
+              if (note != null)
+                Padding(padding: const EdgeInsets.only(bottom: 4), child: note),
+              if (sideBySide && secondaryLabel != null)
+                Row(
+                  spacing: 12,
+                  children: [
+                    Expanded(child: primaryButton),
+                    Expanded(child: secondaryButton),
+                  ],
+                )
+              else ...[
+                primaryButton,
+                if (secondaryLabel != null) secondaryButton,
+              ],
             ],
           ),
         ),
