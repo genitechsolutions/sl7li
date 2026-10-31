@@ -35,6 +35,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.star,
     required this.pro,
     required this.warning,
+    required this.textOnAccent,
     required this.successDisabled,
   });
 
@@ -82,6 +83,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// "عاجل" برتقالي (أولوية الطلب).
   final Color warning;
 
+  /// نص فوق الأصفر (accent): غامق دايماً بالفاتح والداكن.
+  final Color textOnAccent;
+
   /// زر النجاح المعطّل ("قبول العرض"). بالداكن مشتق (مش بالتصميم).
   final Color successDisabled;
 
@@ -116,6 +120,7 @@ class AppColors extends ThemeExtension<AppColors> {
     star: Color(0xFFEBB409),
     pro: Color(0xFFF8594D),
     warning: Color(0xFFE86F0C),
+    textOnAccent: Color(0xFF171922),
     successDisabled: Color(0xFFAFE7C4),
   );
 
@@ -150,6 +155,7 @@ class AppColors extends ThemeExtension<AppColors> {
     star: Color(0xFFF7C425),
     pro: Color(0xFFF8594D),
     warning: Color(0xFFE86F0C),
+    textOnAccent: Color(0xFF171922),
     successDisabled: Color(0xFF2A5A3D),
   );
 
@@ -191,6 +197,7 @@ class AppColors extends ThemeExtension<AppColors> {
       star: c(star, other.star),
       pro: c(pro, other.pro),
       warning: c(warning, other.warning),
+      textOnAccent: c(textOnAccent, other.textOnAccent),
       successDisabled: c(successDisabled, other.successDisabled),
     );
   }

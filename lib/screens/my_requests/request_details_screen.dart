@@ -8,12 +8,17 @@ import '../../core/widgets/app_segmented_control.dart';
 import '../../core/widgets/form/app_toggle.dart';
 import '../../data/dummy_data.dart';
 import '../../data/my_request.dart';
+import 'dialogs/request_dialogs.dart';
 import 'widgets/offer_tile.dart';
 import 'widgets/request_stepper.dart';
 
 /// تفاصيل الطلب: تاب "التفاصيل" (مراحل، صور، وصف، موقع) وتاب "العروض" (عروض الأسعار الواردة).
 class RequestDetailsScreen extends StatefulWidget {
-  const RequestDetailsScreen({super.key, required this.request, this.initialTab = 0});
+  const RequestDetailsScreen({
+    super.key,
+    required this.request,
+    this.initialTab = 0,
+  });
 
   final MyRequest request;
   final int initialTab;
@@ -32,7 +37,9 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       // الهيدر كحلي بالفاتح والداكن، فأيقونات شريط الحالة فاتحة.
-      value: SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent),
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
       child: Scaffold(
         backgroundColor: colors.background,
         bottomNavigationBar: _BottomBar(offersTab: _tab == 1),
@@ -67,14 +74,19 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
 
   List<Widget> _details(BuildContext context) {
     final colors = context.colors;
-    final label = AppTextStyles.body16Medium.copyWith(color: colors.textSecondary);
+    final label = AppTextStyles.body16Medium.copyWith(
+      color: colors.textSecondary,
+    );
 
     Widget infoBox(List<Widget> children) => Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(12)),
-          child: Column(children: children),
-        );
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(children: children),
+    );
 
     return [
       Padding(
@@ -96,7 +108,10 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
                   aspectRatio: 1,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset('assets/images/request_photo_$i.png', fit: BoxFit.cover),
+                    child: Image.asset(
+                      'assets/images/request_photo_$i.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -123,23 +138,36 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
             infoBox([
               Text.rich(
                 TextSpan(
-                  style: AppTextStyles.body16.copyWith(color: colors.textSecondary),
+                  style: AppTextStyles.body16.copyWith(
+                    color: colors.textSecondary,
+                  ),
                   children: [
                     const TextSpan(text: 'مدى الإلحاح: '),
-                    TextSpan(text: 'عاجل', style: TextStyle(color: colors.textPrimary)),
+                    TextSpan(
+                      text: 'عاجل',
+                      style: TextStyle(color: colors.textPrimary),
+                    ),
                   ],
                 ),
               ),
             ]),
             infoBox([
-              Text('التاريخ والوقت المفضل', style: AppTextStyles.body16.copyWith(color: colors.textSecondary)),
+              Text(
+                'التاريخ والوقت المفضل',
+                style: AppTextStyles.body16.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
               const SizedBox(height: 8),
               Text.rich(
                 TextSpan(
                   style: AppTextStyles.body16,
                   children: [
                     const TextSpan(text: 'خلال الأسبوع القادم  '),
-                    TextSpan(text: '|', style: TextStyle(color: colors.textSecondary)),
+                    TextSpan(
+                      text: '|',
+                      style: TextStyle(color: colors.textSecondary),
+                    ),
                     const TextSpan(text: '  بعد الظهر'),
                   ],
                 ),
@@ -154,7 +182,10 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           children: [
             Text('يسمح تواصل المهنيين عبر وتساب', style: AppTextStyles.body18),
             const Spacer(),
-            AppToggle(value: _whatsapp, onChanged: (v) => setState(() => _whatsapp = v)),
+            AppToggle(
+              value: _whatsapp,
+              onChanged: (v) => setState(() => _whatsapp = v),
+            ),
           ],
         ),
       ),
@@ -173,7 +204,10 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           child: SizedBox(
             height: 175,
             width: double.infinity,
-            child: Image.asset('assets/images/map_placeholder.png', fit: BoxFit.cover),
+            child: Image.asset(
+              'assets/images/map_placeholder.png',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),
@@ -181,7 +215,9 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   }
 
   List<Widget> _offers(BuildContext context) {
-    final label = AppTextStyles.body16Medium.copyWith(color: context.colors.textSecondary);
+    final label = AppTextStyles.body16Medium.copyWith(
+      color: context.colors.textSecondary,
+    );
 
     return [
       Padding(
@@ -232,17 +268,24 @@ class _Header extends StatelessWidget {
                       request.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.title20.copyWith(color: colors.textOnPrimary),
+                      style: AppTextStyles.title20.copyWith(
+                        color: colors.textOnPrimary,
+                      ),
                     ),
                     Text(
                       'تاريخ الإنشاء: ${request.date}',
-                      style: AppTextStyles.body16.copyWith(color: colors.textOnPrimaryMuted),
+                      style: AppTextStyles.body16.copyWith(
+                        color: colors.textOnPrimaryMuted,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 12),
-              AppIconButton(icon: 'assets/icons/ic_arrow_back.svg', onTap: () => Navigator.of(context).pop()),
+              AppIconButton(
+                icon: 'assets/icons/ic_arrow_back.svg',
+                onTap: () => Navigator.of(context).pop(),
+              ),
             ],
           ),
         ),
@@ -260,17 +303,32 @@ class _BottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    Widget button(String label, {required Color bg, required Color fg, Color? border}) => Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(12),
-            border: border == null ? null : Border.all(color: border),
+    Widget button(
+      String label, {
+      required Color bg,
+      required Color fg,
+      Color? border,
+      VoidCallback? onTap,
+    }) => GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(12),
+          border: border == null ? null : Border.all(color: border),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.title18Medium.copyWith(
+            fontWeight: FontWeight.w600,
+            color: fg,
           ),
-          child: Text(label, style: AppTextStyles.title18Medium.copyWith(fontWeight: FontWeight.w600, color: fg)),
-        );
+        ),
+      ),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -287,12 +345,30 @@ class _BottomBar extends StatelessWidget {
             spacing: 7,
             children: offersTab
                 ? [
-                    button('قبول العرض', bg: colors.successDisabled, fg: colors.textOnPrimary),
-                    button('مراسلة المختص', bg: colors.primary, fg: colors.textOnPrimary),
+                    button(
+                      'قبول العرض',
+                      bg: colors.successDisabled,
+                      fg: colors.textOnPrimary,
+                    ),
+                    button(
+                      'مراسلة المختص',
+                      bg: colors.primary,
+                      fg: colors.textOnPrimary,
+                    ),
                   ]
                 : [
-                    button('تحديث حالة الطلب', bg: colors.primary, fg: colors.textOnPrimary),
-                    button('تعديل الطلب', bg: colors.background, fg: colors.primaryContent, border: colors.border),
+                    button(
+                      'تحديث حالة الطلب',
+                      bg: colors.primary,
+                      fg: colors.textOnPrimary,
+                      onTap: () => runUpdateStatusFlow(context),
+                    ),
+                    button(
+                      'تعديل الطلب',
+                      bg: colors.background,
+                      fg: colors.primaryContent,
+                      border: colors.border,
+                    ),
                   ],
           ),
         ),

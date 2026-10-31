@@ -182,7 +182,7 @@ class RequestCard extends StatelessWidget {
                     // نص فوق الأصفر: غامق دايماً بالفاتح والداكن.
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
-                      color: const Color(0xFF171922),
+                      color: colors.textOnAccent,
                     ),
                   ),
                 ],

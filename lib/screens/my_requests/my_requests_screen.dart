@@ -11,6 +11,7 @@ import '../../core/widgets/app_icon_button.dart';
 import '../../data/dummy_data.dart';
 import '../../data/my_request.dart';
 import '../new_request/new_request_screen.dart';
+import 'dialogs/request_dialogs.dart';
 import 'request_details_screen.dart';
 import 'widgets/request_card.dart';
 
@@ -24,14 +25,23 @@ class MyRequestsScreen extends StatefulWidget {
 
 class _MyRequestsScreenState extends State<MyRequestsScreen> {
   // (التسمية، العدد) — الفلتر الافتراضي "النشطة".
-  static const _filters = [('الكل', 7), ('النشطة', 3), ('مكتملة', 2), ('ملغاة', 2)];
+  static const _filters = [
+    ('الكل', 7),
+    ('النشطة', 3),
+    ('مكتملة', 2),
+    ('ملغاة', 2),
+  ];
 
   List<MyRequest> get _visible => switch (_filter) {
-        0 => [...sampleActiveRequests, ...sampleDoneRequests, ...sampleCanceledRequests],
-        1 => sampleActiveRequests,
-        2 => sampleDoneRequests,
-        _ => sampleCanceledRequests,
-      };
+    0 => [
+      ...sampleActiveRequests,
+      ...sampleDoneRequests,
+      ...sampleCanceledRequests,
+    ],
+    1 => sampleActiveRequests,
+    2 => sampleDoneRequests,
+    _ => sampleCanceledRequests,
+  };
 
   int _filter = 1;
 
@@ -70,7 +80,10 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                     ),
                     const Spacer(),
                     // TODO: navigate to notifications
-                    AppIconButton(icon: 'assets/icons/ic_bell.svg', onTap: () {}),
+                    AppIconButton(
+                      icon: 'assets/icons/ic_bell.svg',
+                      onTap: () {},
+                    ),
                   ],
                 ),
               ),
@@ -84,9 +97,19 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('طلباتي', style: AppTextStyles.title24Medium.copyWith(fontWeight: FontWeight.w600)),
+                        Text(
+                          'طلباتي',
+                          style: AppTextStyles.title24Medium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const Spacer(),
-                        Text('7 طلبات', style: AppTextStyles.body16.copyWith(color: colors.textSecondary)),
+                        Text(
+                          '7 طلبات',
+                          style: AppTextStyles.body16.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -115,11 +138,14 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                         request: request,
                         onDetails: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => RequestDetailsScreen(request: request)),
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                RequestDetailsScreen(request: request),
+                          ),
                         ),
-                        onUpdate: () {},
-                        onMore: () {},
-                        onRate: () {},
+                        onUpdate: () => runUpdateStatusFlow(context),
+                        onMore: () => runUpdateStatusFlow(context),
+                        onRate: () => showRatingDialog(context),
                         onReorder: () {},
                       ),
                     ),
@@ -135,7 +161,11 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
 }
 
 class _FilterChip extends StatelessWidget {
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   final String label;
   final bool selected;

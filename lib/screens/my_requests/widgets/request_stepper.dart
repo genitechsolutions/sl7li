@@ -21,8 +21,8 @@ class RequestStepper extends StatelessWidget {
     Color stepColor(int i) => i < stage
         ? colors.successLight
         : i == stage
-            ? colors.stepActive
-            : colors.border;
+        ? colors.stepActive
+        : colors.border;
 
     return SizedBox(
       height: 79,
@@ -92,13 +92,23 @@ class _Dot extends StatelessWidget {
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Center(
         child: index < stage
-            ? SvgPicture.asset('assets/icons/ic_step_check.svg', width: 20, height: 20)
+            ? SvgPicture.asset(
+                'assets/icons/ic_step_check.svg',
+                width: 20,
+                height: 20,
+              )
             : index == stage
-                ? Image.asset('assets/images/step_spinner.png', width: 20, height: 20)
-                : Text(
-                    '${index + 1}',
-                    style: AppTextStyles.body16Medium.copyWith(color: colors.textHint),
-                  ),
+            ? Image.asset(
+                'assets/images/step_spinner.png',
+                width: 20,
+                height: 20,
+              )
+            : Text(
+                '${index + 1}',
+                style: AppTextStyles.body16Medium.copyWith(
+                  color: colors.textHint,
+                ),
+              ),
       ),
     );
   }

@@ -15,16 +15,19 @@ class OfferTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final small = AppTextStyles.body12.copyWith(fontSize: 13, color: colors.textSecondary);
+    final small = AppTextStyles.body12.copyWith(
+      fontSize: 13,
+      color: colors.textSecondary,
+    );
     final price = small.copyWith(color: colors.success);
 
     Widget feeRow(String label, String value) => Row(
-          children: [
-            Text(label, style: small),
-            const Spacer(),
-            Text(value, style: price),
-          ],
-        );
+      children: [
+        Text(label, style: small),
+        const Spacer(),
+        Text(value, style: price),
+      ],
+    );
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
@@ -37,7 +40,13 @@ class OfferTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              ClipOval(child: Image.asset('assets/images/offer_avatar.png', width: 64, height: 64)),
+              ClipOval(
+                child: Image.asset(
+                  'assets/images/offer_avatar.png',
+                  width: 64,
+                  height: 64,
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -54,7 +63,11 @@ class OfferTile extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        SvgPicture.asset('assets/icons/ic_verified.svg', width: 20, height: 20),
+                        SvgPicture.asset(
+                          'assets/icons/ic_verified.svg',
+                          width: 20,
+                          height: 20,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 2),
@@ -64,17 +77,31 @@ class OfferTile extends StatelessWidget {
                           'assets/icons/ic_star.svg',
                           width: 14,
                           height: 14,
-                          colorFilter: ColorFilter.mode(colors.star, BlendMode.srcIn),
+                          colorFilter: ColorFilter.mode(
+                            colors.star,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         const SizedBox(width: 4),
-                        Text('(${offer.reviews}) ${offer.rating}', textDirection: TextDirection.ltr, style: small),
+                        Text(
+                          '(${offer.reviews}) ${offer.rating}',
+                          textDirection: TextDirection.ltr,
+                          style: small,
+                        ),
                         Container(
                           width: 1,
                           height: 20,
                           margin: const EdgeInsets.symmetric(horizontal: 8),
                           color: colors.border,
                         ),
-                        Flexible(child: Text('محترف موصى به', maxLines: 1, overflow: TextOverflow.ellipsis, style: small)),
+                        Flexible(
+                          child: Text(
+                            'محترف موصى به',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: small,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -95,7 +122,10 @@ class OfferTile extends StatelessWidget {
                     'assets/icons/ic_open_external.svg',
                     width: 20,
                     height: 20,
-                    colorFilter: ColorFilter.mode(colors.primaryContent, BlendMode.srcIn),
+                    colorFilter: ColorFilter.mode(
+                      colors.primaryContent,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -112,9 +142,16 @@ class OfferTile extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: '${offer.price} ',
-                      style: AppTextStyles.title20.copyWith(color: colors.success),
+                      style: AppTextStyles.title20.copyWith(
+                        color: colors.success,
+                      ),
                     ),
-                    TextSpan(text: offer.priceUnit, style: AppTextStyles.body16.copyWith(color: colors.success)),
+                    TextSpan(
+                      text: offer.priceUnit,
+                      style: AppTextStyles.body16.copyWith(
+                        color: colors.success,
+                      ),
+                    ),
                   ],
                 ),
               ),
