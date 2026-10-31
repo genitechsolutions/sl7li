@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
 import '../../notifications/notifications_screen.dart';
+import 'create_offer_screen.dart';
 
 /// تاب "عروضي" (عروض ترويجية للمهني): حالياً الحالة الفاضية (الكل / قيد المراجعة / نشط).
 class MyOffersTab extends StatefulWidget {
@@ -117,9 +118,11 @@ class _MyOffersTabState extends State<MyOffersTab> {
                 ),
               ),
               const SizedBox(height: 28),
-              // TODO: شاشات إنشاء العرض (frames Creating offer: Step 1..4) لسا ما انبنت.
               GestureDetector(
-                onTap: () {},
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateOfferScreen()),
+                ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
