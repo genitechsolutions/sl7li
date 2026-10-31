@@ -449,19 +449,19 @@ class _AccountBtn extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SvgPicture.asset(
+              icon,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
+            ),
+            const SizedBox(width: 12),
             Text(
               label,
               style: AppTextStyles.title18Medium.copyWith(
                 fontWeight: FontWeight.w600,
                 color: fg,
               ),
-            ),
-            const SizedBox(width: 12),
-            SvgPicture.asset(
-              icon,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
             ),
           ],
         ),

@@ -185,7 +185,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                   ...signupField(
                     const FormLabel('الاسم الكامل'),
                     AppTextField(hint: 'الاسم الكامل', controller: _name),
-                    top: 24,
+                    top: 54,
                   ),
                   ...signupField(
                     const FormLabel('الرقم'),
@@ -213,6 +213,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                       controller: _bio,
                       minLines: 4,
                     ),
+                    top: 36,
                   ),
                   const SizedBox(height: 28),
                   Padding(

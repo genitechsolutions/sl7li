@@ -8,7 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:khaled_flutter/core/theme/app_theme.dart';
+import 'package:khaled_flutter/data/craftsman_signup.dart';
 import 'package:khaled_flutter/screens/auth/customer_login_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/offers/create_offer_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/offers/my_offers_tab.dart';
+import 'package:khaled_flutter/screens/craftsman/profile/edit_profile_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/signup/signup_step2_screen.dart';
+import 'package:khaled_flutter/screens/messages/messages_screen.dart';
+import 'package:khaled_flutter/screens/settings/settings_screen.dart';
 import 'package:khaled_flutter/screens/auth/login_screen.dart';
 import 'package:khaled_flutter/screens/auth/phone_login_screen.dart';
 import 'package:khaled_flutter/screens/home/home_screen.dart';
@@ -23,6 +30,22 @@ final _screens = <(String, Widget Function())>[
   ('17_login_account_type', () => const LoginScreen()),
   ('18_customer_login_empty', () => const CustomerLoginScreen()),
   ('23_phone_login', () => const PhoneLoginScreen()),
+  ('32_settings', () => const SettingsScreen()),
+  // المهني
+  ('26_cr_my_offers_empty', () => const Scaffold(body: MyOffersTab())),
+  ('27_cr_messages', () => const MessagesScreen(craftsmanMode: true)),
+  ('28_cr_create_offer_step1', () => const CreateOfferScreen()),
+  ('29_cr_settings', () => const SettingsScreen(craftsmanMode: true)),
+  ('30_cr_edit_profile', () => const EditCraftsmanProfileScreen()),
+  (
+    '31_cr_edit_services',
+    () => SignupStep2Screen(
+      draft: CraftsmanSignupDraft()
+        ..services.addAll(['التكييف', 'الكهرباء', 'السباكة'])
+        ..specialties['التكييف'] = {'تبديل وصيانة الضواغط'},
+      editing: true,
+    ),
+  ),
 ];
 
 Future<ui.Size> _designSize(String name) async {
@@ -40,6 +63,18 @@ void main() {
         plex.addFont(rootBundle.load('assets/fonts/IBMPlexSansArabic-$w.ttf'));
       }
       await plex.load();
+      final root = Platform.environment['FLUTTER_ROOT']!;
+      final icons = FontLoader('MaterialIcons')
+        ..addFont(
+          Future.value(
+            ByteData.sublistView(
+              File(
+                '$root/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+              ).readAsBytesSync(),
+            ),
+          ),
+        );
+      await icons.load();
       final size = await tester.runAsync(() => _designSize(name));
       tester.view.physicalSize = Size(size!.width * 2, size.height * 2);
       tester.view.devicePixelRatio = 2;

@@ -371,6 +371,13 @@ class _AccountButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SvgPicture.asset(
+              icon,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
+            ),
+            const SizedBox(width: 12),
             Text(
               label,
               style: AppTextStyles.title18Medium.copyWith(
@@ -378,13 +385,6 @@ class _AccountButton extends StatelessWidget {
                 height: 1.5,
                 color: fg,
               ),
-            ),
-            const SizedBox(width: 12),
-            SvgPicture.asset(
-              icon,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(fg, BlendMode.srcIn),
             ),
           ],
         ),
@@ -567,7 +567,10 @@ class _DeleteDialog extends StatelessWidget {
 
 /// تأكيد تسجيل الخروج ثم الرجوع لصفحة الرقم (بيستعملها الإعدادات وبروفايل المهني).
 Future<void> confirmLogout(BuildContext context) async {
-  final ok = await showAppModal<bool>(context, (context) => const _LogoutDialog());
+  final ok = await showAppModal<bool>(
+    context,
+    (context) => const _LogoutDialog(),
+  );
   if (ok == true && context.mounted) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
@@ -578,7 +581,10 @@ Future<void> confirmLogout(BuildContext context) async {
 
 /// تأكيد حذف الحساب ثم الرجوع لصفحة الرقم.
 Future<void> confirmDeleteAccount(BuildContext context) async {
-  final ok = await showAppModal<bool>(context, (context) => const _DeleteDialog());
+  final ok = await showAppModal<bool>(
+    context,
+    (context) => const _DeleteDialog(),
+  );
   if (ok == true && context.mounted) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
