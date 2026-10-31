@@ -8,6 +8,7 @@ import '../../core/widgets/craftsman_avatar.dart';
 import '../../data/chat_data.dart';
 import '../../data/dummy_data.dart';
 import '../my_requests/request_details_screen.dart';
+import '../my_requests/dialogs/request_dialogs.dart';
 import 'widgets/message_status_icon.dart';
 
 /// دردشة مع حرفي: رسائل، بطاقة الطلب، صور، وشريط كتابة.
@@ -173,9 +174,65 @@ class _Header extends StatelessWidget {
                   ],
                 ),
               ),
-              // TODO: قائمة الخيارات (frame Options 382:2389)
-              GestureDetector(
-                onTap: () {},
+              PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                color: colors.background,
+                surfaceTintColor: Colors.transparent,
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                offset: const Offset(0, 36),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'agree':
+                      showAgreementDialog(context);
+                    case 'rate':
+                      showRatingDialog(context);
+                    // TODO: إبلاغ (ما في تصميم لنافذة الإبلاغ)
+                  }
+                },
+                itemBuilder: (context) => [
+                  _menuItem(
+                    context,
+                    'agree',
+                    'الاتفاق مع المهني',
+                    // TODO: asset — أيقونة الاتفاق من Figma (382:2389)
+                    Icon(
+                      Icons.how_to_reg_outlined,
+                      size: 20,
+                      color: colors.success,
+                    ),
+                  ),
+                  _menuItem(
+                    context,
+                    'rate',
+                    'تقييم المهني',
+                    SvgPicture.asset(
+                      'assets/icons/ic_star.svg',
+                      width: 20,
+                      height: 20,
+                      colorFilter: ColorFilter.mode(
+                        colors.star,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  _menuItem(
+                    context,
+                    'report',
+                    'إبلاغ',
+                    SvgPicture.asset(
+                      'assets/icons/ic_block.svg',
+                      width: 20,
+                      height: 20,
+                      colorFilter: ColorFilter.mode(
+                        colors.error,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                ],
                 child: SvgPicture.asset(
                   'assets/icons/ic_more_vert_24.svg',
                   width: 24,
@@ -192,6 +249,24 @@ class _Header extends StatelessWidget {
       ),
     );
   }
+}
+
+PopupMenuItem<String> _menuItem(
+  BuildContext context,
+  String value,
+  String label,
+  Widget icon,
+) {
+  return PopupMenuItem<String>(
+    value: value,
+    child: Row(
+      children: [
+        icon,
+        const SizedBox(width: 12),
+        Text(label, style: AppTextStyles.body16),
+      ],
+    ),
+  );
 }
 
 class _Pill extends StatelessWidget {

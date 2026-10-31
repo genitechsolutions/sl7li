@@ -37,33 +37,52 @@ class AppBottomNavBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           // التصميم يضع "الرئيسية" على اليسار، فنثبّت الترتيب LTR.
-          child: Row(
-            textDirection: TextDirection.ltr,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _item(context, 0, 'assets/icons/ic_nav_home.svg', 'الرئيسية'),
-              _item(context, 1, 'assets/icons/ic_nav_requests.svg', 'طلباتي'),
-              GestureDetector(
-                onTap: onAddTap,
-                child: SvgPicture.asset(
-                  'assets/icons/ic_add.svg',
-                  width: 52,
-                  height: 52,
-                  colorMapper: SvgThemeColors.of(context),
-                ),
-              ),
-              _item(context, 2, 'assets/icons/ic_nav_messages.svg', 'الرسائل'),
-              _item(context, 3, 'assets/icons/ic_nav_settings.svg', 'الإعدادات'),
-            ],
+          // بالشاشات الضيقة (أقل من 372) بنصغّر الصف كله بدل الـ overflow.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final row = _row(context);
+              if (constraints.maxWidth >= _minRowWidth) return row;
+              return FittedBox(
+                fit: BoxFit.scaleDown,
+                child: SizedBox(width: _minRowWidth, child: row),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
+  /// عرض الصف الطبيعي: 4 عناصر × 64 + زر الإضافة 52 + فراغات.
+  static const _minRowWidth = 332.0;
+
+  Widget _row(BuildContext context) {
+    return Row(
+      textDirection: TextDirection.ltr,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _item(context, 0, 'assets/icons/ic_nav_home.svg', 'الرئيسية'),
+        _item(context, 1, 'assets/icons/ic_nav_requests.svg', 'طلباتي'),
+        GestureDetector(
+          onTap: onAddTap,
+          child: SvgPicture.asset(
+            'assets/icons/ic_add.svg',
+            width: 52,
+            height: 52,
+            colorMapper: SvgThemeColors.of(context),
+          ),
+        ),
+        _item(context, 2, 'assets/icons/ic_nav_messages.svg', 'الرسائل'),
+        _item(context, 3, 'assets/icons/ic_nav_settings.svg', 'الإعدادات'),
+      ],
+    );
+  }
+
   Widget _item(BuildContext context, int index, String icon, String label) {
     final isActive = index == currentIndex;
-    final color = isActive ? context.colors.textPrimary : context.colors.textSecondary;
+    final color = isActive
+        ? context.colors.textPrimary
+        : context.colors.textSecondary;
 
     return GestureDetector(
       onTap: () => onTap(index),

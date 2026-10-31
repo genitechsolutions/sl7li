@@ -31,7 +31,8 @@ class _OtpScreenState extends State<OtpScreen> {
   static const _labelPadding = EdgeInsetsDirectional.symmetric(horizontal: 12);
 
   final _code = TextEditingController();
-  final _supportTap = TapGestureRecognizer()..onTap = () {}; // TODO: open customer support
+  final _supportTap = TapGestureRecognizer()
+    ..onTap = () {}; // TODO: open customer support
   Timer? _timer;
   int _secondsLeft = _resendAfter;
 
@@ -64,8 +65,10 @@ class _OtpScreenState extends State<OtpScreen> {
 
   // TODO: التحقق الحقيقي من الرمز (API)؛ هلق أي 6 أرقام بتكمّل لاختيار نوع الحساب.
   void _confirm() {
-    Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
   }
 
   @override
@@ -109,7 +112,9 @@ class _OtpScreenState extends State<OtpScreen> {
             Text(
               'تم إرسال رمز التحقق على واتساب إلى الرقم',
               textAlign: TextAlign.center,
-              style: AppTextStyles.title20Medium.copyWith(color: context.colors.textSecondary),
+              style: AppTextStyles.title20Medium.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             Text(
               widget.phone,
@@ -133,7 +138,9 @@ class _OtpScreenState extends State<OtpScreen> {
                     padding: _labelPadding,
                     child: Text(
                       'أدخل الرمز المكون من 6 أرقام المرسل إلى رقمك الوتس اب',
-                      style: AppTextStyles.body14.copyWith(color: context.colors.textSecondary),
+                      style: AppTextStyles.body14.copyWith(
+                        color: context.colors.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -142,18 +149,28 @@ class _OtpScreenState extends State<OtpScreen> {
                     child: Row(
                       spacing: 21,
                       children: [
-                        GestureDetector(
-                          onTap: canResend ? _startTimer : null,
-                          child: Text(
-                            canResend ? 'إعادة إرسال الرمز' : 'إعادة إرسال الرمز خلال $_countdown',
-                            style: link,
+                        Flexible(
+                          child: GestureDetector(
+                            onTap: canResend ? _startTimer : null,
+                            child: Text(
+                              canResend
+                                  ? 'إعادة إرسال الرمز'
+                                  : 'إعادة إرسال الرمز خلال $_countdown',
+                              style: link,
+                            ),
                           ),
                         ),
-                        Container(width: 1, height: 24, color: context.colors.border),
-                        GestureDetector(
-                          // الرقم بينكتب بصفحة تسجيل الدخول اللي قبل.
-                          onTap: () => Navigator.pop(context),
-                          child: Text('تغيير رقم الهاتف', style: link),
+                        Container(
+                          width: 1,
+                          height: 24,
+                          color: context.colors.border,
+                        ),
+                        Flexible(
+                          child: GestureDetector(
+                            // الرقم بينكتب بصفحة تسجيل الدخول اللي قبل.
+                            onTap: () => Navigator.pop(context),
+                            child: Text('تغيير رقم الهاتف', style: link),
+                          ),
                         ),
                       ],
                     ),
