@@ -15,10 +15,12 @@ def ink(path, scale, width=412):
         im = im.resize((im.width // scale, im.height // scale), Image.LANCZOS)
     a = np.asarray(im).astype(np.float32)
     bg = np.median(a.reshape(-1, 3), axis=0)  # لون الخلفية الغالب
-    d = np.abs(a - bg).sum(axis=2)
-    return d
+    g = a.sum(axis=2)
+    # خريطة حواف (تغيّر محلي) بدل الفرق عن الخلفية: بتبيّن الأيقونات/الحروف جوا الأزرار الملوّنة كمان.
+    e = np.abs(np.diff(g, axis=1, prepend=g[:, :1])) + np.abs(np.diff(g, axis=0, prepend=g[:1]))
+    return np.minimum(e, 200.0)
 
-def blur(v, k=9):
+def blur(v, k=3):
     kern = np.ones(k) / k
     return np.convolve(v, kern, mode='same')
 
@@ -31,7 +33,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('render'); ap.add_argument('design')
     ap.add_argument('--scale', type=int, default=2)
-    ap.add_argument('--band', type=int, default=28)
+    ap.add_argument('--band', type=int, default=14)
     ap.add_argument('--margin', type=float, default=0.12)
     ap.add_argument('--skip-top', type=int, default=32, help='شريط الحالة')
     args = ap.parse_args()
@@ -45,10 +47,10 @@ def main():
     for y in range(args.skip_top, h - args.band, args.band):
         rb = blur(r[y:y + args.band].sum(axis=0))
         db = blur(d[y:y + args.band].sum(axis=0))
-        if rb.sum() < 2000 or db.sum() < 2000:  # شريط فاضي
+        if rb.sum() < 600 or db.sum() < 600:  # شريط فاضي
             continue
         # شريط صورة (حبر كتير تقريباً بكل العرض): الصور مختلفة بالتصميم عن الـ placeholder، تجاهله.
-        if (r[y:y + args.band] > 60).mean() > 0.45 or (d[y:y + args.band] > 60).mean() > 0.45:
+        if (r[y:y + args.band] > 40).mean() > 0.3 or (d[y:y + args.band] > 40).mean() > 0.3:
             continue
         same = corr(rb, db)
         flip = corr(rb, db[::-1])

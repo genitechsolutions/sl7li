@@ -11,6 +11,7 @@ for f in test/_tmp/rtl/*.png; do
   n=$(basename "$f" .png)
   echo "== $n"
   python3 -I tool/design_check/rtl_diff.py "$f" "design/$n.png" || fail=1
+  python3 -I tool/design_check/rtl_order.py "$f" "design/$n.png" || fail=1
 done
 rm -rf test
 exit $fail

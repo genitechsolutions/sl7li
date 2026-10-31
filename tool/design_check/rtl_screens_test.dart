@@ -15,6 +15,7 @@ import 'package:khaled_flutter/screens/craftsman/offers/my_offers_tab.dart';
 import 'package:khaled_flutter/screens/craftsman/profile/edit_profile_screen.dart';
 import 'package:khaled_flutter/screens/craftsman/signup/signup_step2_screen.dart';
 import 'package:khaled_flutter/screens/messages/messages_screen.dart';
+import 'package:khaled_flutter/screens/my_requests/my_requests_screen.dart';
 import 'package:khaled_flutter/screens/settings/settings_screen.dart';
 import 'package:khaled_flutter/screens/auth/login_screen.dart';
 import 'package:khaled_flutter/screens/auth/phone_login_screen.dart';
@@ -31,6 +32,7 @@ final _screens = <(String, Widget Function())>[
   ('18_customer_login_empty', () => const CustomerLoginScreen()),
   ('23_phone_login', () => const PhoneLoginScreen()),
   ('32_settings', () => const SettingsScreen()),
+  ('33_my_requests_active', () => const MyRequestsScreen()),
   // المهني
   ('26_cr_my_offers_empty', () => const Scaffold(body: MyOffersTab())),
   ('27_cr_messages', () => const MessagesScreen(craftsmanMode: true)),
