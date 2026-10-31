@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -60,7 +61,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   controller: _controller,
                   itemCount: _pages.length,
                   onPageChanged: (i) => setState(() => _index = i),
-                  itemBuilder: (_, i) => _Page(title: _pages[i].$1, body: _pages[i].$2),
+                  itemBuilder: (_, i) => _Page(
+                    image: 'assets/images/onboarding_${i + 1}.png',
+                    title: _pages[i].$1,
+                    body: _pages[i].$2,
+                  ),
                 ),
               ),
               // الأزرار بمكانها الفيزيائي متل التصميم: "التالي" يمين و"السابق" يسار.
@@ -71,8 +76,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Row(
                     children: [
                       _NavButton(
-                                        flip: false,
-                        filled: false,
+                        flip: false,
+                        filled: _index != 0,
                         onTap: _index == 0 ? null : () => _go(_index - 1),
                       ),
                       Expanded(child: Center(child: _Dots(count: _pages.length, index: _index))),
@@ -109,8 +114,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class _Page extends StatelessWidget {
-  const _Page({required this.title, required this.body});
+  const _Page({required this.image, required this.title, required this.body});
 
+  final String image;
   final String title;
   final String body;
 
@@ -122,20 +128,43 @@ class _Page extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         children: [
-          // TODO: asset — صورة المهني مع الـ Bolt الأصفر (Figma 149:1212 / 149:1129) محتاجة تصدير.
-          const Spacer(),
+          // الصورة (330×388.5) مع الـ Bolt الأصفر خلفها بإزاحة 125.5 من فوق.
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 60),
+              child: FittedBox(
+                alignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  width: 330,
+                  height: 388.5,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 125.5,
+                        left: 0,
+                        child: SvgPicture.asset('assets/icons/onboarding_bolt.svg', width: 330, height: 263),
+                      ),
+                      Image.asset(image, width: 330, height: 388.5),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // النصوص بالتصميم أنزل ~13px من مربعاتها بالفلاتر (قيس بالرسم): 65 و71 بدل 52 و84، والصورة بتضل بمكانها.
+          const SizedBox(height: 65),
           Text(
             title,
             textAlign: TextAlign.center,
             style: AppTextStyles.title30Bold.copyWith(fontSize: 32, height: 1.8),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
           Text(
             body,
             textAlign: TextAlign.center,
             style: AppTextStyles.title20.copyWith(color: colors.textSecondary, height: 1.5),
           ),
-          const SizedBox(height: 64),
+          const SizedBox(height: 71),
         ],
       ),
     );
@@ -200,8 +229,13 @@ class _NavButton extends StatelessWidget {
           child: Center(
             child: Transform.flip(
               flipX: flip,
-              // TODO: asset — سهم التصميم (Figma 149:1118) SVG؛ مؤقتاً أيقونة Material.
-              child: Icon(Icons.arrow_back, size: 28, color: colors.textOnPrimary),
+              // الـ SVG أصلاً سهم لليسار؛ "التالي" بينعكس لليمين.
+              child: SvgPicture.asset(
+                'assets/icons/ic_arrow_next.svg',
+                width: 28,
+                height: 28,
+                colorFilter: ColorFilter.mode(colors.textOnPrimary, BlendMode.srcIn),
+              ),
             ),
           ),
         ),

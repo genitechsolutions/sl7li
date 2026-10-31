@@ -26,7 +26,8 @@
 ## خريطة الشاشات والتنقل
 | الشاشة | الملف | بتفتح من |
 |---|---|---|
-| تسجيل الدخول: رقم الواتساب — **أول صفحة** | `screens/auth/phone_login_screen.dart` | `main.dart` |
+| شاشة البداية (Splash) ← 3 صفحات Onboarding | `screens/onboarding/` | `main.dart` (أول شي) |
+| تسجيل الدخول: رقم الواتساب | `screens/auth/phone_login_screen.dart` | "تخطي"/"إبدأ الآن" بالـ Onboarding |
 | تأكيد الرقم (OTP 6 خانات + عداد، بيعرض الرقم المدخل) | `screens/auth/otp_screen.dart` | "إرسال رمز التحقق" |
 | تسجيل الدخول: نوع الحساب | `screens/auth/login_screen.dart` | "تأكيد الرمز" (بتمسح اللي قبل) |
 | دخول الزبائن (اسم، مدينة منسدلة، حي ببحث) | `screens/auth/customer_login_screen.dart` | كرت "دخول الزبائن" |
