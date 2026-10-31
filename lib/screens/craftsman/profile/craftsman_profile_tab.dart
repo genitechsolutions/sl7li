@@ -61,22 +61,22 @@ class CraftsmanProfileTab extends StatelessWidget {
                     child: Row(
                       children: [
                         AppIconButton(
-                          icon: 'assets/icons/ic_set_bell_dark.svg',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const NotificationsScreen(),
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        AppIconButton(
                           icon: 'assets/icons/ic_settings.svg',
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
                                   const SettingsScreen(craftsmanMode: true),
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        AppIconButton(
+                          icon: 'assets/icons/ic_set_bell_dark.svg',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen(),
                             ),
                           ),
                         ),
@@ -97,27 +97,23 @@ class CraftsmanProfileTab extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    const EditCraftsmanProfileScreen(),
-                              ),
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: colors.tag,
+                              shape: BoxShape.circle,
                             ),
-                            child: SvgPicture.asset(
-                              'assets/icons/ic_edit_badge.svg',
-                              width: 24,
-                              height: 24,
-                              colorFilter: ColorFilter.mode(
-                                colors.primaryContent,
-                                BlendMode.srcIn,
-                              ),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.person_outline,
+                              size: 32,
+                              color: colors.primary,
                             ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 12),
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
@@ -144,19 +140,23 @@ class CraftsmanProfileTab extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: colors.tag,
-                              shape: BoxShape.circle,
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    const EditCraftsmanProfileScreen(),
+                              ),
                             ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.person_outline,
-                              size: 32,
-                              color: colors.primary,
+                            child: SvgPicture.asset(
+                              'assets/icons/ic_edit_badge.svg',
+                              width: 24,
+                              height: 24,
+                              colorFilter: ColorFilter.mode(
+                                colors.primaryContent,
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
                         ],
@@ -235,6 +235,16 @@ class CraftsmanProfileTab extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              SvgPicture.asset(
+                                'assets/icons/cr_switch.svg',
+                                width: 20,
+                                height: 20,
+                                colorFilter: ColorFilter.mode(
+                                  colors.primaryContent,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
                                   'التبديل لوضع الزبون',
@@ -243,16 +253,6 @@ class CraftsmanProfileTab extends StatelessWidget {
                                     fontWeight: FontWeight.w600,
                                     color: colors.primaryContent,
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              SvgPicture.asset(
-                                'assets/icons/cr_switch.svg',
-                                width: 20,
-                                height: 20,
-                                colorFilter: ColorFilter.mode(
-                                  colors.primaryContent,
-                                  BlendMode.srcIn,
                                 ),
                               ),
                             ],
@@ -516,6 +516,10 @@ class _VerificationCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              Icon(Icons.badge_outlined, color: colors.textPrimary),
+              const SizedBox(width: 12),
+              Flexible(child: Text(title, style: AppTextStyles.body16Medium)),
+              const Spacer(),
               if (badge.isNotEmpty)
                 Text(
                   badge,
@@ -524,10 +528,6 @@ class _VerificationCard extends StatelessWidget {
                     color: badgeColor,
                   ),
                 ),
-              const Spacer(),
-              Flexible(child: Text(title, style: AppTextStyles.body16Medium)),
-              const SizedBox(width: 12),
-              Icon(Icons.badge_outlined, color: colors.textPrimary),
             ],
           ),
           if (body.isNotEmpty) ...[
@@ -554,6 +554,8 @@ class _VerificationCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Icon(Icons.verified, size: 20, color: colors.textOnPrimary),
+                    const SizedBox(width: 8),
                     Text(
                       'توثيق حسابي',
                       style: AppTextStyles.title18Medium.copyWith(
@@ -561,8 +563,6 @@ class _VerificationCard extends StatelessWidget {
                         color: colors.textOnPrimary,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.verified, size: 20, color: colors.textOnPrimary),
                   ],
                 ),
               ),

@@ -102,6 +102,10 @@ class _CraftsmanRequestDetailsScreenState
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (iconW != null || icon != null) ...[
+              iconW ?? Icon(icon, color: fg ?? colors.textOnPrimary, size: 22),
+              const SizedBox(width: 12),
+            ],
             Text(
               text,
               style: AppTextStyles.title18Medium.copyWith(
@@ -109,10 +113,6 @@ class _CraftsmanRequestDetailsScreenState
                 color: fg ?? colors.textOnPrimary,
               ),
             ),
-            if (iconW != null || icon != null) ...[
-              const SizedBox(width: 12),
-              iconW ?? Icon(icon, color: fg ?? colors.textOnPrimary, size: 22),
-            ],
           ],
         ),
       ),
@@ -167,6 +167,11 @@ class _CraftsmanRequestDetailsScreenState
                   padding: const EdgeInsets.only(top: 15),
                   child: Row(
                     children: [
+                      AppIconButton(
+                        icon: 'assets/icons/ic_arrow_back.svg',
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,11 +192,6 @@ class _CraftsmanRequestDetailsScreenState
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      AppIconButton(
-                        icon: 'assets/icons/ic_arrow_back.svg',
-                        onTap: () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),

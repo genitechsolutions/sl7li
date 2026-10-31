@@ -36,7 +36,7 @@ class _NotificationSettingsScreenState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          padding: const EdgeInsets.fromLTRB(20, 33, 20, 20),
           child: Row(
             children: [
               Text(title, style: AppTextStyles.title18Medium),
@@ -57,7 +57,10 @@ class _NotificationSettingsScreenState
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 21.5,
+              ),
               decoration: BoxDecoration(
                 color: colors.background,
                 borderRadius: BorderRadius.circular(12),

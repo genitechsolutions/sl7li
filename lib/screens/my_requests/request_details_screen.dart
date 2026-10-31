@@ -328,6 +328,11 @@ class _Header extends StatelessWidget {
           padding: const EdgeInsets.only(top: 15),
           child: Row(
             children: [
+              AppIconButton(
+                icon: 'assets/icons/ic_arrow_back.svg',
+                onTap: () => Navigator.of(context).pop(),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,11 +353,6 @@ class _Header extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              AppIconButton(
-                icon: 'assets/icons/ic_arrow_back.svg',
-                onTap: () => Navigator.of(context).pop(),
               ),
             ],
           ),

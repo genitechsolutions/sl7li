@@ -9,7 +9,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:khaled_flutter/core/theme/app_colors.dart';
 import 'package:khaled_flutter/core/theme/app_theme.dart';
-import 'package:khaled_flutter/data/chat_data.dart';
 import 'package:khaled_flutter/data/craftsman_data.dart';
 import 'package:khaled_flutter/data/craftsman_signup.dart';
 import 'package:khaled_flutter/data/dummy_data.dart';
@@ -26,11 +25,15 @@ import 'package:khaled_flutter/screens/craftsman_profile/craftsman_profile_scree
 import 'package:khaled_flutter/screens/messages/chat_screen.dart';
 import 'package:khaled_flutter/screens/new_request/craftsman_targeting_screen.dart';
 import 'package:khaled_flutter/screens/new_request/new_request_screen.dart';
-import 'package:khaled_flutter/screens/new_request/request_confirm_screen.dart';
 import 'package:khaled_flutter/screens/new_request/request_details_screen.dart'
     as nr;
 import 'package:khaled_flutter/screens/new_request/request_location_screen.dart';
 import 'package:khaled_flutter/screens/new_request/request_sent_screen.dart';
+import 'package:khaled_flutter/screens/my_requests/my_requests_screen.dart';
+import 'package:khaled_flutter/screens/my_requests/request_details_screen.dart'
+    as mr;
+import 'package:khaled_flutter/screens/messages/messages_screen.dart' as msgs;
+import 'package:khaled_flutter/screens/settings/profile_screen.dart';
 import 'package:khaled_flutter/screens/notifications/notifications_screen.dart';
 import 'package:khaled_flutter/screens/offer_details/offer_details_screen.dart';
 import 'package:khaled_flutter/screens/service_details/service_details_screen.dart';
@@ -40,8 +43,6 @@ import 'package:khaled_flutter/screens/craftsman/offers/create_offer_screen.dart
 import 'package:khaled_flutter/screens/craftsman/offers/my_offers_tab.dart';
 import 'package:khaled_flutter/screens/craftsman/profile/edit_profile_screen.dart';
 import 'package:khaled_flutter/screens/craftsman/signup/signup_step2_screen.dart';
-import 'package:khaled_flutter/screens/messages/messages_screen.dart';
-import 'package:khaled_flutter/screens/my_requests/my_requests_screen.dart';
 import 'package:khaled_flutter/screens/settings/settings_screen.dart';
 import 'package:khaled_flutter/screens/auth/login_screen.dart';
 import 'package:khaled_flutter/screens/auth/phone_login_screen.dart';
@@ -61,16 +62,33 @@ CraftsmanSignupDraft _draft() => CraftsmanSignupDraft()
   ..workshopAddress = 'عنوان'
   ..bio = 'نبذة';
 
-Future<void> _tap(WidgetTester t, String text) async {
+Future<void> _tap(
+  WidgetTester t,
+  String text, {
+  bool scrollChips = false,
+}) async {
+  if (scrollChips) {
+    await t.scrollUntilVisible(
+      find.textContaining(text),
+      150,
+      scrollable: find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.left,
+      ),
+    );
+  }
   await t.tap(find.textContaining(text).first);
   await t.pumpAndSettle();
 }
 
 /// خطوات بعد فتح الشاشة (تابات/فلاتر)، بالاسم.
 final _prep = <String, Future<void> Function(WidgetTester)>{
+  '68_my_requests_done': (t) => _tap(t, 'مكتملة', scrollChips: true),
+  '69_my_requests_canceled': (t) => _tap(t, 'ملغاة', scrollChips: true),
+  '06_craftsman_profile_works': (t) => _tap(t, 'معرض الأعمال'),
+  '55_cr_public_profile': (t) => _tap(t, 'معرض الأعمال'),
   '39_cr_available_requests': (t) => _tap(t, 'الطلبات المتاحة'),
-  '44_cr_requests_completed': (t) => _tap(t, 'مكتملة'),
-  '45_cr_requests_cancelled': (t) => _tap(t, 'ملغاة'),
+  '44_cr_requests_completed': (t) => _tap(t, 'مكتملة', scrollChips: true),
+  '45_cr_requests_cancelled': (t) => _tap(t, 'ملغاة', scrollChips: true),
 };
 
 final _screens = <(String, Widget Function())>[
@@ -102,6 +120,28 @@ final _screens = <(String, Widget Function())>[
   ),
   ('16_request_sent', () => const RequestSentScreen()),
   ('22_otp_verify', () => const OtpScreen(phone: '+963 993 930 716')),
+  ('62_notif_settings', () => const NotificationSettingsScreen()),
+  ('63_notifications', () => const NotificationsScreen()),
+  ('64_messages', () => const msgs.MessagesScreen()),
+  ('65_chat', () => ChatScreen(conversation: sampleConversations[1])),
+  (
+    '66_chat_first',
+    () => ChatScreen(conversation: sampleConversations[1], firstTime: true),
+  ),
+  ('67_profile', () => const ProfileScreen()),
+  ('68_my_requests_done', () => const MyRequestsScreen()),
+  ('69_my_requests_canceled', () => const MyRequestsScreen()),
+  (
+    '70_request_offers_tab',
+    () => mr.RequestDetailsScreen(
+      request: sampleActiveRequests[0],
+      initialTab: 1,
+    ),
+  ),
+  (
+    '71_request_details_open',
+    () => mr.RequestDetailsScreen(request: sampleActiveRequests[0]),
+  ),
   // مهني
   ('34_cr_signup1', () => const SignupStep1Screen()),
   ('36_cr_signup3', () => SignupStep3Screen(draft: _draft())),
@@ -173,7 +213,7 @@ final _screens = <(String, Widget Function())>[
       ),
     ),
   ),
-  ('27_cr_messages', () => const MessagesScreen(craftsmanMode: true)),
+  ('27_cr_messages', () => const msgs.MessagesScreen(craftsmanMode: true)),
   ('28_cr_create_offer_step1', () => const CreateOfferScreen()),
   ('29_cr_settings', () => const SettingsScreen(craftsmanMode: true)),
   ('30_cr_edit_profile', () => const EditCraftsmanProfileScreen()),

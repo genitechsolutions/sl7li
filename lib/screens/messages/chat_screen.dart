@@ -468,12 +468,22 @@ class _ProfileCard extends StatelessWidget {
           const CraftsmanAvatar(
             image: 'assets/images/chat_avatar.png',
             isPro: true,
-            size: 100,
+            size: 74,
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SvgPicture.asset(
+                'assets/icons/ic_open_external.svg',
+                width: 20,
+                height: 20,
+                colorFilter: ColorFilter.mode(
+                  colors.primaryContent,
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(width: 8),
               Text('مركز النور للكهرباء', style: AppTextStyles.title18Medium),
               const SizedBox(width: 8),
               SvgPicture.asset(
@@ -487,9 +497,19 @@ class _ProfileCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SvgPicture.asset(
+                'assets/icons/ic_star.svg',
+                width: 16,
+                height: 16,
+                colorFilter: ColorFilter.mode(colors.star, BlendMode.srcIn),
+              ),
+              const SizedBox(width: 4),
               Text(
-                'محترف موصى به',
-                style: AppTextStyles.body14.copyWith(color: colors.verified),
+                '(128) 4.9',
+                textDirection: TextDirection.ltr,
+                style: AppTextStyles.body14.copyWith(
+                  color: colors.textSecondary,
+                ),
               ),
               Container(
                 width: 1,
@@ -498,18 +518,8 @@ class _ProfileCard extends StatelessWidget {
                 color: colors.border,
               ),
               Text(
-                '(128) 4.9',
-                textDirection: TextDirection.ltr,
-                style: AppTextStyles.body14.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: 4),
-              SvgPicture.asset(
-                'assets/icons/ic_star.svg',
-                width: 16,
-                height: 16,
-                colorFilter: ColorFilter.mode(colors.star, BlendMode.srcIn),
+                'محترف موصى به',
+                style: AppTextStyles.body14.copyWith(color: colors.verified),
               ),
             ],
           ),
