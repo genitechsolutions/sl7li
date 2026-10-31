@@ -34,7 +34,11 @@ class PromoBanner extends StatelessWidget {
             start: 0,
             child: Opacity(
               opacity: 0.05,
-              child: SvgPicture.asset('assets/icons/banner_pattern.svg', width: 251, height: 178),
+              child: SvgPicture.asset(
+                'assets/icons/banner_pattern.svg',
+                width: 251,
+                height: 178,
+              ),
             ),
           ),
           Padding(
@@ -43,13 +47,18 @@ class PromoBanner extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.title18.copyWith(color: context.colors.textOnPrimary),
+                  style: AppTextStyles.title18.copyWith(
+                    color: context.colors.textOnPrimary,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   subtitle,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.body14.copyWith(color: context.colors.textOnPrimaryMuted),
+                  style: AppTextStyles.body16.copyWith(
+                    height: 1.5,
+                    color: context.colors.textOnPrimaryMuted,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -60,7 +69,9 @@ class PromoBanner extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: context.colors.background,
                       foregroundColor: context.colors.primaryContent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       textStyle: AppTextStyles.title16,
                     ),
                     child: Text(buttonLabel),

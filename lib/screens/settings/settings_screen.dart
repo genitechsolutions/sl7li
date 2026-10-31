@@ -148,8 +148,17 @@ class SettingsScreen extends StatelessWidget {
             ),
             if (craftsmanMode)
               _Row(
-                icon: 'assets/icons/ic_set_profile.svg',
+                icon: 'assets/icons/ic_user.svg',
                 title: 'التبديل لوضع الزبون',
+                trailing: SvgPicture.asset(
+                  'assets/icons/cr_switch.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                    colors.textSecondary,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 onTap: () => Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const HomeScreen()),
                   (_) => false,

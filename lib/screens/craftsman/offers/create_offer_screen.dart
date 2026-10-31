@@ -139,17 +139,17 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                 children: [
                   Row(
                     children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 18,
+                        color: colors.warning,
+                      ),
+                      const SizedBox(width: 8),
                       Text(
                         'سياسة النشر بخصوص أرقام الهاتف',
                         style: AppTextStyles.body16.copyWith(
                           color: colors.warning,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        size: 18,
-                        color: colors.warning,
                       ),
                     ],
                   ),

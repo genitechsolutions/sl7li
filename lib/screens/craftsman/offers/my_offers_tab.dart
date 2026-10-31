@@ -100,7 +100,7 @@ class _MyOffersTabState extends State<MyOffersTab> {
                   height: 178,
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 42),
               Center(
                 child: Text(
                   'لم تقم بإنشاء أي عروض ترويجية',
@@ -117,7 +117,7 @@ class _MyOffersTabState extends State<MyOffersTab> {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
@@ -132,6 +132,8 @@ class _MyOffersTabState extends State<MyOffersTab> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(Icons.add, color: colors.textOnPrimary),
+                      const SizedBox(width: 12),
                       Text(
                         'إنشاء عرض جديد',
                         style: AppTextStyles.title18Medium.copyWith(
@@ -139,13 +141,11 @@ class _MyOffersTabState extends State<MyOffersTab> {
                           color: colors.textOnPrimary,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.add, color: colors.textOnPrimary),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 33),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(

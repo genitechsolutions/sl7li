@@ -132,25 +132,29 @@ class RequestCard extends StatelessWidget {
             child: Text(request.title, style: AppTextStyles.title18Medium),
           ),
           const SizedBox(height: 4),
-          Text.rich(
-            TextSpan(
-              text: request.description,
-              children: [
-                // الطلبات المفتوحة (فيها عروض) بالتصميم آخر وصفها "قراءة المزيد".
-                if (request.offersCount != null)
-                  TextSpan(
-                    text: ' قراءة المزيد',
-                    style: TextStyle(
-                      color: colors.verified,
-                      decoration: TextDecoration.underline,
-                      decorationColor: colors.verified,
+          Padding(
+            // التصميم بيلفّ الوصف بصندوق أضيق من جهة اليسار (~300px).
+            padding: const EdgeInsetsDirectional.only(end: 40),
+            child: Text.rich(
+              TextSpan(
+                text: request.description,
+                children: [
+                  // الطلبات المفتوحة (فيها عروض) بالتصميم آخر وصفها "قراءة المزيد".
+                  if (request.offersCount != null)
+                    TextSpan(
+                      text: ' قراءة المزيد',
+                      style: TextStyle(
+                        color: colors.verified,
+                        decoration: TextDecoration.underline,
+                        decorationColor: colors.verified,
+                      ),
                     ),
-                  ),
-              ],
-            ),
-            style: AppTextStyles.body16.copyWith(
-              color: colors.textSecondary,
-              height: 1.5,
+                ],
+              ),
+              style: AppTextStyles.body16.copyWith(
+                color: colors.textSecondary,
+                height: 1.5,
+              ),
             ),
           ),
           if (request.offersCount != null) ...[
@@ -164,25 +168,25 @@ class RequestCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  RotatedBox(
-                    quarterTurns: 1,
-                    child: SvgPicture.asset(
-                      'assets/icons/ic_chevron_down.svg',
-                      width: 16,
-                      height: 16,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF171922),
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
                   Text(
                     '${request.offersCount} عروض واردة',
                     // نص فوق الأصفر: غامق دايماً بالفاتح والداكن.
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
                       color: colors.textOnAccent,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  RotatedBox(
+                    quarterTurns: 1,
+                    child: SvgPicture.asset(
+                      'assets/icons/ic_chevron_down.svg',
+                      width: 16,
+                      height: 16,
+                      colorFilter: ColorFilter.mode(
+                        colors.textOnAccent,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                 ],

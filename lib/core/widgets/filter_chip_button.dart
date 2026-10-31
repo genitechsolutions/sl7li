@@ -16,7 +16,7 @@ class FilterChipButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 36,
-        padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+        padding: const EdgeInsetsDirectional.only(start: 8, end: 12),
         decoration: BoxDecoration(
           color: context.colors.background,
           borderRadius: BorderRadius.circular(8),
@@ -26,8 +26,17 @@ class FilterChipButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 4,
           children: [
-            Text(label, style: AppTextStyles.body14.copyWith(color: context.colors.primaryContent)),
-            Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: context.colors.primaryContent),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 20,
+              color: context.colors.primaryContent,
+            ),
+            Text(
+              label,
+              style: AppTextStyles.body14.copyWith(
+                color: context.colors.primaryContent,
+              ),
+            ),
           ],
         ),
       ),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:khaled_flutter/core/theme/app_colors.dart';
 import 'package:khaled_flutter/core/theme/app_theme.dart';
 import 'package:khaled_flutter/data/craftsman_signup.dart';
 import 'package:khaled_flutter/screens/auth/customer_login_screen.dart';
@@ -34,7 +35,15 @@ final _screens = <(String, Widget Function())>[
   ('32_settings', () => const SettingsScreen()),
   ('33_my_requests_active', () => const MyRequestsScreen()),
   // المهني
-  ('26_cr_my_offers_empty', () => const Scaffold(body: MyOffersTab())),
+  (
+    '26_cr_my_offers_empty',
+    () => Builder(
+      builder: (c) => Scaffold(
+        backgroundColor: Theme.of(c).extension<AppColors>()!.pageAlt,
+        body: const MyOffersTab(),
+      ),
+    ),
+  ),
   ('27_cr_messages', () => const MessagesScreen(craftsmanMode: true)),
   ('28_cr_create_offer_step1', () => const CreateOfferScreen()),
   ('29_cr_settings', () => const SettingsScreen(craftsmanMode: true)),

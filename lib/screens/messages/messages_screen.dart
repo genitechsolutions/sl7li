@@ -217,7 +217,7 @@ class _ConversationRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   conversation.time,
