@@ -92,7 +92,13 @@ class _MyOffersTabState extends State<MyOffersTab> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 40, 20, 24),
             children: [
-              Center(child: SvgPicture.asset('assets/icons/cr_empty_offers.svg', width: 178, height: 178)),
+              Center(
+                child: SvgPicture.asset(
+                  'assets/icons/cr_empty_offers.svg',
+                  width: 178,
+                  height: 178,
+                ),
+              ),
               const SizedBox(height: 28),
               Center(
                 child: Text(

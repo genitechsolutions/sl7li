@@ -6,6 +6,8 @@ import '../../../core/widgets/app_icon_button.dart';
 import '../../../data/craftsman_data.dart';
 import '../../notifications/notifications_screen.dart';
 import '../widgets/craftsman_request_card.dart';
+import 'craftsman_request_details_screen.dart';
+import 'offer_dialogs.dart';
 
 /// تاب "الطلبات" عند المهني: "مهامي الحالية" و"الطلبات المتاحة" مع فلتر بحسب الحالة/الخدمة.
 class CraftsmanRequestsTab extends StatefulWidget {
@@ -33,6 +35,17 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
     'التكييف (2)',
     'السباكة (2)',
   ];
+
+  void _open(CraftsmanRequest r) => Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) =>
+          CraftsmanRequestDetailsScreen(request: r, offerSent: r.stage != null),
+    ),
+  );
+
+  Future<void> _sendOffer(CraftsmanRequest r) =>
+      showSendOfferFlow(context, requestTitle: r.title);
 
   @override
   Widget build(BuildContext context) {
@@ -160,11 +173,10 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
               for (final r in items)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                  // TODO: تفاصيل الطلب / تقديم عرض / تحديث الحالة (frames Sending offer / Request details)
                   child: CraftsmanRequestCard(
                     request: r,
-                    onDetails: () {},
-                    onPrimary: () {},
+                    onDetails: () => _open(r),
+                    onPrimary: () => r.stage == null ? _sendOffer(r) : _open(r),
                     onMore: () {},
                   ),
                 ),

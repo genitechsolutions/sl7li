@@ -12,6 +12,7 @@ import '../messages/messages_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../settings/settings_screen.dart';
 import 'offers/my_offers_tab.dart';
+import 'requests/craftsman_request_details_screen.dart';
 import 'requests/craftsman_requests_tab.dart';
 import 'widgets/craftsman_bottom_nav.dart';
 import 'widgets/craftsman_request_card.dart';
@@ -463,7 +464,15 @@ class _HomeTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: CraftsmanRequestCard(
             request: sampleCraftsmanTasks[0],
-            onDetails: () {},
+            onDetails: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CraftsmanRequestDetailsScreen(
+                  request: sampleCraftsmanTasks[0],
+                  offerSent: true,
+                ),
+              ),
+            ),
             onPrimary: () {},
           ),
         ),
