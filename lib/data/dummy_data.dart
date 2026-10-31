@@ -218,7 +218,11 @@ const sampleOfferDetails = OfferDetails(
     'assets/images/offer_carpentry.jpg',
     'assets/images/offer_carpentry.jpg',
   ],
-  tags: ['الأنظمة الأمنية و المنزل الذكي', 'الإصلاحات الكهربائية', 'الطاقة الشمسية'],
+  tags: [
+    'الأنظمة الأمنية و المنزل الذكي',
+    'الإصلاحات الكهربائية',
+    'الطاقة الشمسية',
+  ],
   craftsman: Craftsman(
     name: 'مركز النور للكهرباء',
     location: 'دمشق وريفها',
@@ -293,12 +297,17 @@ const sampleCraftsmanProfile = CraftsmanProfile(
     isVerified: true,
     isRecommended: true,
   ),
-  bio: '$_bioPreview أنظمة الإنذار والمنزل الذكي. 3قسم تركيب وصيانة منظومات الطاقة الشمسية.',
+  bio:
+      '$_bioPreview أنظمة الإنذار والمنزل الذكي. 3قسم تركيب وصيانة منظومات الطاقة الشمسية.',
   bioPreviewLength: _bioPreview.length,
   experience: '7 سنوات',
   tools: 'نعم، أملك جميع الأدوات',
   transport: 'نعم، سيارة خاصة',
-  specialties: ['الأنظمة الأمنية و المنزل الذكي', 'الإصلاحات الكهربائية', 'الطاقة الشمسية'],
+  specialties: [
+    'الأنظمة الأمنية و المنزل الذكي',
+    'الإصلاحات الكهربائية',
+    'الطاقة الشمسية',
+  ],
   offers: specialOffers,
   works: [
     'assets/images/offer_carpentry.jpg',
@@ -323,8 +332,7 @@ const sampleCraftsmanProfile = CraftsmanProfile(
       rating: 3,
       date: '٢١ ديسمبر ٢٠٢٥',
       tag: 'الأنظمة الأمنية و المنزل الذكي',
-      comment:
-          '1قسم تسيس واصلاح جميع الاعمال الكهربائية منزلي / مصانع . اصلاح منظومة الطاقةالكهربائية',
+      comment: '1قسم تسيس واصلاح جميع الاعمال الكهربائية منزلي / مصانع . اصلاح منظومة الطاقةالكهربائية',
     ),
     Review(
       name: 'فلان الفلاني',
@@ -368,7 +376,15 @@ const requestServiceTypes = [
   'إصلاح الإلكترونيات و الأجهزة الطبية',
 ];
 
-const requestCities = ['دمشق', 'ريف دمشق', 'حلب', 'حمص', 'حماة', 'اللاذقية', 'طرطوس'];
+const requestCities = [
+  'دمشق',
+  'ريف دمشق',
+  'حلب',
+  'حمص',
+  'حماة',
+  'اللاذقية',
+  'طرطوس',
+];
 
 const sampleRequestPhoto = 'assets/images/offer_carpentry.jpg';
 
@@ -442,7 +458,8 @@ const loginDistricts = [
 ];
 
 // ── طلباتي ──
-const _requestDescription = 'شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب';
+const _requestDescription =
+    'شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب';
 
 const sampleActiveRequests = [
   MyRequest(
@@ -608,11 +625,24 @@ const sampleConversations = [
 ];
 
 const sampleChat = [
-  ChatMessage(text: 'سأقدم لك عرضا على هذا الطلب ب 100\$', time: '2:10 م', sent: false),
-  ChatMessage(text: 'لقد حصلت على الكثير من العروض أرخص من هذا', time: '2:10 م', sent: true),
+  ChatMessage(
+    text: 'سأقدم لك عرضا على هذا الطلب ب 100\$',
+    time: '2:10 م',
+    sent: false,
+  ),
+  ChatMessage(
+    text: 'لقد حصلت على الكثير من العروض أرخص من هذا',
+    time: '2:10 م',
+    sent: true,
+  ),
   ChatMessage(text: 'لماذا اختارك أنت؟', time: '2:10 م', sent: true),
   ChatMessage(text: 'أو أعطني سعرا أقل من هذا', time: '2:10 م', sent: true),
-  ChatMessage(text: 'بطل بدي اشتغل معك أصلا', time: '2:10 م', sent: true, status: MessageStatus.sent),
+  ChatMessage(
+    text: 'بطل بدي اشتغل معك أصلا',
+    time: '2:10 م',
+    sent: true,
+    status: MessageStatus.sent,
+  ),
   ChatMessage(
     text: 'هي مثال لإرسال الصورة',
     time: '2:10 م',
@@ -620,5 +650,60 @@ const sampleChat = [
     status: MessageStatus.sent,
     content: ChatContent.image,
     image: 'assets/images/request_photo_2.png',
+  ),
+];
+
+// ── الإشعارات ──
+const _offerBody =
+    'تم استلام عرض جديد من Mevora لطلب العمل: طلب خدمة خدمات أخرى';
+const _withdrawnBody = 'تم سحب عرض Mevora لطلب العمل: طلب خدمة خدمات أخرى';
+
+const sampleImportantNotifications = [
+  NotificationItem(
+    kind: NotificationKind.offer,
+    title: 'تم استلام عرض جديد',
+    body: _offerBody,
+    time: 'الآن',
+    unread: true,
+  ),
+  NotificationItem(
+    kind: NotificationKind.completion,
+    title: 'تأكيد إنجاز الطلب',
+    body: 'أبلغ المهني Mevora عن إنجاز طلب "خدمات أخرى", يرجى تأكيد الإنجاز أو الاعتراض',
+    time: '2:10 م',
+    unread: true,
+    actionLabel: 'الانتقال للخدمة',
+  ),
+  NotificationItem(
+    kind: NotificationKind.withdrawn,
+    title: 'تم سحب عرض لطلبك',
+    body: _withdrawnBody,
+    time: '2:10 م',
+  ),
+];
+
+const sampleTodayNotifications = [
+  NotificationItem(
+    kind: NotificationKind.message,
+    title: 'رسالة جديدة من Mevora',
+    body: 'يتم هنا عرض محتوى الرسالة',
+    time: 'الآن',
+    unread: true,
+  ),
+  NotificationItem(
+    kind: NotificationKind.offer,
+    title: 'تم استلام عرض جديد',
+    body: _offerBody,
+    time: 'الآن',
+  ),
+];
+
+const sampleLastWeekNotifications = [
+  NotificationItem(
+    kind: NotificationKind.withdrawn,
+    title: 'تم سحب عرض لطلبك',
+    body: _withdrawnBody,
+    time: '2:10 م',
+    unread: true,
   ),
 ];

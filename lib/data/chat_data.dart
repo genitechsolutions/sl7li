@@ -48,3 +48,26 @@ class ChatMessage {
   final ChatContent content;
   final String? image;
 }
+
+/// نوع الإشعار (بيحدد الأيقونة واللون).
+enum NotificationKind { offer, completion, withdrawn, message }
+
+class NotificationItem {
+  const NotificationItem({
+    required this.kind,
+    required this.title,
+    required this.body,
+    required this.time,
+    this.unread = false,
+    this.actionLabel,
+  });
+
+  final NotificationKind kind;
+  final String title;
+  final String body;
+  final String time;
+  final bool unread;
+
+  /// زر بآخر الكرت (مثلاً "الانتقال للخدمة").
+  final String? actionLabel;
+}

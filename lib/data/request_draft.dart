@@ -39,7 +39,8 @@ class RequestDraft {
     ('الموعد المفضل', preferredDate),
     ('الوقت المفضل', preferredTime),
     ('الموقع', location),
-    if (onBehalf && customerName.trim().isNotEmpty) ('بالنيابة عن', customerName.trim()),
+    if (onBehalf && customerName.trim().isNotEmpty)
+      ('بالنيابة عن', customerName.trim()),
     ('التواصل', allowWhatsapp ? 'عبر وتساب والتطبيق' : 'عبر التطبيق فقط'),
   ];
 }

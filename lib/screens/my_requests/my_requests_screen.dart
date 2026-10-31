@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../notifications/notifications_screen.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/svg_theme_colors.dart';
@@ -86,10 +87,14 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                       theme: SvgTheme(currentColor: colors.primaryContent),
                     ),
                     const Spacer(),
-                    // TODO: navigate to notifications
                     AppIconButton(
                       icon: 'assets/icons/ic_bell.svg',
-                      onTap: () {},
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationsScreen(),
+                        ),
+                      ),
                     ),
                   ],
                 ),
