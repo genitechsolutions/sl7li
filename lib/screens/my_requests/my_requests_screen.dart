@@ -9,7 +9,9 @@ import '../../core/theme/svg_theme_colors.dart';
 import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../core/widgets/app_icon_button.dart';
 import '../../data/dummy_data.dart';
+import '../../data/my_request.dart';
 import '../new_request/new_request_screen.dart';
+import 'request_details_screen.dart';
 import 'widgets/request_card.dart';
 
 /// "طلباتي" — قائمة طلبات الزبون مع فلتر الحالة (تاب من الشريط السفلي).
@@ -23,6 +25,13 @@ class MyRequestsScreen extends StatefulWidget {
 class _MyRequestsScreenState extends State<MyRequestsScreen> {
   // (التسمية، العدد) — الفلتر الافتراضي "النشطة".
   static const _filters = [('الكل', 7), ('النشطة', 3), ('مكتملة', 2), ('ملغاة', 2)];
+
+  List<MyRequest> get _visible => switch (_filter) {
+        0 => [...sampleActiveRequests, ...sampleDoneRequests, ...sampleCanceledRequests],
+        1 => sampleActiveRequests,
+        2 => sampleDoneRequests,
+        _ => sampleCanceledRequests,
+      };
 
   int _filter = 1;
 
@@ -97,12 +106,22 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  // TODO: قوائم "مكتملة" و"ملغاة" (frames Done/Canceled) لسا ما انبنت؛ مؤقتاً كلها بتعرض النشطة.
-                  for (final request in sampleActiveRequests)
+                  for (final request in _visible)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                       // TODO: navigate to request details / update status
-                      child: RequestCard(request: request, onDetails: () {}, onUpdate: () {}, onMore: () {}),
+                      // TODO: navigate to rating / reorder / update status
+                      child: RequestCard(
+                        request: request,
+                        onDetails: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => RequestDetailsScreen(request: request)),
+                        ),
+                        onUpdate: () {},
+                        onMore: () {},
+                        onRate: () {},
+                        onReorder: () {},
+                      ),
                     ),
                   const SizedBox(height: 8),
                 ],

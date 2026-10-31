@@ -35,6 +35,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.star,
     required this.pro,
     required this.warning,
+    required this.successDisabled,
   });
 
   /// الكحلي: خلفية الأزرار والتابات المختارة.
@@ -81,6 +82,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// "عاجل" برتقالي (أولوية الطلب).
   final Color warning;
 
+  /// زر النجاح المعطّل ("قبول العرض"). بالداكن مشتق (مش بالتصميم).
+  final Color successDisabled;
+
   static const light = AppColors(
     primary: Color(0xFF36407E),
     primaryContent: Color(0xFF36407E),
@@ -112,6 +116,7 @@ class AppColors extends ThemeExtension<AppColors> {
     star: Color(0xFFEBB409),
     pro: Color(0xFFF8594D),
     warning: Color(0xFFE86F0C),
+    successDisabled: Color(0xFFAFE7C4),
   );
 
   static const dark = AppColors(
@@ -145,6 +150,7 @@ class AppColors extends ThemeExtension<AppColors> {
     star: Color(0xFFF7C425),
     pro: Color(0xFFF8594D),
     warning: Color(0xFFE86F0C),
+    successDisabled: Color(0xFF2A5A3D),
   );
 
   @override
@@ -185,6 +191,7 @@ class AppColors extends ThemeExtension<AppColors> {
       star: c(star, other.star),
       pro: c(pro, other.pro),
       warning: c(warning, other.warning),
+      successDisabled: c(successDisabled, other.successDisabled),
     );
   }
 }

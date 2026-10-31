@@ -473,3 +473,84 @@ const sampleActiveRequests = [
     craftsmanReviews: 128,
   ),
 ];
+
+const sampleDoneRequests = [
+  MyRequest(
+    date: '5 آب 2026',
+    priority: RequestPriority.emergency,
+    title: 'طلب خدمة إصلاحات الكهربائية',
+    description: _requestDescription,
+    stage: 4,
+    status: RequestStatus.done,
+    craftsmanName: 'مركز قزاز للتكيف والتبريد',
+    craftsmanRating: '4.9',
+    craftsmanReviews: 128,
+  ),
+  MyRequest(
+    date: '5 آب 2026',
+    priority: RequestPriority.emergency,
+    title: 'طلب خدمة إصلاحات الكهربائية',
+    description: _requestDescription,
+    stage: 4,
+    status: RequestStatus.done,
+    rated: true,
+    craftsmanName: 'مركز قزاز للتكيف والتبريد',
+    craftsmanRating: '4.9',
+    craftsmanReviews: 128,
+  ),
+];
+
+const sampleCanceledRequests = [
+  MyRequest(
+    date: '5 آب 2026',
+    priority: RequestPriority.normal,
+    title: 'طلب خدمة إصلاحات الكهربائية',
+    description: _requestDescription,
+    stage: 0,
+    status: RequestStatus.canceled,
+    cancelNote: 'تم إلغاء الطلب',
+  ),
+  MyRequest(
+    date: '5 آب 2026',
+    priority: RequestPriority.emergency,
+    title: 'طلب خدمة إصلاحات الكهربائية',
+    description: _requestDescription,
+    stage: 0,
+    status: RequestStatus.canceled,
+    cancelNote: 'لقد انتهت مدة طلبك',
+  ),
+];
+
+const sampleBestOffer = RequestOffer(
+  craftsmanName: 'مركز قزاز للتكيف والتبريد',
+  rating: '4.9',
+  reviews: 128,
+  priceLabel: 'الكلفة الأولية تتراوح بين',
+  price: '90 - 100',
+  priceUnit: 'ليرة جديدة',
+  inspectionFee: 'مجاني',
+  materialsFee: '20 ليرة جديدة',
+);
+
+const sampleOtherOffers = [
+  RequestOffer(
+    craftsmanName: 'مركز قزاز للتكيف والتبريد',
+    rating: '4.9',
+    reviews: 128,
+    priceLabel: 'الكلفة الأولية التقديرية',
+    price: '100',
+    priceUnit: 'ليرة جديدة',
+    inspectionFee: 'مجاني',
+    materialsFee: '20 ليرة جديدة',
+  ),
+  RequestOffer(
+    craftsmanName: 'مركز قزاز للتكيف والتبريد',
+    rating: '4.9',
+    reviews: 128,
+    priceLabel: 'الكلفة الأولية اليومية',
+    price: '100',
+    priceUnit: 'ليرة جديدة / يوم',
+    inspectionFee: 'مجاني',
+    materialsFee: '20 ليرة جديدة',
+  ),
+];

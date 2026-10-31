@@ -9,12 +9,22 @@ import 'request_stepper.dart';
 
 /// كرت طلب بقائمة "طلباتي".
 class RequestCard extends StatelessWidget {
-  const RequestCard({super.key, required this.request, this.onDetails, this.onUpdate, this.onMore});
+  const RequestCard({
+    super.key,
+    required this.request,
+    this.onDetails,
+    this.onUpdate,
+    this.onMore,
+    this.onRate,
+    this.onReorder,
+  });
 
   final MyRequest request;
   final VoidCallback? onDetails;
   final VoidCallback? onUpdate;
   final VoidCallback? onMore;
+  final VoidCallback? onRate;
+  final VoidCallback? onReorder;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +41,11 @@ class RequestCard extends StatelessWidget {
         color: colors.background,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          for (final (dy, blur) in const [(7.0, 16.0), (29.0, 29.0), (65.0, 39.0)])
+          for (final (dy, blur) in const [
+            (7.0, 16.0),
+            (29.0, 29.0),
+            (65.0, 39.0),
+          ])
             BoxShadow(
               color: colors.primary.withValues(alpha: 0.01),
               offset: Offset(0, dy),
@@ -42,48 +56,75 @@ class RequestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                request.date,
-                style: AppTextStyles.body12.copyWith(fontSize: 13, color: colors.textHint),
-              ),
-              Container(
-                width: 1,
-                height: 20,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  color: colors.border,
-                  borderRadius: BorderRadius.circular(1),
+          // ارتفاع ثابت (زر القائمة 36 + 8) مشان العنوان ما يتداخل لما ما في زر.
+          SizedBox(
+            height: 44,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  request.date,
+                  style: AppTextStyles.body12.copyWith(
+                    fontSize: 13,
+                    color: colors.textHint,
+                  ),
                 ),
-              ),
-              Text(
-                priorityText,
-                style: AppTextStyles.body12.copyWith(fontSize: 13, color: priorityColor),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: onMore,
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  margin: const EdgeInsets.only(top: 8),
+                Container(
+                  width: 1,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: colors.background,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: colors.border),
-                  ),
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    'assets/icons/ic_more_vert.svg',
-                    width: 20,
-                    height: 20,
-                    colorFilter: ColorFilter.mode(colors.primaryContent, BlendMode.srcIn),
+                    color: colors.border,
+                    borderRadius: BorderRadius.circular(1),
                   ),
                 ),
-              ),
-            ],
+                Text(
+                  priorityText,
+                  style: AppTextStyles.body12.copyWith(
+                    fontSize: 13,
+                    color: priorityColor,
+                  ),
+                ),
+                const Spacer(),
+                if (request.status != RequestStatus.canceled &&
+                    !(request.status == RequestStatus.done && request.rated))
+                  GestureDetector(
+                    onTap: request.status == RequestStatus.done
+                        ? onRate
+                        : onMore,
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      margin: const EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: colors.background,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colors.border),
+                      ),
+                      alignment: Alignment.center,
+                      child: request.status == RequestStatus.done
+                          ? SvgPicture.asset(
+                              'assets/icons/ic_star.svg',
+                              width: 18,
+                              height: 18,
+                              colorFilter: ColorFilter.mode(
+                                colors.star,
+                                BlendMode.srcIn,
+                              ),
+                            )
+                          : SvgPicture.asset(
+                              'assets/icons/ic_more_vert.svg',
+                              width: 20,
+                              height: 20,
+                              colorFilter: ColorFilter.mode(
+                                colors.primaryContent,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           // التاريخ وزر القائمة بنفس السطر؛ العنوان تحت التاريخ بدون ما يزيد الارتفاع.
           Transform.translate(
@@ -107,7 +148,10 @@ class RequestCard extends StatelessWidget {
                   ),
               ],
             ),
-            style: AppTextStyles.body16.copyWith(color: colors.textSecondary, height: 1.5),
+            style: AppTextStyles.body16.copyWith(
+              color: colors.textSecondary,
+              height: 1.5,
+            ),
           ),
           if (request.offersCount != null) ...[
             const SizedBox(height: 20),
@@ -126,14 +170,20 @@ class RequestCard extends StatelessWidget {
                       'assets/icons/ic_chevron_down.svg',
                       width: 16,
                       height: 16,
-                      colorFilter: const ColorFilter.mode(Color(0xFF171922), BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFF171922),
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${request.offersCount} عروض واردة',
                     // نص فوق الأصفر: غامق دايماً بالفاتح والداكن.
-                    style: AppTextStyles.body12.copyWith(fontSize: 13, color: const Color(0xFF171922)),
+                    style: AppTextStyles.body12.copyWith(
+                      fontSize: 13,
+                      color: const Color(0xFF171922),
+                    ),
                   ),
                 ],
               ),
@@ -143,18 +193,135 @@ class RequestCard extends StatelessWidget {
             const SizedBox(height: 16),
             _CraftsmanRow(request: request),
           ],
-          const SizedBox(height: 20),
-          RequestStepper(stage: request.stage),
-          const SizedBox(height: 13),
-          Row(
-            children: [
-              Expanded(child: _ActionButton(label: 'تحديث الحالة', filled: true, onTap: onUpdate)),
-              const SizedBox(width: 12),
-              Expanded(child: _ActionButton(label: 'التفاصيل', filled: false, onTap: onDetails)),
+          if (request.status == RequestStatus.active) ...[
+            const SizedBox(height: 20),
+            RequestStepper(stage: request.stage),
+            const SizedBox(height: 13),
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionButton(
+                    label: 'تحديث الحالة',
+                    filled: true,
+                    onTap: onUpdate,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionButton(
+                    label: 'التفاصيل',
+                    filled: false,
+                    onTap: onDetails,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (request.status == RequestStatus.done) ...[
+            if (request.rated) ...[
+              const SizedBox(height: 20),
+              _RatedNote(),
+              const SizedBox(height: 16),
+              _ActionButton(label: 'التفاصيل', filled: false, onTap: onDetails),
+            ] else ...[
+              const SizedBox(height: 20),
+              RequestStepper(stage: request.stage),
+              const SizedBox(height: 13),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionButton(
+                      label: 'تقييم الخدمة',
+                      filled: true,
+                      accent: true,
+                      onTap: onRate,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionButton(
+                      label: 'التفاصيل',
+                      filled: false,
+                      onTap: onDetails,
+                    ),
+                  ),
+                ],
+              ),
             ],
-          ),
+          ],
+          if (request.status == RequestStatus.canceled) ...[
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: colors.error,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(
+                    'assets/icons/ic_block.svg',
+                    width: 20,
+                    height: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  request.cancelNote!,
+                  style: AppTextStyles.body16.copyWith(color: colors.error),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionButton(
+                    label: 'إعادة الطلب',
+                    filled: true,
+                    onTap: onReorder,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionButton(
+                    label: 'التفاصيل',
+                    filled: false,
+                    onTap: onDetails,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _RatedNote extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(color: colors.star, shape: BoxShape.circle),
+          alignment: Alignment.center,
+          child: SvgPicture.asset(
+            'assets/icons/ic_star_rate.svg',
+            width: 17,
+            height: 16,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text('تم تقييم الخدمة, شكرا لرأيك', style: AppTextStyles.body16),
+      ],
     );
   }
 }
@@ -170,7 +337,11 @@ class _CraftsmanRow extends StatelessWidget {
 
     return Row(
       children: [
-        const CraftsmanAvatar(image: 'assets/images/craftsman_1.jpg', isPro: true, size: 48),
+        const CraftsmanAvatar(
+          image: 'assets/images/craftsman_1.jpg',
+          isPro: true,
+          size: 48,
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -187,7 +358,11 @@ class _CraftsmanRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  SvgPicture.asset('assets/icons/ic_verified.svg', width: 20, height: 20),
+                  SvgPicture.asset(
+                    'assets/icons/ic_verified.svg',
+                    width: 20,
+                    height: 20,
+                  ),
                 ],
               ),
               Row(
@@ -203,7 +378,10 @@ class _CraftsmanRow extends StatelessWidget {
                   Text(
                     '(${request.craftsmanReviews}) ${request.craftsmanRating}',
                     textDirection: TextDirection.ltr,
-                    style: AppTextStyles.body12.copyWith(fontSize: 13, color: colors.textSecondary),
+                    style: AppTextStyles.body12.copyWith(
+                      fontSize: 13,
+                      color: colors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -216,10 +394,18 @@ class _CraftsmanRow extends StatelessWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({required this.label, required this.filled, required this.onTap});
+  const _ActionButton({
+    required this.label,
+    required this.filled,
+    required this.onTap,
+    this.accent = false,
+  });
 
   final String label;
   final bool filled;
+
+  /// الزر الأصفر الثانوي ("تقييم الخدمة").
+  final bool accent;
   final VoidCallback? onTap;
 
   @override
@@ -232,7 +418,11 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: filled ? colors.primary : colors.background,
+          color: accent
+              ? colors.accent
+              : filled
+              ? colors.primary
+              : colors.background,
           borderRadius: BorderRadius.circular(12),
           border: filled ? null : Border.all(color: colors.border),
         ),
@@ -240,7 +430,11 @@ class _ActionButton extends StatelessWidget {
           label,
           style: AppTextStyles.title18Medium.copyWith(
             fontWeight: FontWeight.w600,
-            color: filled ? colors.textOnPrimary : colors.primaryContent,
+            color: accent
+                ? const Color(0xFF171922)
+                : filled
+                ? colors.textOnPrimary
+                : colors.primaryContent,
           ),
         ),
       ),

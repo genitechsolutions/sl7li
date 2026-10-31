@@ -1,3 +1,6 @@
+/// حالة الطلب بالقائمة: نشط، مكتمل، ملغى/منتهي.
+enum RequestStatus { active, done, canceled }
+
 /// أولوية الطلب.
 enum RequestPriority { urgent, emergency, normal }
 
@@ -9,6 +12,9 @@ class MyRequest {
     required this.title,
     required this.description,
     required this.stage,
+    this.status = RequestStatus.active,
+    this.rated = false,
+    this.cancelNote,
     this.offersCount,
     this.craftsmanName,
     this.craftsmanRating,
@@ -20,6 +26,13 @@ class MyRequest {
   final String title;
   final String description;
   final int stage;
+  final RequestStatus status;
+
+  /// المكتمل: هل الزبون قيّم الخدمة.
+  final bool rated;
+
+  /// الملغى: سبب الإلغاء ("تم إلغاء الطلب"، "لقد انتهت مدة طلبك").
+  final String? cancelNote;
 
   /// عدد العروض الواردة (للطلبات المفتوحة بدون حرفي).
   final int? offersCount;
@@ -28,4 +41,29 @@ class MyRequest {
   final int? craftsmanReviews;
 
   bool get hasCraftsman => craftsmanName != null;
+}
+
+/// عرض سعر وارد من حرفي على طلب.
+class RequestOffer {
+  const RequestOffer({
+    required this.craftsmanName,
+    required this.rating,
+    required this.reviews,
+    required this.priceLabel,
+    required this.price,
+    required this.priceUnit,
+    required this.inspectionFee,
+    required this.materialsFee,
+  });
+
+  final String craftsmanName;
+  final String rating;
+  final int reviews;
+
+  /// عنوان السعر (الكلفة الأولية التقديرية...).
+  final String priceLabel;
+  final String price;
+  final String priceUnit;
+  final String inspectionFee;
+  final String materialsFee;
 }

@@ -5,7 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// شريط مراحل الطلب: مفتوح ← تم الاتفاق ← قيد التنفيذ ← مكتمل (من اليمين).
-/// [stage] المرحلة الحالية (0..3). اللي قبلها مكتملة (أخضر)، واللي بعدها رمادي.
+/// [stage] المرحلة الحالية (0..3). اللي قبلها مكتملة (أخضر)، واللي بعدها رمادي. 4 = الكل مكتمل.
 class RequestStepper extends StatelessWidget {
   const RequestStepper({super.key, required this.stage});
 
