@@ -34,6 +34,7 @@
 | طلباتي (قائمة + فلتر الحالة + مراحل الطلب) | `screens/my_requests/` | تاب "طلباتي" بالشريط السفلي |
 | الرسائل: قائمة المحادثات + الدردشة | `screens/messages/` | تاب "الرسائل" بالشريط السفلي |
 | الإشعارات | `screens/notifications/` | أيقونة الجرس بطلباتي/الرسائل |
+| الإعدادات (+ الملف الشخصي، تخصيص الإشعارات، خروج/حذف حساب، الوضع المظلم) | `screens/settings/` | تاب "الإعدادات" بالشريط السفلي |
 | الرئيسية | `screens/home/home_screen.dart` | "متابعة" بدخول الزبائن (تحميل وهمي 2 ثانية)، أو "الدخول كضيف" — الاتنين بيمسحوا كل اللي قبل |
 | البحث (اقتراحات ↔ نتائج بنفس الصفحة) | `screens/search/search_screen.dart` | زر البحث بالرئيسية |
 | تفاصيل الخدمة | `screens/service_details/` | كروت "الخدمات الشائعة" |
@@ -63,7 +64,7 @@
 - `form/`: `PhoneField` (رمز +963، `inline` = شكل التصميم: الرقم جنب الرمز — مستعمل بالدخول وطلب الخدمة، `restrictInput` للتحقق، `PhoneField.format()`)، `FormLabel(starAfterNote, noteSize)`، `FormLabel` (نجمة حمرا / ملاحظة "(اختياري)")، `AppTextField`، `AppSelectField` (معطّل لما `onTap: null`، `hasError`)، `AppToggle` (أحمر مطفي/أخضر شغّال)، `FieldIcons`، `showOptionsSheet()`.
 
 ## الثيم (فاتح + داكن)
-- **Dark mode حسب إعداد الجهاز** (`ThemeMode.system` بـ `main.dart`). ما في زر تبديل بالتطبيق لسا (بدها تصميم الإعدادات).
+- **Dark mode حسب إعداد الجهاز** (`ThemeMode.system` بـ `main.dart`). زر التبديل موجود بالإعدادات (الوضع المظلم).
 - ألوان: [app_colors.dart](lib/core/theme/app_colors.dart) — `ThemeExtension` فيها `AppColors.light` و`AppColors.dark`. **بالكود دايماً `context.colors.x`** (مش ثابتة → ما بتنحط جوا `const`، وأي helper بدو `BuildContext`).
   - فاتح: `primary #36407E`، `accent #F7C425`، `background #F9F9FB`، `surface #F0F0F5`، `border #C8CDDA`، `textPrimary #171922`، `textSecondary #68719A`، `textHint #989FBA`، `link #2695D0`، `error #EB1809`.
   - داكن (من `design/24_dark_craftsman_profile.png` و`25_dark_request_step1.png`): `background #171922`، `surface #1F222E` (كروت)، `fieldFill #27293A` (حقول الفورم)، `primary #2A3161`، `disabled #262B4D` (كحلي باهت — مشتق، مش بالتصميم)، `border #373B52`، `textPrimary #F9F9FB`، `textSecondary #B0B6CA`، `textHint #989FBA`، `link #43A8DE`، `error #DB3126`، `successLight #2E9D57` (السويتش). الخطوات: `stepActive #36407E`، `stepInactive #27293A`.
@@ -97,6 +98,7 @@
 6. `flutter analyze` نظيف، وبعدين تقرير قصير بالعربي: شو انعمل، كيف بيشتغل، ملاحظات، وشو ناقص.
 
 ## معلّق / TODOs
+- **الإعدادات:** انبنت كلها (إعدادات، ملف شخصي، تخصيص إشعارات، نافذتا الخروج والحذف). زر "الوضع المظلم" بيشتغل فعلياً عبر `themeModeNotifier` (`core/theme/theme_mode_notifier.dart`)؛ بالبداية الثيم حسب الجهاز. ناقص: قائمة أسباب الحذف (مش بالتصميم)، قائمة مدن الملف الشخصي، شاشات المساعدة/الأمان/انضم كحرفي (ما في تصاميم).
 - **الرسائل:** انبنت القائمة والدردشة (رسائل نص/صورة/بطاقة طلب، شريط كتابة، أول مرة `firstTime`). ناقص: قائمة الخيارات (frame 382:2389 — timeout بفيغما)، زر "العودة للعرض" والنزول لآخر الدردشة، لوحة المفاتيح/الرسالة الطويلة (339:2170, 339:2346)، نقشة خلفية الدردشة، الداكن مش مفحوص.
 - **طلباتي:** انبنت: القوائم (نشطة/مكتملة/ملغاة)، تفاصيل الطلب (تابات التفاصيل/العروض)، نوافذ تحديث الحالة/الاتفاق مع مهني/إلغاء الطلب/تقييم الخدمة (`my_requests/dialogs/`). ناقص: تعديل الطلب (frames Editing)، متغيرات تفاصيل الطلب لحالات تانية (310:3007, 319:3273)، وفتح عرض/حرفي من العروض. لون `warning`/`successDisabled` للداكن مشتق (ما في تصميم داكن مفحوص).
 - **Dark mode:** `map_placeholder.png` فاتحة بالداكن كمان (مقبول لأنها خريطة). صورة الطاقية إلها نسختين: `otp_header.png` و`otp_header_dark.png` (3x، `AuthHeroImage` بيختار حسب الثيم).

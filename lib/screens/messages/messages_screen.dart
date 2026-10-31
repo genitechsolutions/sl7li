@@ -12,6 +12,7 @@ import '../../core/widgets/craftsman_avatar.dart';
 import '../../data/chat_data.dart';
 import '../../data/dummy_data.dart';
 import '../new_request/new_request_screen.dart';
+import '../settings/settings_screen.dart';
 import 'chat_screen.dart';
 import 'widgets/message_status_icon.dart';
 
@@ -29,10 +30,15 @@ class MessagesScreen extends StatelessWidget {
         backgroundColor: colors.background,
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: 2,
-          // TODO: navigate to settings tab
           onTap: (index) {
             if (index == 0) Navigator.of(context).popUntil((r) => r.isFirst);
             if (index == 1) Navigator.of(context).pop();
+            if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            }
           },
           onAddTap: () => Navigator.push(context, NewRequestScreen.route()),
         ),

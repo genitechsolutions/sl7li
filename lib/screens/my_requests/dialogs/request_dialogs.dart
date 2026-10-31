@@ -1,141 +1,23 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/craftsman_avatar.dart';
 import '../../../core/widgets/form/app_select_field.dart';
 import '../../../core/widgets/form/options_sheet.dart';
-
-/// فتح نافذة منبثقة مع خلفية معتمة ومموّهة (متل تصميم "طلباتي").
-Future<T?> _showModal<T>(BuildContext context, WidgetBuilder builder) {
-  return showGeneralDialog<T>(
-    context: context,
-    barrierDismissible: true,
-    barrierLabel: 'إغلاق',
-    barrierColor: Colors.transparent,
-    transitionDuration: const Duration(milliseconds: 150),
-    pageBuilder: (context, _, _) => Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
-              child: const ColoredBox(color: Color(0x66000000)),
-            ),
-          ),
-        ),
-        SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Material(
-                color: Colors.transparent,
-                child: builder(context),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _DialogCard extends StatelessWidget {
-  const _DialogCard({
-    required this.child,
-    this.padding = const EdgeInsets.all(20),
-  });
-
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: context.colors.background,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _DialogButton extends StatelessWidget {
-  const _DialogButton({
-    required this.label,
-    required this.background,
-    required this.foreground,
-    required this.onTap,
-    this.border,
-  });
-
-  final String label;
-  final Color background;
-  final Color foreground;
-  final Color? border;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(12),
-          border: border == null ? null : Border.all(color: border!),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.title18Medium.copyWith(
-            fontWeight: FontWeight.w600,
-            color: foreground,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// دائرة ملونة 36 فيها أيقونة (ممنوع / نجمة) بجنب عنوان النافذة.
-class _TitleBadge extends StatelessWidget {
-  const _TitleBadge({required this.color, required this.child});
-
-  final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      alignment: Alignment.center,
-      child: child,
-    );
-  }
-}
 
 // ───────────────────────── تحديث حالة الطلب ─────────────────────────
 
 /// أزرار "تحديث الحالة". النتيجة: 'agree' | 'done' | 'edit' | 'cancel' أو null (رجوع).
 Future<String?> showUpdateStatusDialog(BuildContext context) {
-  return _showModal<String>(context, (context) {
+  return showAppModal<String>(context, (context) {
     final colors = context.colors;
 
     Widget action(String label, String result, Color bg, Color fg) => Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: _DialogButton(
+      child: AppDialogButton(
         label: label,
         background: bg,
         foreground: fg,
@@ -143,7 +25,7 @@ Future<String?> showUpdateStatusDialog(BuildContext context) {
       ),
     );
 
-    return _DialogCard(
+    return AppDialogCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,7 +51,7 @@ Future<String?> showUpdateStatusDialog(BuildContext context) {
           ),
           action('تعديل الطلب', 'edit', colors.accent, colors.textOnAccent),
           action('إلغاء الطلب', 'cancel', colors.error, colors.textOnPrimary),
-          _DialogButton(
+          AppDialogButton(
             label: 'رجوع',
             background: colors.background,
             foreground: colors.primaryContent,
@@ -186,7 +68,10 @@ Future<String?> showUpdateStatusDialog(BuildContext context) {
 
 /// اختيار المهني اللي تم الاتفاق معه من العروض. بترجع فهرس المختار (أو null).
 Future<int?> showAgreementDialog(BuildContext context, {int count = 4}) {
-  return _showModal<int>(context, (context) => _AgreementDialog(count: count));
+  return showAppModal<int>(
+    context,
+    (context) => _AgreementDialog(count: count),
+  );
 }
 
 class _AgreementDialog extends StatefulWidget {
@@ -205,7 +90,7 @@ class _AgreementDialogState extends State<_AgreementDialog> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return _DialogCard(
+    return AppDialogCard(
       padding: EdgeInsets.zero,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -245,7 +130,7 @@ class _AgreementDialogState extends State<_AgreementDialog> {
             child: Row(
               children: [
                 Expanded(
-                  child: _DialogButton(
+                  child: AppDialogButton(
                     label: 'تأكيد',
                     background: colors.primary,
                     foreground: colors.textOnPrimary,
@@ -254,7 +139,7 @@ class _AgreementDialogState extends State<_AgreementDialog> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _DialogButton(
+                  child: AppDialogButton(
                     label: 'إلغاء',
                     background: colors.background,
                     foreground: colors.primaryContent,
@@ -365,7 +250,7 @@ const _cancelReasons = ['لم أتلق أي عروض أو رسائل', 'أتلق
 
 /// تأكيد إلغاء الطلب مع سبب إجباري. بترجع true إذا أكّد.
 Future<bool?> showCancelRequestDialog(BuildContext context) {
-  return _showModal<bool>(context, (context) => const _CancelDialog());
+  return showAppModal<bool>(context, (context) => const _CancelDialog());
 }
 
 class _CancelDialog extends StatefulWidget {
@@ -426,14 +311,14 @@ class _CancelDialogState extends State<_CancelDialog> {
       ),
     );
 
-    return _DialogCard(
+    return AppDialogCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              _TitleBadge(
+              AppDialogBadge(
                 color: colors.error,
                 child: SvgPicture.asset(
                   'assets/icons/ic_block.svg',
@@ -483,14 +368,14 @@ class _CancelDialogState extends State<_CancelDialog> {
             Text('خيارات بديلة', style: AppTextStyles.body16),
             const SizedBox(height: 8),
             // TODO: إخفاء رقم الواتساب / تعليق الطلب (إجراءات وهمية)
-            _DialogButton(
+            AppDialogButton(
               label: 'إخفاء رقم الواتساب عن المهنيين',
               background: colors.primary,
               foreground: colors.textOnPrimary,
               onTap: () {},
             ),
             const SizedBox(height: 8),
-            _DialogButton(
+            AppDialogButton(
               label: 'تعليق الطلب مؤقتاً',
               background: colors.accent,
               foreground: colors.textOnAccent,
@@ -510,7 +395,7 @@ class _CancelDialogState extends State<_CancelDialog> {
               Expanded(
                 child: Opacity(
                   opacity: _reason == null ? 0.5 : 1,
-                  child: _DialogButton(
+                  child: AppDialogButton(
                     label: 'تأكيد الإلغاء',
                     background: colors.error,
                     foreground: colors.textOnPrimary,
@@ -522,7 +407,7 @@ class _CancelDialogState extends State<_CancelDialog> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _DialogButton(
+                child: AppDialogButton(
                   label: 'إلغاء',
                   background: colors.background,
                   foreground: colors.primaryContent,
@@ -542,7 +427,7 @@ class _CancelDialogState extends State<_CancelDialog> {
 
 /// تقييم الخدمة (5 نجوم + تعليق اختياري). بترجع عدد النجوم (أو null إذا إلغاء).
 Future<int?> showRatingDialog(BuildContext context) {
-  return _showModal<int>(context, (context) => const _RatingDialog());
+  return showAppModal<int>(context, (context) => const _RatingDialog());
 }
 
 class _RatingDialog extends StatefulWidget {
@@ -559,14 +444,14 @@ class _RatingDialogState extends State<_RatingDialog> {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return _DialogCard(
+    return AppDialogCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              _TitleBadge(
+              AppDialogBadge(
                 color: colors.star,
                 child: SvgPicture.asset(
                   'assets/icons/ic_star_rate.svg',
@@ -683,7 +568,7 @@ class _RatingDialogState extends State<_RatingDialog> {
           Row(
             children: [
               Expanded(
-                child: _DialogButton(
+                child: AppDialogButton(
                   label: 'إرسال التقييم',
                   background: colors.accent,
                   foreground: colors.textOnAccent,
@@ -692,7 +577,7 @@ class _RatingDialogState extends State<_RatingDialog> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _DialogButton(
+                child: AppDialogButton(
                   label: 'إلغاء',
                   background: colors.background,
                   foreground: colors.primaryContent,

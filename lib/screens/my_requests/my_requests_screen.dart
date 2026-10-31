@@ -13,6 +13,7 @@ import '../../data/dummy_data.dart';
 import '../../data/my_request.dart';
 import '../new_request/new_request_screen.dart';
 import '../messages/messages_screen.dart';
+import '../settings/settings_screen.dart';
 import 'dialogs/request_dialogs.dart';
 import 'request_details_screen.dart';
 import 'widgets/request_card.dart';
@@ -58,13 +59,18 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
         backgroundColor: colors.surface,
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: 1,
-          // TODO: navigate to settings tab
           onTap: (index) {
             if (index == 0) Navigator.of(context).pop();
             if (index == 2) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const MessagesScreen()),
+              );
+            }
+            if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             }
           },
