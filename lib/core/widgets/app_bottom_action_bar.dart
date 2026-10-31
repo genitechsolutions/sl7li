@@ -49,21 +49,23 @@ class AppBottomActionBar extends StatelessWidget {
         child: Text(label),
       ),
     );
-    final secondaryButton = SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: OutlinedButton(
-        onPressed: onSecondaryPressed,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: context.colors.background,
-          foregroundColor: context.colors.primaryContent,
-          side: BorderSide(color: context.colors.border),
-          shape: shape,
-          textStyle: AppTextStyles.title16,
-        ),
-        child: Text(secondaryLabel!),
-      ),
-    );
+    final secondaryButton = secondaryLabel == null
+        ? null
+        : SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: OutlinedButton(
+              onPressed: onSecondaryPressed,
+              style: OutlinedButton.styleFrom(
+                backgroundColor: context.colors.background,
+                foregroundColor: context.colors.primaryContent,
+                side: BorderSide(color: context.colors.border),
+                shape: shape,
+                textStyle: AppTextStyles.title16,
+              ),
+              child: Text(secondaryLabel!),
+            ),
+          );
 
     return Container(
       decoration: BoxDecoration(
@@ -92,12 +94,12 @@ class AppBottomActionBar extends StatelessWidget {
                   spacing: 12,
                   children: [
                     Expanded(child: primaryButton),
-                    Expanded(child: secondaryButton),
+                    Expanded(child: secondaryButton!),
                   ],
                 )
               else ...[
                 primaryButton,
-                if (secondaryLabel != null) secondaryButton,
+                ?secondaryButton,
               ],
             ],
           ),

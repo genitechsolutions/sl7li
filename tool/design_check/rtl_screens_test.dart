@@ -9,7 +9,32 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:khaled_flutter/core/theme/app_colors.dart';
 import 'package:khaled_flutter/core/theme/app_theme.dart';
+import 'package:khaled_flutter/data/chat_data.dart';
+import 'package:khaled_flutter/data/craftsman_data.dart';
 import 'package:khaled_flutter/data/craftsman_signup.dart';
+import 'package:khaled_flutter/data/dummy_data.dart';
+import 'package:khaled_flutter/data/request_draft.dart';
+import 'package:khaled_flutter/screens/auth/otp_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/craftsman_home_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/profile/craftsman_profile_tab.dart';
+import 'package:khaled_flutter/screens/craftsman/requests/craftsman_request_details_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/signup/signup_review_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/signup/signup_step1_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/signup/signup_step3_screen.dart';
+import 'package:khaled_flutter/screens/craftsman/signup/signup_step4_screen.dart';
+import 'package:khaled_flutter/screens/craftsman_profile/craftsman_profile_screen.dart';
+import 'package:khaled_flutter/screens/messages/chat_screen.dart';
+import 'package:khaled_flutter/screens/new_request/craftsman_targeting_screen.dart';
+import 'package:khaled_flutter/screens/new_request/new_request_screen.dart';
+import 'package:khaled_flutter/screens/new_request/request_confirm_screen.dart';
+import 'package:khaled_flutter/screens/new_request/request_details_screen.dart'
+    as nr;
+import 'package:khaled_flutter/screens/new_request/request_location_screen.dart';
+import 'package:khaled_flutter/screens/new_request/request_sent_screen.dart';
+import 'package:khaled_flutter/screens/notifications/notifications_screen.dart';
+import 'package:khaled_flutter/screens/offer_details/offer_details_screen.dart';
+import 'package:khaled_flutter/screens/service_details/service_details_screen.dart';
+import 'package:khaled_flutter/screens/settings/notification_settings_screen.dart';
 import 'package:khaled_flutter/screens/auth/customer_login_screen.dart';
 import 'package:khaled_flutter/screens/craftsman/offers/create_offer_screen.dart';
 import 'package:khaled_flutter/screens/craftsman/offers/my_offers_tab.dart';
@@ -25,7 +50,111 @@ import 'package:khaled_flutter/screens/offers/offers_screen.dart';
 import 'package:khaled_flutter/screens/search/search_screen.dart';
 
 /// (اسم الصورة بـ design/، الـ widget). أضف شاشات هون.
+CraftsmanSignupDraft _draft() => CraftsmanSignupDraft()
+  ..businessName = 'رضا'
+  ..city = 'دمشق'
+  ..districts.addAll(['المزة'])
+  ..services.addAll(['التكييف'])
+  ..specialties['التكييف'] = {'تصليح براد'}
+  ..years = '4'
+  ..transport = craftsmanTransportOptions.first
+  ..workshopAddress = 'عنوان'
+  ..bio = 'نبذة';
+
+Future<void> _tap(WidgetTester t, String text) async {
+  await t.tap(find.textContaining(text).first);
+  await t.pumpAndSettle();
+}
+
+/// خطوات بعد فتح الشاشة (تابات/فلاتر)، بالاسم.
+final _prep = <String, Future<void> Function(WidgetTester)>{
+  '39_cr_available_requests': (t) => _tap(t, 'الطلبات المتاحة'),
+  '44_cr_requests_completed': (t) => _tap(t, 'مكتملة'),
+  '45_cr_requests_cancelled': (t) => _tap(t, 'ملغاة'),
+};
+
 final _screens = <(String, Widget Function())>[
+  // زبون (صور design/ الموجودة)
+  (
+    '02_service_details',
+    () => const ServiceDetailsScreen(details: sampleServiceDetails),
+  ),
+  (
+    '04_offer_details',
+    () => const OfferDetailsScreen(details: sampleOfferDetails),
+  ),
+  (
+    '06_craftsman_profile_works',
+    () => const CraftsmanProfileScreen(profile: sampleCraftsmanProfile),
+  ),
+  ('09_request_step1_empty', () => const NewRequestScreen()),
+  (
+    '11_request_step2_empty',
+    () => nr.RequestDetailsScreen(draft: RequestDraft()),
+  ),
+  (
+    '13_request_step3_location',
+    () => RequestLocationScreen(draft: RequestDraft()),
+  ),
+  (
+    '15_craftsman_targeting',
+    () => const CraftsmanTargetingScreen(craftsmen: targetableCraftsmen),
+  ),
+  ('16_request_sent', () => const RequestSentScreen()),
+  ('22_otp_verify', () => const OtpScreen(phone: '+963 993 930 716')),
+  // مهني
+  ('34_cr_signup1', () => const SignupStep1Screen()),
+  ('36_cr_signup3', () => SignupStep3Screen(draft: _draft())),
+  ('37_cr_signup4', () => SignupStep4Screen(draft: _draft())),
+  ('38_cr_signup_review', () => SignupReviewScreen(draft: _draft())),
+  ('39_cr_available_requests', () => const CraftsmanHomeScreen(initialTab: 1)),
+  (
+    '40_cr_request_details',
+    () => CraftsmanRequestDetailsScreen(request: sampleAvailableRequests.first),
+  ),
+  ('43_cr_my_requests', () => const CraftsmanHomeScreen(initialTab: 1)),
+  ('44_cr_requests_completed', () => const CraftsmanHomeScreen(initialTab: 1)),
+  ('45_cr_requests_cancelled', () => const CraftsmanHomeScreen(initialTab: 1)),
+  (
+    '46_cr_task_details',
+    () => CraftsmanRequestDetailsScreen(
+      request: sampleCraftsmanTasks.first,
+      offerSent: true,
+    ),
+  ),
+  (
+    '52_cr_chat',
+    () => ChatScreen(
+      conversation: sampleCustomerConversations.first,
+      craftsmanMode: true,
+    ),
+  ),
+  (
+    '53_cr_chat_first',
+    () => ChatScreen(
+      conversation: sampleCustomerConversations.first,
+      firstTime: true,
+      craftsmanMode: true,
+    ),
+  ),
+  (
+    '54_cr_profile',
+    () => Builder(
+      builder: (c) => Scaffold(
+        backgroundColor: Theme.of(c).extension<AppColors>()!.pageAlt,
+        body: const CraftsmanProfileTab(),
+      ),
+    ),
+  ),
+  (
+    '55_cr_public_profile',
+    () => const CraftsmanProfileScreen(
+      profile: sampleCraftsmanProfile,
+      selfView: true,
+    ),
+  ),
+  ('59_cr_notif_settings', () => const NotificationSettingsScreen()),
+  ('61_cr_notifications', () => const NotificationsScreen()),
   ('01_home', () => const HomeScreen()),
   ('03_offers', () => const OffersScreen()),
   ('07_search_suggestions', () => const SearchScreen()),
@@ -107,6 +236,8 @@ void main() {
         }
       });
       await tester.pump(const Duration(seconds: 1));
+      final prep = _prep[name];
+      if (prep != null) await prep(tester);
       await expectLater(
         find.byType(MaterialApp),
         matchesGoldenFile('rtl/$name.png'),
