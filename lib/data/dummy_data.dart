@@ -1,3 +1,4 @@
+import 'chat_data.dart';
 import 'my_request.dart';
 
 class ServiceItem {
@@ -552,5 +553,72 @@ const sampleOtherOffers = [
     priceUnit: 'ليرة جديدة / يوم',
     inspectionFee: 'مجاني',
     materialsFee: '20 ليرة جديدة',
+  ),
+];
+
+// ── الرسائل ──
+const sampleConversations = [
+  Conversation(
+    name: 'مركز قزاز للتكيف والتبريد',
+    lastMessage: 'آخر رسالة تم إرسالها',
+    time: '2:24 م',
+    sentStatus: MessageStatus.read,
+  ),
+  Conversation(
+    name: 'مركز قزاز للتكيف والتبريد',
+    lastMessage: 'آخر رسالة تم استلامها',
+    time: '2:24 م',
+    verified: true,
+    unread: 3,
+  ),
+  Conversation(
+    name: 'مركز قزاز للتكيف والتبريد',
+    lastMessage: 'آخر رسالة تم إرسالها',
+    time: '2:24 م',
+    verified: true,
+    sentStatus: MessageStatus.delivered,
+  ),
+  Conversation(
+    name: 'مركز قزاز للتكيف والتبريد',
+    lastMessage: 'آخر رسالة تم إرسالها',
+    time: '2:24 م',
+    isPro: false,
+    sentStatus: MessageStatus.sent,
+  ),
+  Conversation(
+    name: 'مركز قزاز للتكيف والتبريد',
+    lastMessage: 'آخر رسالة تم إرسالها',
+    time: '2:24 م',
+    sentStatus: MessageStatus.sending,
+  ),
+  Conversation(
+    name: 'مركز قزاز للتكيف والتبريد',
+    lastMessage: 'آخر رسالة تم استلامها',
+    time: '2:24 م',
+    verified: true,
+    unread: 3,
+  ),
+  Conversation(
+    name: 'مركز قزاز للتكيف والتبريد',
+    lastMessage: 'آخر رسالة تم إرسالها',
+    time: '2:24 م',
+    verified: true,
+    sentStatus: MessageStatus.read,
+  ),
+];
+
+const sampleChat = [
+  ChatMessage(text: 'سأقدم لك عرضا على هذا الطلب ب 100\$', time: '2:10 م', sent: false),
+  ChatMessage(text: 'لقد حصلت على الكثير من العروض أرخص من هذا', time: '2:10 م', sent: true),
+  ChatMessage(text: 'لماذا اختارك أنت؟', time: '2:10 م', sent: true),
+  ChatMessage(text: 'أو أعطني سعرا أقل من هذا', time: '2:10 م', sent: true),
+  ChatMessage(text: 'بطل بدي اشتغل معك أصلا', time: '2:10 م', sent: true, status: MessageStatus.sent),
+  ChatMessage(
+    text: 'هي مثال لإرسال الصورة',
+    time: '2:10 م',
+    sent: true,
+    status: MessageStatus.sent,
+    content: ChatContent.image,
+    image: 'assets/images/request_photo_2.png',
   ),
 ];

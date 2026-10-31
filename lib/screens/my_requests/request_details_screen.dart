@@ -352,8 +352,10 @@ class _BottomBar extends StatelessWidget {
       ),
     );
 
-    final noActions = request.hasCraftsman &&
-        (request.status == RequestStatus.canceled || (request.status == RequestStatus.done && request.rated));
+    final noActions =
+        request.hasCraftsman &&
+        (request.status == RequestStatus.canceled ||
+            (request.status == RequestStatus.done && request.rated));
     if (noActions) return const SizedBox.shrink();
 
     return Container(

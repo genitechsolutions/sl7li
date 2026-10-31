@@ -7,6 +7,7 @@ import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../data/dummy_data.dart';
 import '../craftsman_profile/craftsman_profile_screen.dart';
 import '../offer_details/offer_details_screen.dart';
+import '../messages/messages_screen.dart';
 import '../my_requests/my_requests_screen.dart';
 import '../new_request/new_request_screen.dart';
 import '../offers/offers_screen.dart';
@@ -37,6 +38,9 @@ class HomeScreen extends StatelessWidget {
           onTap: (index) {
             if (index == 1) {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const MyRequestsScreen()));
+            }
+            if (index == 2) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const MessagesScreen()));
             }
           },
           onAddTap: () => Navigator.push(context, NewRequestScreen.route()),
