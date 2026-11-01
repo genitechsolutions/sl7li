@@ -25,6 +25,15 @@ class AmplifyGraphQlGateway implements GraphQlGateway {
     bool mutation = false,
     bool guest = false,
   }) async {
+    // الاستعلامات الخاصة بالمستخدم بدها جلسة: بدونها رسالة عربية واضحة (مش خطأ Amplify الإنكليزي).
+    if (!guest) {
+      try {
+        final session = await Amplify.Auth.fetchAuthSession();
+        if (!session.isSignedIn) throw BackendException.unauthenticated;
+      } on AuthException {
+        throw BackendException.unauthenticated;
+      }
+    }
     final request = GraphQLRequest<String>(
       document: document,
       variables: variables,
@@ -44,10 +53,13 @@ class AmplifyGraphQlGateway implements GraphQlGateway {
       if (raw == null) return const {};
       final decoded = jsonDecode(raw);
       return decoded is Map ? Map<String, dynamic>.from(decoded) : const {};
+    } on NetworkException {
+      throw const BackendException('تعذّر الاتصال بالإنترنت', code: 'NetworkException');
     } on AuthException catch (e) {
       throw BackendException(e.message, code: e.runtimeType.toString());
     } on ApiException catch (e) {
-      throw BackendException(e.message, code: 'ApiException');
+      // رسائل Amplify إنكليزية: منعرض رسالة عربية عامة ومنحتفظ بالتفاصيل بالـ code.
+      throw BackendException('تعذّر الاتصال بالخادم، حاول مرة ثانية', code: e.message);
     }
   }
 }

@@ -31,19 +31,23 @@ class _OtpInputState extends State<OtpInput> {
       onTap: _focus.requestFocus,
       child: Stack(
         children: [
-          // الحقل الحقيقي، مخفي ورا الخانات.
+          // الحقل الحقيقي، مخفي ورا الخانات (نص ومؤشر شفاف بدل Opacity(0): الويب ما بيعطي
+          // تركيز لحقل شفافيته 0).
           Positioned.fill(
-            child: Opacity(
-              opacity: 0,
-              child: TextField(
-                controller: widget.controller,
-                focusNode: _focus,
-                keyboardType: TextInputType.number,
-                maxLength: widget.length,
-                showCursor: false,
-                enableInteractiveSelection: false,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(counterText: '', border: InputBorder.none),
+            child: TextField(
+              controller: widget.controller,
+              focusNode: _focus,
+              keyboardType: TextInputType.number,
+              maxLength: widget.length,
+              showCursor: false,
+              enableInteractiveSelection: false,
+              style: const TextStyle(color: Colors.transparent),
+              cursorColor: Colors.transparent,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: const InputDecoration(
+                counterText: '',
+                border: InputBorder.none,
+                fillColor: Colors.transparent,
               ),
             ),
           ),
