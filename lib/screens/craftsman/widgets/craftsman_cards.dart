@@ -15,7 +15,7 @@ class CraftsmanProgressCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 13),
       decoration: BoxDecoration(
         color: colors.cardAlt,
         borderRadius: BorderRadius.circular(12),
@@ -42,7 +42,7 @@ class CraftsmanProgressCard extends StatelessWidget {
                       ),
                     ),
                     PositionedDirectional(
-                      bottom: 6,
+                      bottom: 0,
                       child: Text(
                         '67%',
                         textDirection: TextDirection.ltr,
@@ -57,34 +57,38 @@ class CraftsmanProgressCard extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'مسار التطور',
-                      style: AppTextStyles.body12.copyWith(
-                        fontSize: 13,
-                        color: colors.textSecondary,
+                child: Padding(
+                  // النص بالتصميم أخفض ~6px من منتصف الحلقة.
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'مسار التطور',
+                        style: AppTextStyles.body12.copyWith(
+                          fontSize: 13,
+                          color: colors.textSecondary,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'المسار الحالي: 1 - بداية الرحلة',
-                      style: AppTextStyles.body16Medium,
-                    ),
-                  ],
+                      Text(
+                        'المسار الحالي: 1 - بداية الرحلة',
+                        style: AppTextStyles.body16Medium,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 14),
           Text(
             'المسار التالي: 2 - حرفي موثق',
             style: AppTextStyles.body16.copyWith(color: colors.success),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 13),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
             decoration: BoxDecoration(
               color: colors.noticeInfo.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
@@ -107,7 +111,7 @@ class CraftsmanProgressCard extends StatelessWidget {
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
                       color: colors.verified,
-                      height: 1.85,
+                      height: 1.55,
                     ),
                   ),
               ],
