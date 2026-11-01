@@ -33,10 +33,24 @@ class CraftsmanProgressCard extends StatelessWidget {
                   children: [
                     SvgPicture.asset('assets/icons/cr_ring_a.svg', width: 68),
                     SvgPicture.asset('assets/icons/cr_ring_b.svg', width: 58),
-                    SvgPicture.asset(
-                      'assets/icons/cr_medal.svg',
-                      width: 24,
-                      height: 24,
+                    PositionedDirectional(
+                      top: 16,
+                      child: SvgPicture.asset(
+                        'assets/icons/cr_medal.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                    PositionedDirectional(
+                      bottom: 6,
+                      child: Text(
+                        '67%',
+                        textDirection: TextDirection.ltr,
+                        style: AppTextStyles.body12.copyWith(
+                          fontSize: 11,
+                          color: colors.link,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -57,16 +71,15 @@ class CraftsmanProgressCard extends StatelessWidget {
                       'المسار الحالي: 1 - بداية الرحلة',
                       style: AppTextStyles.body16Medium,
                     ),
-                    Text(
-                      'المسار التالي: 2 - حرفي موثق',
-                      style: AppTextStyles.body16.copyWith(
-                        color: colors.success,
-                      ),
-                    ),
                   ],
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'المسار التالي: 2 - حرفي موثق',
+            style: AppTextStyles.body16.copyWith(color: colors.success),
           ),
           const SizedBox(height: 16),
           Container(
@@ -161,62 +174,74 @@ class CraftsmanTxRow extends StatelessWidget {
     required this.title,
     required this.value,
     required this.color,
-    required this.icon,
+    this.income = true,
   });
 
   final String title;
   final String value;
   final Color color;
-  final String icon;
+
+  /// دخل (سهم صاعد أخضر) أو سحب (سهم نازل أحمر).
+  final bool income;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final small = AppTextStyles.body12.copyWith(
+      fontSize: 13,
+      color: colors.textSecondary,
+    );
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: colors.cardAlt,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
+      child: Column(
         children: [
-          SvgPicture.asset(icon, width: 32, height: 32),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTextStyles.body16),
-                Text(
-                  'منذ 3 أيام',
-                  style: AppTextStyles.body12.copyWith(
-                    fontSize: 13,
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              Expanded(child: Text(title, style: AppTextStyles.body16)),
+              Text('منذ 3 أيام', style: small),
+            ],
           ),
-          Text.rich(
-            textDirection: TextDirection.ltr,
-            TextSpan(
-              style: AppTextStyles.title24Medium.copyWith(
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-              children: [
-                TextSpan(text: '$value '),
-                TextSpan(
-                  text: 'ل.س',
-                  style: AppTextStyles.body12.copyWith(
-                    fontSize: 13,
-                    color: color,
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    style: AppTextStyles.title24Medium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                    children: [
+                      TextSpan(text: '\u200E$value '),
+                      TextSpan(
+                        text: 'ل.س',
+                        style: AppTextStyles.body12.copyWith(
+                          fontSize: 13,
+                          color: color,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              // الأيقونة صاعدة بالأصل؛ السحب بيقلبها لنازلة (متل التصميم).
+              Transform.flip(
+                flipY: !income,
+                child: SvgPicture.asset(
+                  'assets/icons/cr_trend_up.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -200,30 +200,37 @@ class _HomeTab extends StatelessWidget {
                   horizontal: 16,
                   vertical: 12,
                 ),
-                child: Column(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/cr_trend_up.svg',
-                          width: 32,
-                          height: 32,
-                        ),
-                        const SizedBox(width: 12),
-                        Text('أرباح الأسبوع الماضي', style: label),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '16 آب 2026 — 22 آب 2026',
-                      style: AppTextStyles.body12.copyWith(
-                        fontSize: 13,
-                        color: colors.textHint,
+                    // الأيقونة بالتصميم جنب سطر التاريخ (مش جنب العنوان).
+                    Padding(
+                      padding: const EdgeInsets.only(top: 22),
+                      child: SvgPicture.asset(
+                        'assets/icons/cr_trend_up.svg',
+                        width: 32,
+                        height: 32,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    money('100000'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('أرباح الأسبوع الماضي', style: label),
+                          const SizedBox(height: 4),
+                          Text(
+                            '16 آب 2026 — 22 آب 2026',
+                            style: AppTextStyles.body12.copyWith(
+                              fontSize: 13,
+                              color: colors.textHint,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          money('100000'),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -306,13 +313,12 @@ class _HomeTab extends StatelessWidget {
                 title: 'أرباح خدمة - تنظيف مكيفات',
                 value: '+1000',
                 color: colors.success,
-                icon: 'assets/icons/cr_arrow_in.svg',
               ),
               CraftsmanTxRow(
                 title: 'سحب رصيد',
                 value: '-1000',
                 color: colors.error,
-                icon: 'assets/icons/cr_arrow_out.svg',
+                income: false,
               ),
               GestureDetector(
                 onTap: () {}, // TODO: سجل المحفظة الكامل (ما في تصميم)
@@ -338,7 +344,7 @@ class _HomeTab extends StatelessWidget {
         ),
         sectionHeader('آخر الطلبات الواردة', onAll: onSeeRequests),
         SizedBox(
-          height: 300,
+          height: 171,
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -424,16 +430,28 @@ class _MiniRequest extends StatelessWidget {
             style: AppTextStyles.title18Medium,
           ),
           const SizedBox(height: 8),
-          Text(
-            request.description,
-            maxLines: 3,
+          Text.rich(
+            TextSpan(
+              text: request.description,
+              children: [
+                TextSpan(
+                  text: ' قراءة المزيد',
+                  style: TextStyle(
+                    color: colors.link,
+                    decoration: TextDecoration.underline,
+                    decorationColor: colors.link,
+                  ),
+                ),
+              ],
+            ),
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.body16.copyWith(
               color: colors.textSecondary,
               height: 1.5,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 4),
           Row(
             children: [
               SvgPicture.asset(

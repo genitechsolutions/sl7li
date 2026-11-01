@@ -141,7 +141,7 @@ class _CraftsmanRequestDetailsScreenState
                     wide('تقديم عرض', colors.success, onTap: _sendOffer),
                   if (r.state == CraftsmanRequestState.task)
                     wide(
-                      'تحديث الطلب',
+                      'تحديث حالة الطلب',
                       colors.primary,
                       onTap: () => showTaskStatusDialog(context),
                     ),
@@ -301,10 +301,10 @@ class _CraftsmanRequestDetailsScreenState
                   wide(
                     'التواصل عبر واتساب',
                     colors.success,
-                    iconW: Icon(
-                      Icons.chat_outlined,
-                      color: colors.textOnPrimary,
-                      size: 22,
+                    iconW: SvgPicture.asset(
+                      'assets/icons/ic_whatsapp.svg',
+                      width: 20,
+                      height: 20,
                     ),
                     onTap: _message,
                   ),

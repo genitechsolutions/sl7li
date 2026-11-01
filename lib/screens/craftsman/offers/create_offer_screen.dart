@@ -321,6 +321,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
             label(const FormLabel('الأحياء المخدمة', isRequired: true)),
             AppTextField(
               hint: 'ابحث عن الحي أو المنطقة...',
+              keyboardType: TextInputType.text,
               controller: _district,
               showFocusBorder: true,
               suffixIcon: FieldIcons.search(),
@@ -417,6 +418,31 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
         );
       case 4:
         title = 'تأكيد إنشاء العرض';
+        final specialties =
+            (craftsmanSpecialtiesByService[_service] ??
+                    craftsmanSpecialtiesByService['الكهرباء']!)
+                .take(3)
+                .toList();
+        final photos = _photos.isEmpty
+            ? const ['assets/images/offer_carpentry.jpg']
+            : _photos;
+        Widget overlayPill(String text, {bool counter = false}) => Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: counter ? 10 : 12,
+            vertical: counter ? 4 : 6,
+          ),
+          decoration: BoxDecoration(
+            color: counter ? colors.barrier : colors.background,
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Text(
+            text,
+            textDirection: counter ? TextDirection.ltr : null,
+            style: AppTextStyles.body14.copyWith(
+              color: counter ? colors.textOnPrimary : colors.textPrimary,
+            ),
+          ),
+        );
         body = Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -424,28 +450,41 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: SizedBox(
-                height: 212,
-                child: Image.asset(
-                  _photos.isEmpty
-                      ? 'assets/images/offer_carpentry.jpg'
-                      : _photos.first,
-                  fit: BoxFit.cover,
+                height: 242,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(photos.first, fit: BoxFit.cover),
+                    PositionedDirectional(
+                      top: 12,
+                      end: 12,
+                      child: overlayPill(_city),
+                    ),
+                    PositionedDirectional(
+                      bottom: 12,
+                      start: 12,
+                      child: overlayPill('1 / ${photos.length}', counter: true),
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               _title.text.isEmpty ? 'عنوان العرض يكتب هنا' : _title.text,
-              style: AppTextStyles.title18Medium,
+              style: AppTextStyles.title20.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Text(
                   _offerType == 'سعر خاص'
                       ? '${_price.text} ل.س'
-                      : '${_percent.text}% خصم',
-                  style: AppTextStyles.title18Medium.copyWith(
+                      : 'خصم ${_percent.text}%',
+                  style: AppTextStyles.title20.copyWith(
+                    fontWeight: FontWeight.w700,
                     color: colors.success,
                   ),
                 ),
@@ -454,7 +493,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                   _expiry == null
                       ? 'ساري حتى شهر من الآن'
                       : 'ساري حتى ${_expiry!.day}/${_expiry!.month}/${_expiry!.year}',
-                  style: AppTextStyles.body14.copyWith(
+                  style: AppTextStyles.body16.copyWith(
                     color: colors.textSecondary,
                   ),
                 ),
@@ -462,7 +501,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
             ),
             Padding(
               padding: const EdgeInsetsDirectional.only(
-                top: 16,
+                top: 20,
                 start: 12,
                 bottom: 4,
               ),
@@ -475,15 +514,43 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
             ),
             Text(
               _desc.text.isEmpty ? 'وصف العرض' : _desc.text,
-              style: AppTextStyles.body16.copyWith(height: 1.5),
+              style: AppTextStyles.title18.copyWith(height: 1.5),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
+              children: [for (final t in specialties) AppChip(label: t)],
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(
+                top: 24,
+                start: 12,
+                bottom: 8,
+              ),
+              child: Text(
+                'صور العرض',
+                style: AppTextStyles.body16Medium.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+            ),
+            Row(
+              spacing: 12,
               children: [
-                AppChip(label: _service ?? 'الكهرباء'),
-                AppChip(label: _city),
+                for (var i = 0; i < 3; i++)
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          photos[i % photos.length],
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
@@ -593,11 +660,33 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                   if (_step == 4)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        'بإنشاء العرض أنت توافق على الشروط والأحكام و سياسة الخصوصية',
-                        style: AppTextStyles.body12.copyWith(
-                          color: colors.textSecondary,
+                      child: Text.rich(
+                        TextSpan(
+                          style: AppTextStyles.body12.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                          children: [
+                            const TextSpan(text: 'بإنشاء العرض أنت توافق على '),
+                            TextSpan(
+                              text: 'الشروط والأحكام',
+                              style: TextStyle(
+                                color: colors.link,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colors.link,
+                              ),
+                            ),
+                            const TextSpan(text: ' و '),
+                            TextSpan(
+                              text: 'سياسة الخصوصية',
+                              style: TextStyle(
+                                color: colors.link,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colors.link,
+                              ),
+                            ),
+                          ],
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   Row(

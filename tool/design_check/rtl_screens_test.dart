@@ -145,6 +145,7 @@ final _prep = <String, Future<void> Function(WidgetTester)>{
     await _coStep1(t);
     await _tapExact(t, 'يوم / شهر / سنة');
   },
+  '76_cr_create_offer_step4': _coStep3,
   '51_cr_create_offer_done': (t) async {
     await _coStep3(t);
     await _tapExact(t, 'إنشاء العرض');
@@ -160,7 +161,7 @@ final _prep = <String, Future<void> Function(WidgetTester)>{
   '06_craftsman_profile_works': (t) => _tap(t, 'معرض الأعمال'),
   '55_cr_public_profile': (t) => _tap(t, 'معرض الأعمال'),
   '39_cr_available_requests': (t) => _tap(t, 'الطلبات المتاحة'),
-  '44_cr_requests_completed': (t) => _tap(t, 'مكتملة', scrollChips: true),
+  '44_cr_requests_completed': (t) => _tap(t, 'مكتمل (', scrollChips: true),
   '45_cr_requests_cancelled': (t) => _tap(t, 'ملغاة', scrollChips: true),
 };
 
@@ -263,6 +264,7 @@ final _screens = <(String, Widget Function())>[
   ('49_cr_create_offer_step3', () => const CreateOfferScreen()),
   ('50_cr_date_picking', () => const CreateOfferScreen()),
   ('51_cr_create_offer_done', () => const CreateOfferScreen()),
+  ('76_cr_create_offer_step4', () => const CreateOfferScreen()),
   ('74_cr_home', () => const CraftsmanHomeScreen()),
   ('34_cr_signup1', () => const SignupStep1Screen()),
   ('36_cr_signup3', () => SignupStep3Screen(draft: _draft())),

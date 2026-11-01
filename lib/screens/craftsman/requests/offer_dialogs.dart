@@ -521,10 +521,10 @@ class _ConfirmOffer extends StatelessWidget {
             'تأكيد إرسال العرض',
             badge: AppDialogBadge(
               color: colors.success,
-              child: Icon(
-                Icons.send_outlined,
-                size: 18,
-                color: colors.textOnPrimary,
+              child: SvgPicture.asset(
+                'assets/icons/cr_send_plane.svg',
+                width: 20,
+                height: 20,
               ),
             ),
           ),
@@ -664,37 +664,44 @@ class _OfferSent extends StatelessWidget {
   }
 }
 
-/// قائمة "المزيد" بكرت الطلب (ثلاث نقاط): واتساب / مراسلة الزبون / تجاهل.
-Future<void> showRequestMoreMenu(BuildContext context) async {
-  final choice = await showAppModal<String>(context, (context) {
-    final colors = context.colors;
-    Widget row(String label, String value, {Color? color}) => GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(value),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Text(
-          label,
-          style: AppTextStyles.body16Medium.copyWith(
-            color: color ?? colors.textPrimary,
-          ),
+/// قائمة "المزيد" (ثلاث نقاط) بكرت الطلب: "تجاهل العرض" بس (متل التصميم)، لاصقة بالزر.
+Future<void> showRequestMoreMenu(BuildContext anchor) async {
+  final colors = anchor.colors;
+  final box = anchor.findRenderObject() as RenderBox;
+  final overlay = Overlay.of(anchor).context.findRenderObject() as RenderBox;
+  final topLeft = box.localToGlobal(Offset.zero, ancestor: overlay);
+  final position = RelativeRect.fromLTRB(
+    topLeft.dx,
+    topLeft.dy + box.size.height + 4,
+    overlay.size.width - topLeft.dx - box.size.width,
+    0,
+  );
+  final choice = await showMenu<String>(
+    context: anchor,
+    position: position,
+    color: colors.background,
+    surfaceTintColor: Colors.transparent,
+    elevation: 8,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    items: [
+      PopupMenuItem<String>(
+        value: 'ignore',
+        child: Row(
+          children: [
+            SvgPicture.asset(
+              'assets/icons/ic_block.svg',
+              width: 20,
+              height: 20,
+              colorFilter: ColorFilter.mode(colors.error, BlendMode.srcIn),
+            ),
+            const SizedBox(width: 12),
+            Text('تجاهل العرض', style: AppTextStyles.body16),
+          ],
         ),
       ),
-    );
-    return AppDialogCard(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          row('تواصل عبر واتساب', 'whatsapp'),
-          row('مراسلة الزبون', 'message'),
-          row('تجاهل العرض', 'ignore', color: colors.error),
-        ],
-      ),
-    );
-  });
-  if (choice == 'ignore' && context.mounted) {
-    await showIgnoreRequestDialog(context);
+    ],
+  );
+  if (choice == 'ignore' && anchor.mounted) {
+    await showIgnoreRequestDialog(anchor);
   }
-  // TODO: واتساب ومراسلة الزبون (ما في وجهة بدون backend).
 }

@@ -21,7 +21,7 @@ class CraftsmanRequestCard extends StatelessWidget {
   final double? width;
   final VoidCallback? onDetails;
   final VoidCallback? onPrimary;
-  final VoidCallback? onMore;
+  final void Function(BuildContext anchor)? onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -119,25 +119,27 @@ class CraftsmanRequestCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                GestureDetector(
-                  onTap: onMore,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    margin: const EdgeInsets.only(top: 8),
-                    decoration: BoxDecoration(
-                      color: colors.background,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: colors.border),
-                    ),
-                    alignment: Alignment.center,
-                    child: SvgPicture.asset(
-                      'assets/icons/ic_more_vert.svg',
-                      width: 20,
-                      height: 20,
-                      colorFilter: ColorFilter.mode(
-                        colors.primaryContent,
-                        BlendMode.srcIn,
+                Builder(
+                  builder: (anchor) => GestureDetector(
+                    onTap: onMore == null ? null : () => onMore!(anchor),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      margin: const EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: colors.background,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colors.border),
+                      ),
+                      alignment: Alignment.center,
+                      child: SvgPicture.asset(
+                        'assets/icons/ic_more_vert.svg',
+                        width: 20,
+                        height: 20,
+                        colorFilter: ColorFilter.mode(
+                          colors.primaryContent,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   ),

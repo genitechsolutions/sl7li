@@ -31,7 +31,7 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
     'عرض مرسل',
     'تم الاتفاق',
     'قيد التنفيذ',
-    'مكتملة',
+    'مكتمل',
     'ملغاة',
   ];
   static const _availableFilters = [
@@ -206,7 +206,7 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                         ),
                         _ => showSendOfferFlow(context, requestTitle: r.title),
                       },
-                      onMore: () => showRequestMoreMenu(context),
+                      onMore: showRequestMoreMenu,
                     ),
                   ),
               ],
