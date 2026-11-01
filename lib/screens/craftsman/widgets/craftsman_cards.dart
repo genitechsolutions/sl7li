@@ -3,11 +3,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/arc_progress.dart';
 
 class CraftsmanProgressCard extends StatelessWidget {
-  const CraftsmanProgressCard({super.key, this.compact = false});
+  const CraftsmanProgressCard({
+    super.key,
+    this.compact = false,
+    this.percent = 67,
+  });
 
   final bool compact;
+
+  /// نسبة الإنجاز (0..100) — بتحدد طول القوس الأزرق والنص.
+  final int percent;
 
   @override
   Widget build(BuildContext context) {
@@ -25,34 +33,37 @@ class CraftsmanProgressCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              SizedBox(
-                width: 68,
-                height: 68,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SvgPicture.asset('assets/icons/cr_ring_a.svg', width: 68),
-                    SvgPicture.asset('assets/icons/cr_ring_b.svg', width: 58),
-                    PositionedDirectional(
-                      top: 16,
-                      child: SvgPicture.asset(
-                        'assets/icons/cr_medal.svg',
-                        width: 24,
-                        height: 24,
-                      ),
-                    ),
-                    PositionedDirectional(
-                      bottom: 0,
-                      child: Text(
-                        '67%',
-                        textDirection: TextDirection.ltr,
-                        style: AppTextStyles.body12.copyWith(
-                          fontSize: 11,
-                          color: colors.link,
+              Padding(
+                // الحلقة بالتصميم أخفض ~5px.
+                padding: const EdgeInsets.only(top: 5),
+                child: ArcProgress(
+                  value: percent / 100,
+                  trackColor: colors.tag,
+                  progressColor: colors.link,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      PositionedDirectional(
+                        top: 16,
+                        child: SvgPicture.asset(
+                          'assets/icons/cr_medal.svg',
+                          width: 24,
+                          height: 24,
                         ),
                       ),
-                    ),
-                  ],
+                      PositionedDirectional(
+                        bottom: 0,
+                        child: Text(
+                          '$percent%',
+                          textDirection: TextDirection.ltr,
+                          style: AppTextStyles.body12.copyWith(
+                            fontSize: 11,
+                            color: colors.link,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -80,7 +91,7 @@ class CraftsmanProgressCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 9),
           Text(
             'المسار التالي: 2 - حرفي موثق',
             style: AppTextStyles.body16.copyWith(color: colors.success),
