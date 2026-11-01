@@ -456,7 +456,8 @@ class _MiniRequest extends StatelessWidget {
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(
-              text: request.description,
+              // نقصّ الوصف قبل الرابط (maxLines لحاله كان بيخفي "قراءة المزيد").
+              text: _clip(request.description),
               children: [
                 TextSpan(
                   text: ' قراءة المزيد',
@@ -495,4 +496,12 @@ class _MiniRequest extends StatelessWidget {
       ),
     );
   }
+}
+
+/// وصف مختصر (حد أقصى ~54 حرف عند حدّ كلمة) ليتّسع مع "قراءة المزيد" بسطرين.
+String _clip(String text, {int max = 54}) {
+  if (text.length <= max) return text;
+  final cut = text.substring(0, max);
+  final space = cut.lastIndexOf(' ');
+  return (space > 20 ? cut.substring(0, space) : cut).trimRight();
 }
