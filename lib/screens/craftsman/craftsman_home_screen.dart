@@ -5,7 +5,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
+import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_view.dart';
 import '../../data/craftsman_data.dart';
+import '../../data/repositories/requests_repository.dart';
 import '../messages/messages_screen.dart';
 import 'offers/my_offers_tab.dart';
 import 'profile/craftsman_profile_tab.dart';
@@ -343,35 +346,56 @@ class _HomeTab extends StatelessWidget {
           ),
         ),
         sectionHeader('آخر الطلبات الواردة', onAll: onSeeRequests),
-        SizedBox(
-          height: 171,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+        LoadView<CraftsmanJobsCubit, CraftsmanJobs>(
+          compact: true,
+          builder: (context, jobs) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final r in sampleAvailableRequests)
+              SizedBox(
+                height: 171,
+                child: jobs.available.isEmpty
+                    ? const Center(child: Text('لا توجد طلبات واردة حالياً'))
+                    : ListView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        children: [
+                          for (final r in jobs.available)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                end: 12,
+                              ),
+                              child: SizedBox(
+                                width: 293,
+                                child: _MiniRequest(request: r),
+                              ),
+                            ),
+                        ],
+                      ),
+              ),
+              sectionHeader('مهامي الحالية', onAll: onSeeRequests),
+              if (jobs.tasks.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: Text('لا توجد مهام حالية')),
+                )
+              else
                 Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 12),
-                  child: SizedBox(width: 293, child: _MiniRequest(request: r)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: CraftsmanRequestCard(
+                    request: jobs.tasks.first,
+                    onDetails: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CraftsmanRequestDetailsScreen(
+                          request: jobs.tasks.first,
+                          offerSent: true,
+                        ),
+                      ),
+                    ),
+                    onPrimary: () {},
+                  ),
                 ),
             ],
-          ),
-        ),
-        sectionHeader('مهامي الحالية', onAll: onSeeRequests),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: CraftsmanRequestCard(
-            request: sampleCraftsmanTasks[0],
-            onDetails: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => CraftsmanRequestDetailsScreen(
-                  request: sampleCraftsmanTasks[0],
-                  offerSent: true,
-                ),
-              ),
-            ),
-            onPrimary: () {},
           ),
         ),
         const SizedBox(height: 24),

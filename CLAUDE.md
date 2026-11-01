@@ -10,19 +10,31 @@
 - الناقص: شوف "معلّق / TODOs" تحت.
 
 ## نطاق المشروع
-- UI + تنقل بين الصفحات فقط. لا API، لا backend، لا قواعد بيانات.
-- البيانات وهمية في `lib/data/dummy_data.dart`. الاستثناء: [request_draft.dart](lib/data/request_draft.dart) — كائن عادي بيتمرّر بين خطوات "طلب خدمة" (المستخدم طلبه صراحةً) — مش state management.
+- UI + تنقل + **ربط بالخلفية الحقيقية** (AWS Amplify: Cognito + AppSync GraphQL) عبر Cubit — بطلب المستخدم صراحةً. شوف قسم "الخلفية والـ Cubits" تحت.
+- البيانات الوهمية بـ `lib/data/dummy_data.dart` و`craftsman_data.dart` لسا موجودة: هي اللي بيرجعها وضع `fake` (الافتراضي، للتصميم والاختبارات). [request_draft.dart](lib/data/request_draft.dart) كائن عادي بيتمرّر بين خطوات "طلب خدمة".
 - صورة النجار `assets/images/offer_carpentry.jpg` هي الـ placeholder المعتمد لكل صور العروض/الأعمال/الطلبات (المستخدم موافق).
-- **لا packages إضافية بدون موافقة.** الموجود: `flutter_localizations`, `flutter_svg` بس.
+- **لا packages إضافية بدون موافقة.** الموجود: `flutter_localizations`, `flutter_svg`، ومعتمدة بطلب المستخدم للخلفية: `flutter_bloc`, `equatable`, `amplify_flutter`, `amplify_auth_cognito`, `amplify_api`. (للرفع لاحقاً: `amplify_storage_s3` بموافقة.)
 
 ## اللغة والاتجاه
 - **عربي فقط، RTL بالكامل.** لا إنجليزي، لا `intl`. النصوص بتنكتب مباشرة بالـ widgets حرفياً متل التصميم.
 - `EdgeInsetsDirectional` / `AlignmentDirectional` / `PositionedDirectional` / `start`/`end` دائماً. `left`/`right` بس إذا التصميم بيفرضها (وعلّق ليش).
 
 ## State & Navigation
-- **لا state management.** `StatelessWidget` افتراضياً، `StatefulWidget` + `setState` لحالة محلية.
+- **state management = Cubit (`flutter_bloc`)** للبيانات اللي جاية من الخلفية (قوائم، جلسة). حالة الواجهة المحلية (تاب مختار، حقول) تضل `StatefulWidget` + `setState`. `StatelessWidget` افتراضياً.
 - التنقل: `Navigator.push(context, MaterialPageRoute(...))` و`pop`. لا `go_router`.
 - استثناء: خطوات الطلب بتنفتح بـ `NewRequestScreen.route()` (فيها `RouteSettings(name)`) مشان `NewRequestScreen.cancelFlow(context)` يسكّر كل الخطوات. صفحة النجاح بتنفتح بـ `RequestSentScreen.open(context)` (بتمسح كل شي فوق الرئيسية).
+
+## الخلفية والـ Cubits
+- **الطبقات:** `core/backend/` (إعداد البيئة، تهيئة Amplify، `GraphQlGateway`، مستندات GraphQL `Gql`، أدوات JSON) ← `data/repositories/` (كل ميزة: واجهة abstract + `Fake*` ببيانات وهمية + `Remote*`/`Amplify*` للحقيقي + دوال تحويل JSON←نماذج الواجهة) ← `cubits/` ← الشاشات.
+- **الأوضاع:** `AppConfig.mode`: `fake` (افتراضي، بدون شبكة) أو `amplify`. التشغيل الحقيقي:
+  `flutter run --dart-define=BACKEND=amplify --dart-define=APP_ENV=devqa --dart-define=APPSYNC_API_KEY=<المفتاح>` (البيئة `production` بـ `APP_ENV=production`). **مفتاح AppSync ما بينكتب بالكود/الريبو أبداً.** إذا فشلت تهيئة Amplify بالإقلاع بنكمّل بـ fake وبنسجّل السبب.
+- **التزويد:** `AppDependencies` (`.fake()` / `.amplify()`) + `AppProviders` (فوق `MaterialApp` بـ `main.dart`). **أي اختبار/رسم لشاشة لازم يلفّها بـ `AppProviders(dependencies: AppDependencies.fake(), …)`** وإلا `context.read` بيفشل.
+- **Cubits:** `LoadCubit<T>` (قاعدة: `load()` / `load(force: true)` / `reset()`، الحالة `LoadState`) ← `OffersCubit`, `FeaturedOffersCubit`, `MyRequestsCubit`, `CraftsmanJobsCubit`, `ConversationsCubit` (`loadFor(professionalMode:)`), `NotificationsCubit`. `AuthCubit` حالته `AuthState` (رقم ← رمز ← جلسة). الشاشات بتستعمل `LoadView<Cubit, T>` (`cubits/load_view.dart`) اللي بيعرض تحميل/خطأ+إعادة محاولة/فاضي. تسجيل الخروج: `signOutAndReset(context)`.
+- **الدخول (متل الموقع):** Cognito، الهاتف هو الـ username. مستخدم جديد: `signUp` بكلمة سر عشوائية ← رمز SMS ← `confirmSignUp` ← `signIn`. موجود: `signIn` بـ `CUSTOM_WITHOUT_SRP` ← `confirmSignIn(code)`. إعادة الإرسال: `resendOtpSecure` (API key). (devqa فيه تجاوز OTP للأرقام المسموحة؛ تفاصيله عند فريق الباك.)
+- **GraphQL:** استعلامات `*Secure` بترجع نص JSON (AWSJSON) بحقول نماذج الخلفية؛ التحويل بـ `myRequestFromJson`/`craftsmanRequestFromJson`/`offerFromJson`/`conversationFromJson`/`notificationFromJson`. القائمة الكاملة بـ [docs/backend_api_catalog.md](docs/backend_api_catalog.md)، والبيئة بـ [docs/backend_dev_env.md](docs/backend_dev_env.md).
+- **اختبارات الوحدة:** `test/unit/` (بتنحفظ بالريبو): المحوّلات، الـ cubits، تحليل إعداد Amplify. تشغيل: `flutter test test/unit`. (اختبارات الرسم المؤقتة بـ `test/_tmp/` بس وبتنمسح.)
+- **مربوط فعلياً:** دخول (رقم/OTP)، العروض (الرئيسية + القائمة)، طلباتي، طلبات/مهام المهني (الرئيسية + التاب)، المحادثات (قائمة)، الإشعارات (+ تمييز الكل)، تسجيل الخروج. **مش مربوط لسا (الواجهة وهمية):** إنشاء طلب (`createJobSecure`)، إرسال عرض/مقترح (`createJobProposalSecure`)، إنشاء عرض ترويجي (`createOfferSecure`)، الدردشة (رسائل + subscriptions)، المحفظة، توثيق الهوية (رفع S3)، الملف الشخصي/إعدادات الإشعارات، الاعتراض/التقييم، تفاصيل الطلب/الحرفي/العرض (بتفتح بيانات وهمية)، تجاهل الطلب (`ignoreJobForProfessionalSecure` جاهز بالـ repo، ما انربط بحوار التجاهل).
+- ⚠️ **ما انجرّب على الخلفية الحقيقية** (ما في حساب تجريبي): أشكال ردود `*Secure` ومفاتيح JSON مأخوذة من نماذج الخلفية (introspection) وكود الموقع؛ تحقّق منها بأول تشغيل حقيقي (خاصة أسماء حقول المحادثات: `otherParticipantName`...).
 
 ## خريطة الشاشات والتنقل
 | الشاشة | الملف | بتفتح من |
@@ -101,7 +113,7 @@
 6. `flutter analyze` نظيف، وبعدين تقرير قصير بالعربي: شو انعمل، كيف بيشتغل، ملاحظات، وشو ناقص.
 
 ## معلّق / TODOs
-- **واجهة المهني (Figma ملف جديد `m6JhQu7sjSZJczMdcR37cH`، صفحة Craftsmen app):** انبنى تسجيل المهني (خطوات 1-4 + المراجعة)، الرئيسية، الطلبات (مهامي/المتاحة)، عروضي (الحالة الفاضية). **ناقص:** تدفق إرسال عرض (Sending offer flow: تفاصيل الطلب، إرسال، تأكيد)، طلباتي عند المهني (مكتملة/ملغاة/تحديث الحالة)، إنشاء عرض ترويجي (4 خطوات + اختيار تاريخ)، رسائل المهني، الملف الشخصي والإعدادات (تعديل الملف والخدمات)، توثيق الحساب (Account verification flow)، إشعارات المهني، حالات فاضية. شريط المهني السفلي من عندي (ما في تصميم له بالإطارات).
+- **واجهة المهني (Figma ملف جديد `m6JhQu7sjSZJczMdcR37cH`، صفحة Craftsmen app):** انبنى تسجيل المهني (خطوات 1-4 + المراجعة)، الرئيسية، الطلبات (مهامي/المتاحة)، عروضي (الحالة الفاضية). **(قديم — معظمه انبنى لاحقاً؛ المرجع الحالي أسفل الملف).** ناقص: تدفق إرسال عرض (Sending offer flow: تفاصيل الطلب، إرسال، تأكيد)، طلباتي عند المهني (مكتملة/ملغاة/تحديث الحالة)، إنشاء عرض ترويجي (4 خطوات + اختيار تاريخ)، رسائل المهني، الملف الشخصي والإعدادات (تعديل الملف والخدمات)، توثيق الحساب (Account verification flow)، إشعارات المهني، حالات فاضية. شريط المهني السفلي من عندي (ما في تصميم له بالإطارات).
 - **حالات التحقق:** رقم الهاتف غير صحيح (حدود حمرا + "رقم الهاتف يجب أن يكون 9 أرقام" بعد ما تطلع من الحقل)، وحي بدون نتيجة ("لا توجد مناطق تطابق البحث" + إضافة الحي).
 - **الإعدادات:** انبنت كلها (إعدادات، ملف شخصي، تخصيص إشعارات، نافذتا الخروج والحذف). زر "الوضع المظلم" بيشتغل فعلياً عبر `themeModeNotifier` (`core/theme/theme_mode_notifier.dart`)؛ بالبداية الثيم حسب الجهاز. ناقص: قائمة أسباب الحذف (مش بالتصميم)، قائمة مدن الملف الشخصي، شاشات المساعدة/الأمان/انضم كحرفي (ما في تصاميم).
 - **الرسائل:** انبنت القائمة والدردشة (رسائل نص/صورة/بطاقة طلب، شريط كتابة، أول مرة `firstTime`). قائمة الخيارات وزر "العودة للعرض" والنزول والرسالة الطويلة (حتى 5 أسطر) موجودين. ناقص: نقشة خلفية الدردشة، الداكن مش مفحوص.
@@ -118,7 +130,7 @@
 - **المهني (تحديث 2):** الإشعارات = نفس شاشة الزبون (مطابقة للتصميم). `EditCraftsmanProfileScreen` وتعديل الخدمات (`SignupStep2Screen(editing)` + `SignupScaffold(editTitle)`) طابقوا Figma 701:2396/701:2620؛ `AppBottomActionBar(sideBySide)` للزر الثانوي جنب الرئيسي. قائمة ثلاث نقاط بكرت الطلب (`showRequestMoreMenu`، بدون تصميم دقيق). قائمة خيارات دردشة المهني (549:5929) = "إبلاغ" فقط (موجودة).
 
 - **فحص RTL:** `python3 -I tool/rtl_check.py` بيطلّع كل اتجاه ثابت (left/right، Positioned، Alignment، أيقونات اتجاهية). الحالات المقصودة علّم سطرها بـ `// rtl-ok`. بيكشف أخطاء الكود بس، مش أخطاء الترتيب البصري.
-- **فحص RTL البصري (تلقائي):** `bash tool/design_check/run_rtl.sh` بيرسم الشاشات المعرّفة بـ `tool/design_check/rtl_screens_test.dart` (اسم صورة `design/` + widget) ويشغّل `rtl_diff.py` اللي بيلاقي شرايط أفقية شكلها أقرب لانعكاس التصميم (ترتيب/سهم معكوس). لتغطية شاشة جديدة: احفظ صورة Figma بـ `design/NN_name.png` وضيف سطر بالقائمة. ما بيشوف نصوص/أرقام معكوسة داخل نفس الشريط ولا الصور.
+- **فحص RTL البصري (تلقائي):** `bash tool/design_check/run_rtl.sh` (بيمسح `test/_tmp` بس) بيرسم الشاشات المعرّفة بـ `tool/design_check/rtl_screens_test.dart` (اسم صورة `design/` + widget) ويشغّل `rtl_diff.py` اللي بيلاقي شرايط أفقية شكلها أقرب لانعكاس التصميم (ترتيب/سهم معكوس). لتغطية شاشة جديدة: احفظ صورة Figma بـ `design/NN_name.png` وضيف سطر بالقائمة. ما بيشوف نصوص/أرقام معكوسة داخل نفس الشريط ولا الصور.
 - **فحص ترتيب العناصر (`rtl_order.py`، بيشتغل ضمن `run_rtl.sh`):** بيستخرج لكل صف تسلسل بقع الحبر (أيقونة/كلمة) وبيقارن عروضها مع التصميم؛ إذا نفس البقع بس بترتيب مختلف (أيقونة ونص مبدّلين، سهم بجهة غلط) بيطلّعه. بيلقط متل شارة "7 عروض واردة" (السهم لازم يسار النص). فيه ضجيج على الصور/الأفاتار والنصوص الملتفّة بشكل مختلف؛ راجع كل ملاحظة بصرياً.
 - **نتيجة تمرير فحص RTL على كل الشاشات (49 شاشة):** انصلحت: أيقونات/أسهم بجهة غلط (هيدر الطلبات عند المهني والزبون، تاب الحساب عند المهني، بطاقة التعريف بالدردشة، تقييم الحرفي)، وتخطيط الإشعارات. الباقي ضجيج (صور/أفاتار/حالات تصميم مختلفة). تفاصيل ما بقي: شارة Pro أكبر من التصميم على أفاتار 48، ترتيب صور الطلب بالبيانات الوهمية، عنوان/مفتاح الواتساب بإعدادات إشعارات المهني ("إعدادات الإشعارات" + الواتساب مطفي بتصميمه).
 - **فحص RTL الكامل:** `run_rtl.sh` بيغطي هلق 66 شاشة/حالة (شاشات، نوافذ، شيتات إرسال العرض، خطوات إنشاء العرض، الداكن). لإضافة شاشة: صورة `design/NN_name.png` + سطر بـ `_screens` + (اختياري) خطوات فتح بـ `_prep`. ملاحظة: `verificationNotifier` عام فبيتصفّر بأول كل اختبار.

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../cubits/feature_cubits.dart';
+import '../../../cubits/load_view.dart';
+import '../../../data/repositories/requests_repository.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/craftsman_data.dart';
@@ -41,20 +45,14 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
     'السباكة',
   ];
 
-  List<CraftsmanRequest> get _items {
+  List<CraftsmanRequest> _itemsFor(CraftsmanJobs jobs) {
     if (widget.empty) {
       return const [];
     }
     if (_mode == 1) {
-      return _filter == 0
-          ? sampleAvailableRequests
-          : sampleAvailableRequests.take(1).toList();
+      return _filter == 0 ? jobs.available : jobs.available.take(1).toList();
     }
-    final all = [
-      ...sampleCraftsmanTasks,
-      ...sampleDoneTasks,
-      ...sampleCancelledTasks,
-    ];
+    final all = [...jobs.tasks, ...jobs.done, ...jobs.cancelled];
     return switch (_filter) {
       0 => all,
       1 =>
@@ -95,133 +93,142 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final filters = _mode == 0 ? _taskFilters : _availableFilters;
-    final items = _items;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const CraftsmanHeader(),
         Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Container(
-                  height: 48,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: colors.cardAlt,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      for (final (i, label) in [
-                        'مهامي الحالية (${widget.empty ? 0 : 9})',
-                        'الطلبات المتاحة (${widget.empty ? 0 : 7})',
-                      ].indexed)
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() {
-                              _mode = i;
-                              _filter = 0;
-                            }),
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: i == _mode
-                                    ? colors.primary
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                label,
-                                style: AppTextStyles.body16.copyWith(
-                                  color: i == _mode
-                                      ? colors.textOnPrimary
-                                      : colors.textPrimary,
+          child: LoadView<CraftsmanJobsCubit, CraftsmanJobs>(
+            builder: (context, jobs) {
+              final items = _itemsFor(jobs);
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: Container(
+                      height: 48,
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: colors.cardAlt,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          for (final (i, label) in [
+                            'مهامي الحالية (${widget.empty ? 0 : jobs.tasks.length + jobs.done.length + jobs.cancelled.length})',
+                            'الطلبات المتاحة (${widget.empty ? 0 : jobs.available.length})',
+                          ].indexed)
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() {
+                                  _mode = i;
+                                  _filter = 0;
+                                }),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: i == _mode
+                                        ? colors.primary
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    label,
+                                    style: AppTextStyles.body16.copyWith(
+                                      color: i == _mode
+                                          ? colors.textOnPrimary
+                                          : colors.textPrimary,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 45,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: filters.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 12),
+                      itemBuilder: (_, i) => GestureDetector(
+                        onTap: () => setState(() => _filter = i),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 8,
+                          ),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: i == _filter
+                                ? colors.primary
+                                : colors.background,
+                            borderRadius: BorderRadius.circular(43),
+                            border: Border.all(
+                              color: i == _filter
+                                  ? colors.primary
+                                  : colors.border,
+                            ),
+                          ),
+                          child: Text(
+                            '${filters[i]} (${widget.empty ? 0 : _countFor(i, jobs)})',
+                            style: AppTextStyles.title18Medium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: i == _filter
+                                  ? colors.textOnPrimary
+                                  : colors.primaryContent,
+                            ),
                           ),
                         ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 45,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: filters.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 12),
-                  itemBuilder: (_, i) => GestureDetector(
-                    onTap: () => setState(() => _filter = i),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: i == _filter
-                            ? colors.primary
-                            : colors.background,
-                        borderRadius: BorderRadius.circular(43),
-                        border: Border.all(
-                          color: i == _filter ? colors.primary : colors.border,
-                        ),
-                      ),
-                      child: Text(
-                        '${filters[i]} (${widget.empty ? 0 : _countFor(i)})',
-                        style: AppTextStyles.title18Medium.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: i == _filter
-                              ? colors.textOnPrimary
-                              : colors.primaryContent,
-                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              if (items.isEmpty)
-                _Empty(
-                  mode: _mode,
-                  onSeeAvailable: () => setState(() => _mode = 1),
-                )
-              else ...[
-                const SizedBox(height: 16),
-                for (final r in items)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                    child: CraftsmanRequestCard(
-                      request: r,
-                      onDetails: () => _open(r),
-                      onPrimary: () => switch (r.state) {
-                        CraftsmanRequestState.task => showTaskStatusDialog(
-                          context,
+                  if (items.isEmpty)
+                    _Empty(
+                      mode: _mode,
+                      onSeeAvailable: () => setState(() => _mode = 1),
+                    )
+                  else ...[
+                    const SizedBox(height: 16),
+                    for (final r in items)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        child: CraftsmanRequestCard(
+                          request: r,
+                          onDetails: () => _open(r),
+                          onPrimary: () => switch (r.state) {
+                            CraftsmanRequestState.task => showTaskStatusDialog(
+                              context,
+                            ),
+                            _ => showSendOfferFlow(
+                              context,
+                              requestTitle: r.title,
+                            ),
+                          },
+                          onMore: showRequestMoreMenu,
                         ),
-                        _ => showSendOfferFlow(context, requestTitle: r.title),
-                      },
-                      onMore: showRequestMoreMenu,
-                    ),
-                  ),
-              ],
-              const SizedBox(height: 8),
-            ],
+                      ),
+                  ],
+                  const SizedBox(height: 8),
+                ],
+              );
+            },
           ),
         ),
       ],
     );
   }
 
-  int _countFor(int i) {
+  int _countFor(int i, CraftsmanJobs jobs) {
     final saved = _filter;
     _filter = i;
-    final n = _items.length;
+    final n = _itemsFor(jobs).length;
     _filter = saved;
     return n;
   }

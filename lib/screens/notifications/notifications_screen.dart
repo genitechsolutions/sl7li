@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_view.dart';
+import '../../data/repositories/notifications_repository.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -17,6 +22,9 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final unread = context.select(
+      (NotificationsCubit c) => c.state.data?.unread ?? 0,
+    );
 
     Widget section(
       String title,
@@ -78,19 +86,20 @@ class NotificationsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7),
-                      decoration: BoxDecoration(
-                        color: colors.error,
-                        borderRadius: BorderRadius.circular(60),
-                      ),
-                      child: Text(
-                        '4',
-                        style: AppTextStyles.body16.copyWith(
-                          color: colors.textOnPrimary,
+                    if (unread > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7),
+                        decoration: BoxDecoration(
+                          color: colors.error,
+                          borderRadius: BorderRadius.circular(60),
+                        ),
+                        child: Text(
+                          '$unread',
+                          style: AppTextStyles.body16.copyWith(
+                            color: colors.textOnPrimary,
+                          ),
                         ),
                       ),
-                    ),
                     const Spacer(),
                     // TODO: إعدادات الإشعارات / تحديث
                     AppIconButton(
@@ -107,27 +116,45 @@ class NotificationsScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  section(
-                    'إشعارات مهمة',
-                    sampleImportantNotifications,
-                    top: 20,
-                    trailing: Text(
-                      'تمييز الكل كمقروءة',
-                      style: AppTextStyles.body12.copyWith(
-                        fontSize: 13,
-                        color: colors.link,
-                        decoration: TextDecoration.underline,
-                        decorationColor: colors.link,
+              child: LoadView<NotificationsCubit, NotificationsData>(
+                emptyText: 'لا توجد إشعارات',
+                isEmpty: (d) =>
+                    d.important.isEmpty &&
+                    d.today.isEmpty &&
+                    d.lastWeek.isEmpty,
+                builder: (context, data) => ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    if (data.important.isNotEmpty)
+                      section(
+                        'إشعارات مهمة',
+                        data.important,
+                        top: 20,
+                        trailing: GestureDetector(
+                          onTap: () =>
+                              context.read<NotificationsCubit>().markAllRead(),
+                          child: Text(
+                            'تمييز الكل كمقروءة',
+                            style: AppTextStyles.body12.copyWith(
+                              fontSize: 13,
+                              color: colors.link,
+                              decoration: TextDecoration.underline,
+                              decorationColor: colors.link,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  section('اليوم', sampleTodayNotifications),
-                  section('الأسبوع الماضي', sampleLastWeekNotifications),
-                  const SizedBox(height: 24),
-                ],
+                    if (data.today.isNotEmpty)
+                      section(
+                        'اليوم',
+                        data.today,
+                        top: data.important.isEmpty ? 20 : 28,
+                      ),
+                    if (data.lastWeek.isNotEmpty)
+                      section('الأسبوع الماضي', data.lastWeek),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ],

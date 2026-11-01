@@ -1,3 +1,5 @@
+import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -96,14 +98,18 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 212,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: _padding,
-                    itemCount: specialOffers.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 13),
-                    itemBuilder: (_, index) => OfferCard(
-                      offer: specialOffers[index],
-                      onTap: () => _openOfferDetails(context),
+                  child: LoadView<FeaturedOffersCubit, List<Offer>>(
+                    emptyText: 'لا توجد عروض حالياً',
+                    isEmpty: (offers) => offers.isEmpty,
+                    builder: (context, offers) => ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: _padding,
+                      itemCount: offers.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 13),
+                      itemBuilder: (_, index) => OfferCard(
+                        offer: offers[index],
+                        onTap: () => _openOfferDetails(context),
+                      ),
                     ),
                   ),
                 ),

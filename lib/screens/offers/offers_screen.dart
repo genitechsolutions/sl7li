@@ -1,3 +1,5 @@
+import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -55,16 +57,20 @@ class OffersScreen extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsetsDirectional.fromSTEB(20, 13, 20, 24),
-                  itemCount: allOffers.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (_, index) => OfferListCard(
-                    offer: allOffers[index],
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const OfferDetailsScreen(details: sampleOfferDetails),
+                child: LoadView<OffersCubit, List<Offer>>(
+                  emptyText: 'لا توجد عروض حالياً',
+                  isEmpty: (offers) => offers.isEmpty,
+                  builder: (context, offers) => ListView.separated(
+                    padding: const EdgeInsetsDirectional.fromSTEB(20, 13, 20, 24),
+                    itemCount: offers.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (_, index) => OfferListCard(
+                      offer: offers[index],
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const OfferDetailsScreen(details: sampleOfferDetails),
+                        ),
                       ),
                     ),
                   ),

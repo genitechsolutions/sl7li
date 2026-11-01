@@ -1,22 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'app_dependencies.dart';
+import 'app_providers.dart';
+import 'core/backend/amplify_bootstrap.dart';
+import 'core/backend/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_notifier.dart';
 import 'screens/onboarding/splash_screen.dart';
 
-void main() {
-  runApp(const App());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  var dependencies = AppDependencies.fake();
+  if (AppConfig.mode == BackendMode.amplify) {
+    try {
+      await configureAmplify();
+      dependencies = AppDependencies.amplify();
+    } on Object catch (e, st) {
+      // فشل التهيئة ما لازم يطيّح التطبيق: منكمل ببيانات وهمية ومنسجّل السبب.
+      debugPrint('Amplify configuration failed, using fake data: $e\n$st');
+    }
+  }
+  runApp(App(dependencies: dependencies));
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  /// بدون [dependencies] بنستعمل البيانات الوهمية (اختبارات/تصميم).
+  App({super.key, AppDependencies? dependencies})
+    : dependencies = dependencies ?? AppDependencies.fake();
+
+  final AppDependencies dependencies;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeModeNotifier,
-      builder: (context, themeMode, _) => _buildApp(themeMode),
+    return AppProviders(
+      dependencies: dependencies,
+      child: ValueListenableBuilder<ThemeMode>(
+        valueListenable: themeModeNotifier,
+        builder: (context, themeMode, _) => _buildApp(themeMode),
+      ),
     );
   }
 

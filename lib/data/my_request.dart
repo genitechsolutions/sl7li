@@ -19,8 +19,11 @@ class MyRequest {
     this.craftsmanName,
     this.craftsmanRating,
     this.craftsmanReviews,
+    this.id,
   });
 
+  /// معرّف الطلب بالخلفية (job_id)؛ null بالبيانات الوهمية.
+  final String? id;
   final String date;
   final RequestPriority priority;
   final String title;

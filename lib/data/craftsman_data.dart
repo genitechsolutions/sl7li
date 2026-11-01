@@ -12,8 +12,11 @@ class CraftsmanRequest {
     this.state = CraftsmanRequestState.open,
     this.note,
     this.rated = false,
+    this.id,
   });
 
+  /// معرّف الطلب بالخلفية (job_id).
+  final String? id;
   final String date;
 
   /// "عاجل" / "طارئ" / "عادي".

@@ -10,6 +10,8 @@ import 'package:khaled_flutter/screens/craftsman/offers/create_offer_screen.dart
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:khaled_flutter/app_dependencies.dart';
+import 'package:khaled_flutter/app_providers.dart';
 import 'package:khaled_flutter/core/theme/app_colors.dart';
 import 'package:khaled_flutter/core/theme/app_theme.dart';
 import 'package:khaled_flutter/data/craftsman_data.dart';
@@ -385,12 +387,15 @@ void main() {
       tester.view.padding = const FakeViewPadding(top: 64, bottom: 32);
       await tester.runAsync(
         () => tester.pumpWidget(
-          MaterialApp(
-            theme: name.contains('_dark_') ? AppTheme.dark : AppTheme.light,
-            locale: const Locale('ar'),
-            supportedLocales: const [Locale('ar')],
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            home: KeyedSubtree(key: UniqueKey(), child: build()),
+          AppProviders(
+            dependencies: AppDependencies.fake(),
+            child: MaterialApp(
+              theme: name.contains('_dark_') ? AppTheme.dark : AppTheme.light,
+              locale: const Locale('ar'),
+              supportedLocales: const [Locale('ar')],
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              home: KeyedSubtree(key: UniqueKey(), child: build()),
+            ),
           ),
         ),
       );

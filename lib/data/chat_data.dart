@@ -11,8 +11,13 @@ class Conversation {
     this.verified = false,
     this.unread = 0,
     this.sentStatus,
+    this.id,
+    this.jobId,
   });
 
+  /// معرّف المحادثة ومعرّف الطلب المرتبط بالخلفية.
+  final String? id;
+  final String? jobId;
   final String name;
   final String lastMessage;
   final String time;

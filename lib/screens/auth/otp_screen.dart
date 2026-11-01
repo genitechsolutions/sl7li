@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../cubits/auth/auth_cubit.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
@@ -63,12 +66,28 @@ class _OtpScreenState extends State<OtpScreen> {
   String get _countdown =>
       '${_secondsLeft ~/ 60}:${(_secondsLeft % 60).toString().padLeft(2, '0')}';
 
-  // TODO: التحقق الحقيقي من الرمز (API)؛ هلق أي 6 أرقام بتكمّل لاختيار نوع الحساب.
   void _confirm() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (_) => false,
-    );
+    FocusScope.of(context).unfocus();
+    context.read<AuthCubit>().verifyCode(_code.text);
+  }
+
+  void _resend() {
+    context.read<AuthCubit>().resendCode();
+    _startTimer();
+  }
+
+  void _onAuthChanged(BuildContext context, AuthState state) {
+    if (state.status == AuthStatus.authenticated) {
+      // الدخول نجح ← اختيار نوع الحساب (بتمسح اللي قبل).
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (_) => false,
+      );
+    } else if (state.status == AuthStatus.failure && state.error != null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(state.error!)));
+    }
   }
 
   @override
@@ -80,105 +99,117 @@ class _OtpScreenState extends State<OtpScreen> {
     );
     final canResend = _secondsLeft == 0;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.overlayStyle(context),
-      child: Scaffold(
-        backgroundColor: context.colors.background,
-        bottomNavigationBar: AuthBottomBar(
-          label: 'تأكيد الرمز',
-          onPressed: _code.text.length == _codeLength ? _confirm : null,
-          note: AuthNote(
-            spans: [
-              const TextSpan(text: 'في حال عدم وصول الرمز يمكنك '),
-              TextSpan(
-                text: 'التواصل مع خدمة العملاء',
-                style: AuthNote.linkStyle(context),
-                recognizer: _supportTap,
+    final verifying = context.select(
+      (AuthCubit c) => c.state.status == AuthStatus.verifying,
+    );
+    return BlocListener<AuthCubit, AuthState>(
+      listenWhen: (a, b) => a.status != b.status,
+      listener: _onAuthChanged,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: AppTheme.overlayStyle(context),
+        child: Scaffold(
+          backgroundColor: context.colors.background,
+          bottomNavigationBar: AuthBottomBar(
+            label: 'تأكيد الرمز',
+            isLoading: verifying,
+            onPressed: _code.text.length == _codeLength && !verifying
+                ? _confirm
+                : null,
+            note: AuthNote(
+              spans: [
+                const TextSpan(text: 'في حال عدم وصول الرمز يمكنك '),
+                TextSpan(
+                  text: 'التواصل مع خدمة العملاء',
+                  style: AuthNote.linkStyle(context),
+                  recognizer: _supportTap,
+                ),
+              ],
+            ),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              const AuthHeroImage(),
+              const SizedBox(height: 16),
+              const Text(
+                'تأكيد الرقم',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.title30Bold,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'تم إرسال رمز التحقق على واتساب إلى الرقم',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.title20Medium.copyWith(
+                  color: context.colors.textSecondary,
+                ),
+              ),
+              Text(
+                widget.phone,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.ltr,
+                style: AppTextStyles.title20.copyWith(
+                  color: context.colors.link,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 36, 20, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Padding(
+                      padding: _labelPadding,
+                      child: FormLabel('رمز التأكيد', isRequired: true),
+                    ),
+                    const SizedBox(height: 8),
+                    OtpInput(controller: _code, length: _codeLength),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: _labelPadding,
+                      child: Text(
+                        'أدخل الرمز المكون من 6 أرقام المرسل إلى رقمك الوتس اب',
+                        style: AppTextStyles.body14.copyWith(
+                          color: context.colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Padding(
+                      padding: _labelPadding,
+                      child: Row(
+                        spacing: 21,
+                        children: [
+                          Flexible(
+                            child: GestureDetector(
+                              onTap: canResend ? _resend : null,
+                              child: Text(
+                                canResend
+                                    ? 'إعادة إرسال الرمز'
+                                    : 'إعادة إرسال الرمز خلال $_countdown',
+                                style: link,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 24,
+                            color: context.colors.border,
+                          ),
+                          Flexible(
+                            child: GestureDetector(
+                              // الرقم بينكتب بصفحة تسجيل الدخول اللي قبل.
+                              onTap: () => Navigator.pop(context),
+                              child: Text('تغيير رقم الهاتف', style: link),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.only(bottom: 24),
-          children: [
-            const AuthHeroImage(),
-            const SizedBox(height: 16),
-            const Text(
-              'تأكيد الرقم',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.title30Bold,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'تم إرسال رمز التحقق على واتساب إلى الرقم',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.title20Medium.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-            Text(
-              widget.phone,
-              textAlign: TextAlign.center,
-              textDirection: TextDirection.ltr,
-              style: AppTextStyles.title20.copyWith(color: context.colors.link),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 36, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Padding(
-                    padding: _labelPadding,
-                    child: FormLabel('رمز التأكيد', isRequired: true),
-                  ),
-                  const SizedBox(height: 8),
-                  OtpInput(controller: _code, length: _codeLength),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: _labelPadding,
-                    child: Text(
-                      'أدخل الرمز المكون من 6 أرقام المرسل إلى رقمك الوتس اب',
-                      style: AppTextStyles.body14.copyWith(
-                        color: context.colors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Padding(
-                    padding: _labelPadding,
-                    child: Row(
-                      spacing: 21,
-                      children: [
-                        Flexible(
-                          child: GestureDetector(
-                            onTap: canResend ? _startTimer : null,
-                            child: Text(
-                              canResend
-                                  ? 'إعادة إرسال الرمز'
-                                  : 'إعادة إرسال الرمز خلال $_countdown',
-                              style: link,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 24,
-                          color: context.colors.border,
-                        ),
-                        Flexible(
-                          child: GestureDetector(
-                            // الرقم بينكتب بصفحة تسجيل الدخول اللي قبل.
-                            onTap: () => Navigator.pop(context),
-                            child: Text('تغيير رقم الهاتف', style: link),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

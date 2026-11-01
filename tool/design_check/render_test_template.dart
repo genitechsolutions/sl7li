@@ -48,7 +48,7 @@ void main() {
     tester.view.devicePixelRatio = 2;
     tester.view.padding = const FakeViewPadding(top: 64, bottom: 32);
 
-    await tester.runAsync(() => tester.pumpWidget(const App()));
+    await tester.runAsync(() => tester.pumpWidget(App()));
     await _precacheImages(tester);
 
     // ── التنقل للشاشة ── مثال: كرت "الدهانات" بيفتح تفاصيل الخدمة.

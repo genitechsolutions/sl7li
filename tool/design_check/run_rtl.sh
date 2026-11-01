@@ -5,7 +5,7 @@ set -u
 cd "$(dirname "$0")/../.."
 mkdir -p test/_tmp
 cp tool/design_check/rtl_screens_test.dart test/_tmp/rtl_screens_test.dart
-flutter test test/_tmp/rtl_screens_test.dart --update-goldens >/tmp/rtl_run.log 2>&1 || { tail -30 /tmp/rtl_run.log; rm -rf test; exit 2; }
+flutter test test/_tmp/rtl_screens_test.dart --update-goldens >/tmp/rtl_run.log 2>&1 || { tail -30 /tmp/rtl_run.log; rm -rf test/_tmp; exit 2; }
 fail=0
 for f in test/_tmp/rtl/*.png; do
   n=$(basename "$f" .png)
@@ -13,5 +13,5 @@ for f in test/_tmp/rtl/*.png; do
   python3 -I tool/design_check/rtl_diff.py "$f" "design/$n.png" || fail=1
   python3 -I tool/design_check/rtl_order.py "$f" "design/$n.png" || fail=1
 done
-rm -rf test
+rm -rf test/_tmp
 exit $fail

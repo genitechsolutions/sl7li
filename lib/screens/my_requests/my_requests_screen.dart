@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_view.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../notifications/notifications_screen.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -9,7 +12,6 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/svg_theme_colors.dart';
 import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../core/widgets/app_icon_button.dart';
-import '../../data/dummy_data.dart';
 import '../../data/my_request.dart';
 import '../new_request/new_request_screen.dart';
 import '../messages/messages_screen.dart';
@@ -27,24 +29,19 @@ class MyRequestsScreen extends StatefulWidget {
 }
 
 class _MyRequestsScreenState extends State<MyRequestsScreen> {
-  // (التسمية، العدد) — الفلتر الافتراضي "النشطة".
-  static const _filters = [
-    ('الكل', 7),
-    ('النشطة', 3),
-    ('مكتملة', 2),
-    ('ملغاة', 2),
-  ];
+  // تسميات الفلتر؛ الأعداد بتنحسب من الطلبات المحمّلة. الافتراضي "النشطة".
+  static const _labels = ['الكل', 'النشطة', 'مكتملة', 'ملغاة'];
 
-  List<MyRequest> get _visible => switch (_filter) {
-    0 => [
-      ...sampleActiveRequests,
-      ...sampleDoneRequests,
-      ...sampleCanceledRequests,
-    ],
-    1 => sampleActiveRequests,
-    2 => sampleDoneRequests,
-    _ => sampleCanceledRequests,
+  static const _statusOfFilter = {
+    1: RequestStatus.active,
+    2: RequestStatus.done,
+    3: RequestStatus.canceled,
   };
+
+  List<MyRequest> _visibleOf(List<MyRequest> all, int filter) {
+    final status = _statusOfFilter[filter];
+    return status == null ? all : all.where((r) => r.status == status).toList();
+  }
 
   int _filter = 1;
 
@@ -107,68 +104,75 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'طلباتي',
-                          style: AppTextStyles.title24Medium.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '7 طلبات',
-                          style: AppTextStyles.body16.copyWith(
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 45,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: _filters.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 12),
-                      itemBuilder: (_, i) => _FilterChip(
-                        label: '${_filters[i].$1} (${_filters[i].$2})',
-                        selected: i == _filter,
-                        onTap: () => setState(() => _filter = i),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  for (final request in _visible)
+              child: LoadView<MyRequestsCubit, List<MyRequest>>(
+                builder: (context, all) => ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                      // TODO: navigate to request details / update status
-                      // TODO: navigate to rating / reorder / update status
-                      child: RequestCard(
-                        request: request,
-                        onDetails: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                RequestDetailsScreen(request: request),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'طلباتي',
+                            style: AppTextStyles.title24Medium.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        onUpdate: () => runUpdateStatusFlow(context),
-                        onMore: () => runUpdateStatusFlow(context),
-                        onRate: () => showRatingDialog(context),
-                        onReorder: () {},
+                          const Spacer(),
+                          Text(
+                            '${all.length} طلبات',
+                            style: AppTextStyles.body16.copyWith(
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  const SizedBox(height: 8),
-                ],
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 45,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: _labels.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
+                        itemBuilder: (_, i) => _FilterChip(
+                          label: '${_labels[i]} (${_visibleOf(all, i).length})',
+                          selected: i == _filter,
+                          onTap: () => setState(() => _filter = i),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    if (_visibleOf(all, _filter).isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 48),
+                        child: Center(child: Text('لا توجد طلبات')),
+                      ),
+                    for (final request in _visibleOf(all, _filter))
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        // TODO: navigate to request details / update status
+                        // TODO: navigate to rating / reorder / update status
+                        child: RequestCard(
+                          request: request,
+                          onDetails: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  RequestDetailsScreen(request: request),
+                            ),
+                          ),
+                          onUpdate: () => runUpdateStatusFlow(context),
+                          onMore: () => runUpdateStatusFlow(context),
+                          onRate: () => showRatingDialog(context),
+                          onReorder: () {},
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
           ],

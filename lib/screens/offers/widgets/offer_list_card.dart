@@ -1,3 +1,4 @@
+import '../../../core/widgets/app_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -29,7 +30,7 @@ class OfferListCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Image.asset(offer.image, width: double.infinity, height: 182, fit: BoxFit.cover),
+                AppImage(offer.image, width: double.infinity, height: 182),
                 PositionedDirectional(
                   top: 12,
                   end: 12,

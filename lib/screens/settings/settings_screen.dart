@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../app_providers.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -581,6 +582,8 @@ Future<void> confirmLogout(BuildContext context) async {
     (context) => const _LogoutDialog(),
   );
   if (ok == true && context.mounted) {
+    await signOutAndReset(context);
+    if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
       (_) => false,

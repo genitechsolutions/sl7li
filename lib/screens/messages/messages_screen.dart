@@ -10,7 +10,8 @@ import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../core/widgets/app_icon_button.dart';
 import '../../core/widgets/craftsman_avatar.dart';
 import '../../data/chat_data.dart';
-import '../../data/dummy_data.dart';
+import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_view.dart';
 import '../new_request/new_request_screen.dart';
 import '../settings/settings_screen.dart';
 import 'chat_screen.dart';
@@ -22,9 +23,6 @@ class MessagesScreen extends StatelessWidget {
 
   /// رسائل المهني: بدون الشريط السفلي، ومحادثات مع الزبائن.
   final bool craftsmanMode;
-
-  List<Conversation> get _list =>
-      craftsmanMode ? sampleCustomerConversations : sampleConversations;
 
   @override
   Widget build(BuildContext context) {
@@ -118,17 +116,22 @@ class MessagesScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: _list.length,
-                  itemBuilder: (context, i) => _ConversationRow(
-                    conversation: _list[i],
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChatScreen(
-                          conversation: _list[i],
-                          craftsmanMode: craftsmanMode,
+                child: LoadView<ConversationsCubit, List<Conversation>>(
+                  onInit: (c) => c.loadFor(professionalMode: craftsmanMode),
+                  emptyText: 'لا توجد محادثات بعد',
+                  isEmpty: (list) => list.isEmpty,
+                  builder: (context, list) => ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: list.length,
+                    itemBuilder: (context, i) => _ConversationRow(
+                      conversation: list[i],
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            conversation: list[i],
+                            craftsmanMode: craftsmanMode,
+                          ),
                         ),
                       ),
                     ),
