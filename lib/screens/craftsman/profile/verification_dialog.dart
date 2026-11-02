@@ -8,7 +8,6 @@ import '../../../core/widgets/dashed_border_box.dart';
 import '../../../data/craftsman_verification.dart';
 
 /// "توثيق الهوية مطلوب": رفع صورة الهوية (3 حالات: فاضي، جاري الرفع، تم الرفع).
-/// بترجع true لما ينرسل الطلب (الحالة بتصير "جاري التحقق").
 Future<bool?> showVerificationDialog(BuildContext context) =>
     showAppModal<bool>(context, (_) => const _VerificationDialog());
 

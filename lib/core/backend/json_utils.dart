@@ -32,7 +32,6 @@ List<Map<String, dynamic>> asMapList(Object? value) {
     }
   }
   if (v is Map) {
-    // أحياناً بترجع { items: [...] } أو { notifications: [...] }.
     for (final key in const ['items', 'notifications', 'offers', 'jobs']) {
       if (v[key] is List) return asMapList(v[key]);
     }

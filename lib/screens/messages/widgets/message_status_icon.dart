@@ -5,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/chat_data.dart';
 
 /// علامات حالة الرسالة (ساعة، صح، صحين رمادي، صحين أزرق).
-/// [onNavy] = فوق فقاعة كحلية (الأيقونات الجاهزة بألوانها).
 class MessageStatusIcon extends StatelessWidget {
   const MessageStatusIcon({
     super.key,

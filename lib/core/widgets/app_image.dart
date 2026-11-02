@@ -19,7 +19,6 @@ class AppImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
-      // أثناء التحميل/الفشل: مربع بلون الوسم بدل ما ينكسر التصميم.
       errorBuilder: (context, _, _) => SizedBox(width: width, height: height),
       loadingBuilder: (context, child, progress) =>
           progress == null ? child : SizedBox(width: width, height: height),

@@ -64,7 +64,6 @@ class AuthCubit extends Cubit<AuthState> {
       final session = await _repo.verifyCode(code);
       emit(AuthState(status: AuthStatus.authenticated, phone: state.phone, session: session));
     } on BackendException catch (e) {
-      // بنرجع لـ codeSent مع رسالة الخطأ ليقدر المستخدم يعيد المحاولة.
       emit(AuthState(status: AuthStatus.failure, phone: state.phone, error: e.message));
     }
   }

@@ -176,7 +176,6 @@ class _CancelOfferState extends State<_CancelOffer> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  // نص تجريبي كما بالتصميم.
                   'هنا يكتب نص التنبيه في حال أردنا تنبيه المهني لمخاطر إلغاء العرض الخاص به',
                   style: AppTextStyles.body12.copyWith(
                     fontSize: 13,

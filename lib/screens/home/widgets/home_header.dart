@@ -17,7 +17,6 @@ class HomeHeader extends StatelessWidget {
         SvgPicture.asset(
           'assets/icons/logo.svg',
           height: 52,
-          // الطاقية كحلي، وكلمة "صلّحلي" (currentColor) بلون النص.
           colorMapper: SvgThemeColors.of(context),
           theme: SvgTheme(currentColor: context.colors.primaryContent),
         ),

@@ -4,7 +4,6 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 
 /// حقل إدخال بخلفية رمادية. [minLines] > 1 يعطي حقل نص متعدد الأسطر.
-/// [showFocusBorder] بيعطي حدود كحلي لما يكون الحقل مفعّل.
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,

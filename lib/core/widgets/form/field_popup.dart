@@ -4,7 +4,6 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 
 /// قائمة لاصقة بحقل (تحته، أو فوقه لما [above]) بعرض الحقل نفسه، فوق باقي الصفحة.
-/// الكبس برّا الحقل والقائمة بينادي [onDismiss].
 class FieldPopup extends StatefulWidget {
   const FieldPopup({
     super.key,
@@ -50,7 +49,6 @@ class _FieldPopupState extends State<FieldPopup> {
         controller: _portal,
         overlayChildBuilder: (_) {
           if (!widget.isOpen) return const SizedBox.shrink();
-          // القائمة بتنفتح بعد ما الحقل انرسم، فحجمه معروف.
           final width = (context.findRenderObject() as RenderBox?)?.size.width ?? 0;
           return Align(
             alignment: Alignment.topLeft,
@@ -93,7 +91,6 @@ class FieldPopupPanel extends StatelessWidget {
             BoxShadow(color: context.colors.primary.withValues(alpha: 0.12), blurRadius: 24),
           ],
         ),
-        // الخط الكحلي جوا الصندوق مشان ياخد دوران الزوايا.
         child: accentBottom
             ? Column(
                 mainAxisSize: MainAxisSize.min,

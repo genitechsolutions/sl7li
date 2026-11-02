@@ -56,7 +56,6 @@ class RequestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ارتفاع ثابت (زر القائمة 36 + 8) مشان العنوان ما يتداخل لما ما في زر.
           SizedBox(
             height: 44,
             child: Row(
@@ -126,20 +125,17 @@ class RequestCard extends StatelessWidget {
               ],
             ),
           ),
-          // التاريخ وزر القائمة بنفس السطر؛ العنوان تحت التاريخ بدون ما يزيد الارتفاع.
           Transform.translate(
             offset: const Offset(0, -12),
             child: Text(request.title, style: AppTextStyles.title18Medium),
           ),
           const SizedBox(height: 4),
           Padding(
-            // التصميم بيلفّ الوصف بصندوق أضيق من جهة اليسار (~300px).
             padding: const EdgeInsetsDirectional.only(end: 40),
             child: Text.rich(
               TextSpan(
                 text: request.description,
                 children: [
-                  // الطلبات المفتوحة (فيها عروض) بالتصميم آخر وصفها "قراءة المزيد".
                   if (request.offersCount != null)
                     TextSpan(
                       text: ' قراءة المزيد',
@@ -170,7 +166,6 @@ class RequestCard extends StatelessWidget {
                 children: [
                   Text(
                     '${request.offersCount} عروض واردة',
-                    // نص فوق الأصفر: غامق دايماً بالفاتح والداكن.
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,
                       color: colors.textOnAccent,
@@ -378,7 +373,6 @@ class _CraftsmanRow extends StatelessWidget {
                     colorFilter: ColorFilter.mode(colors.star, BlendMode.srcIn),
                   ),
                   const SizedBox(width: 4),
-                  // الأرقام بـ LTR متل التصميم "(128) 4.9".
                   Text(
                     '(${request.craftsmanReviews}) ${request.craftsmanRating}',
                     textDirection: TextDirection.ltr,

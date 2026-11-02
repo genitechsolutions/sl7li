@@ -5,7 +5,6 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 
 /// حقل رقم الواتساب: الرقم، ورمز الدولة (+963) مع العلم.
-/// [inline]: شكل التصميم (تسجيل الدخول وطلب الخدمة) — الرقم لاصق برمز الدولة (عاليسار).
 class PhoneField extends StatefulWidget {
   const PhoneField({
     super.key,
@@ -104,8 +103,6 @@ class _PhoneFieldState extends State<PhoneField> {
                       LengthLimitingTextInputFormatter(PhoneField.length),
                     ]
                   : null,
-              // الرقم بينكتب من اليسار لليمين، بس بيضل على يمين الحقل متل التصميم
-              // (أو جنب رمز الدولة بشكل [inline]).
               textDirection: TextDirection.ltr,
               textAlign: inline ? TextAlign.left : TextAlign.right,
               cursorColor: context.colors.primaryContent,

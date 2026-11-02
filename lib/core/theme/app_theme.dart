@@ -21,7 +21,6 @@ abstract final class AppTheme {
         onSurface: c.textPrimary,
         error: c.error,
       ),
-      // النصوص بدون لون بـ AppTextStyles بتاخد textPrimary من هون.
       textTheme: base.textTheme.apply(bodyColor: c.textPrimary, displayColor: c.textPrimary),
       textSelectionTheme: TextSelectionThemeData(cursorColor: c.primaryContent),
       extensions: [c],

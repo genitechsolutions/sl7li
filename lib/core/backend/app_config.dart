@@ -2,8 +2,6 @@
 enum BackendMode { fake, amplify }
 
 /// إعدادات البيئة. التشغيل مع الخلفية الحقيقية:
-/// `flutter run --dart-define=BACKEND=amplify --dart-define=APP_ENV=devqa --dart-define=APPSYNC_API_KEY=...`
-/// مفتاح AppSync (API key) ما بينحط بالكود — بيجي من `--dart-define` بس.
 class AppConfig {
   const AppConfig._();
 

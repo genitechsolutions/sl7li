@@ -8,7 +8,6 @@ import '../theme/svg_theme_colors.dart';
 import '../theme/app_text_styles.dart';
 
 /// الشريط السفلي للتطبيق.
-/// [currentIndex]: 0 الرئيسية، 1 طلباتي، 2 الرسائل، 3 الإعدادات.
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
     super.key,
@@ -35,15 +34,12 @@ class AppBottomNavBar extends StatelessWidget {
         ],
       ),
       child: Padding(
-        // Figma: 8 فوق، و16 تحت التحديد (مؤشر الجهاز بيرسم جواه)، أو منطقة الإيماءات إذا أكبر.
         padding: EdgeInsets.fromLTRB(
           20,
           8,
           20,
           math.max(16, MediaQuery.paddingOf(context).bottom),
         ),
-        // التصميم يضع "الرئيسية" على اليسار، فنثبّت الترتيب LTR.
-        // بالشاشات الضيقة (أقل من 372) بنصغّر الصف كله بدل الـ overflow.
         child: LayoutBuilder(
           builder: (context, constraints) {
             final row = _row(context);

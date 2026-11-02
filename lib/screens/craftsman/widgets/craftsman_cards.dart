@@ -34,7 +34,6 @@ class CraftsmanProgressCard extends StatelessWidget {
           Row(
             children: [
               Padding(
-                // الحلقة بالتصميم أخفض ~5px.
                 padding: const EdgeInsets.only(top: 5),
                 child: ArcProgress(
                   value: percent / 100,
@@ -69,7 +68,6 @@ class CraftsmanProgressCard extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Padding(
-                  // النص بالتصميم أخفض ~6px من منتصف الحلقة.
                   padding: const EdgeInsets.only(top: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,7 +244,6 @@ class CraftsmanTxRow extends StatelessWidget {
                   ),
                 ),
               ),
-              // الأيقونة صاعدة بالأصل؛ السحب بيقلبها لنازلة (متل التصميم).
               Transform.flip(
                 flipY: !income,
                 child: SvgPicture.asset(

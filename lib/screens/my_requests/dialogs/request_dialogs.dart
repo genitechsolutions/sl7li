@@ -225,7 +225,6 @@ class _AgreementTile extends StatelessWidget {
                 ],
               ),
             ),
-            // دائرة الراديو (حدود رمادية، والمختار نقطة زرقاء).
             Container(
               width: 24,
               height: 24,
@@ -518,7 +517,6 @@ class _RatingDialogState extends State<_RatingDialog> {
             ],
           ),
           const SizedBox(height: 24),
-          // النجوم بتتعبّى من اليمين (الأولى يمين) متل التصميم.
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 12,
@@ -604,7 +602,6 @@ class _RatingDialogState extends State<_RatingDialog> {
   }
 }
 
-/// مسار "تحديث حالة الطلب": النافذة الرئيسية ثم الاتفاق/الإلغاء حسب الاختيار.
 /// TODO: "تم إنجاز المهمة" بدها تحديث الحالة فعلياً.
 Future<void> runUpdateStatusFlow(BuildContext context) async {
   final result = await showUpdateStatusDialog(context);

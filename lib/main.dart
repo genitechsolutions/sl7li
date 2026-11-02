@@ -17,7 +17,6 @@ Future<void> main() async {
       await configureAmplify();
       dependencies = AppDependencies.amplify();
     } on Object catch (e, st) {
-      // فشل التهيئة ما لازم يطيّح التطبيق: منكمل ببيانات وهمية ومنسجّل السبب.
       debugPrint('Amplify configuration failed, using fake data: $e\n$st');
     }
   }
@@ -46,7 +45,6 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      // الداكن بيمشي حسب إعداد الجهاز.
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       locale: const Locale('ar'),

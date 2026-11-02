@@ -15,7 +15,6 @@ import 'widgets/request_step_header.dart';
 import 'widgets/success_illustration.dart';
 
 /// "تم إرسال طلبك بنجاح" — بعد إرسال الطلب.
-/// بتنفتح فوق الرئيسية مباشرة، فـ pop بيرجع عالرئيسية.
 class RequestSentScreen extends StatefulWidget {
   const RequestSentScreen({super.key});
 

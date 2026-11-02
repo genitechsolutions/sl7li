@@ -42,7 +42,6 @@ class RemoteConversationsRepository implements ConversationsRepository {
     final list = asMapList(res['messages'])
         .map((j) => chatMessageFromJson(j, me))
         .toList();
-    // الأقدم أولاً (ترتيب الدردشة).
     list.sort((a, b) => a.sortKey.compareTo(b.sortKey));
     return list.map((m) => m.message).toList();
   }
@@ -102,7 +101,6 @@ Conversation conversationFromJson(Map<String, dynamic> j) {
       time: arabicTime(created),
       sent: myId != null && str(j, 'senderId') == myId,
       status: status,
-      // الصور الحقيقية لسا مش مربوطة؛ الرسالة النصية بتنعرض عادي.
       content: hasImages && (str(j, 'content') ?? '').isEmpty
           ? ChatContent.image
           : ChatContent.text,

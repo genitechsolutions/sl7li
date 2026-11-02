@@ -4,8 +4,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// أسفل صفحات الدخول: زر رئيسي بعرض الشاشة، واختيارياً زر أصفر تحته ([secondaryLabel])،
-/// وتحتهم سطر صغير ([note]).
-/// [onPressed] = null يعني الزر معطّل، و[isLoading] بيعرض مؤشر تحميل جنب النص.
 class AuthBottomBar extends StatelessWidget {
   const AuthBottomBar({
     super.key,
@@ -26,7 +24,6 @@ class AuthBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // الكيبورد مفتوح: بيضل الزر الرئيسي بس (متل تصميم Focus).
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return SafeArea(
       top: false,

@@ -25,7 +25,6 @@ class AmplifyGraphQlGateway implements GraphQlGateway {
     bool mutation = false,
     bool guest = false,
   }) async {
-    // الاستعلامات الخاصة بالمستخدم بدها جلسة: بدونها رسالة عربية واضحة (مش خطأ Amplify الإنكليزي).
     if (!guest) {
       try {
         final session = await Amplify.Auth.fetchAuthSession();
@@ -58,7 +57,6 @@ class AmplifyGraphQlGateway implements GraphQlGateway {
     } on AuthException catch (e) {
       throw BackendException(e.message, code: e.runtimeType.toString());
     } on ApiException catch (e) {
-      // رسائل Amplify إنكليزية: منعرض رسالة عربية عامة ومنحتفظ بالتفاصيل بالـ code.
       throw BackendException('تعذّر الاتصال بالخادم، حاول مرة ثانية', code: e.message);
     }
   }

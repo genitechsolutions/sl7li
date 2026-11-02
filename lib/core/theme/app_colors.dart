@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 /// ألوان التطبيق — مأخوذة من التصميم (فاتح + داكن).
-/// بالشاشات: `context.colors.primary` (مش ثابتة، فما بتنحط جوا `const`).
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({

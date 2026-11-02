@@ -5,8 +5,6 @@ import '../../theme/app_text_styles.dart';
 import 'field_icons.dart';
 
 /// حقل اختيار (بيفتح قائمة) بخلفية رمادية وأيقونة بالطرف (سهم افتراضياً).
-/// [onTap] = null يعني الحقل معطّل. [hasError] بيعطي حدود حمرا،
-/// و[isActive] حدود كحلي (لما تكون القائمة مفتوحة).
 class AppSelectField extends StatelessWidget {
   const AppSelectField({
     super.key,

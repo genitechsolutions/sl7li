@@ -5,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// خانات رمز التأكيد. حقل نص واحد مخفي بياخد الأرقام، والخانات بس بتعرضها.
-/// الرمز بينكتب من اليسار لليمين (أول رقم بأول خانة يسار).
 class OtpInput extends StatefulWidget {
   const OtpInput({super.key, required this.controller, this.length = 6});
 
@@ -31,8 +30,6 @@ class _OtpInputState extends State<OtpInput> {
       onTap: _focus.requestFocus,
       child: Stack(
         children: [
-          // الحقل الحقيقي، مخفي ورا الخانات (نص ومؤشر شفاف بدل Opacity(0): الويب ما بيعطي
-          // تركيز لحقل شفافيته 0).
           Positioned.fill(
             child: TextField(
               controller: widget.controller,

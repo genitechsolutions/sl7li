@@ -7,7 +7,6 @@ import 'cubits/feature_cubits.dart';
 import 'cubits/load_cubit.dart';
 
 /// بيوفّر الـ cubits لكل التطبيق (فوق MaterialApp عشان توصل لكل الصفحات).
-/// الـ cubits كسولة: ما بتشتغل إلا لما شاشة تقرأها.
 class AppProviders extends StatelessWidget {
   const AppProviders({super.key, required this.dependencies, required this.child});
 

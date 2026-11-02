@@ -206,7 +206,6 @@ class _HomeTab extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // الأيقونة بالتصميم جنب سطر التاريخ (مش جنب العنوان).
                     Padding(
                       padding: const EdgeInsets.only(top: 22),
                       child: SvgPicture.asset(
@@ -456,7 +455,6 @@ class _MiniRequest extends StatelessWidget {
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(
-              // نقصّ الوصف قبل الرابط (maxLines لحاله كان بيخفي "قراءة المزيد").
               text: _clip(request.description),
               children: [
                 TextSpan(

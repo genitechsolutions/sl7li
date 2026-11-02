@@ -68,7 +68,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
               ),
-              // الأزرار بمكانها الفيزيائي متل التصميم: "التالي" يمين و"السابق" يسار.
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: Padding(
@@ -128,7 +127,6 @@ class _Page extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         children: [
-          // الصورة (330×388.5) مع الـ Bolt الأصفر خلفها بإزاحة 125.5 من فوق.
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: 60),
@@ -151,7 +149,6 @@ class _Page extends StatelessWidget {
               ),
             ),
           ),
-          // النصوص بالتصميم أنزل ~13px من مربعاتها بالفلاتر (قيس بالرسم): 65 و71 بدل 52 و84، والصورة بتضل بمكانها.
           const SizedBox(height: 65),
           Text(
             title,
@@ -229,7 +226,6 @@ class _NavButton extends StatelessWidget {
           child: Center(
             child: Transform.flip(
               flipX: flip,
-              // الـ SVG أصلاً سهم لليسار؛ "التالي" بينعكس لليمين.
               child: SvgPicture.asset(
                 'assets/icons/ic_arrow_next.svg',
                 width: 28,

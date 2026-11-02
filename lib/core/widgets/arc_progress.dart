@@ -3,8 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// حلقة تقدّم بشكل عدّاد 270° (فتحة بالأسفل) متل التصميم.
-/// المسار الرمادي والقوس الأزرق بنفس المركز والنصف قطر والسماكة بالضبط (بيترسموا بنفس الـ painter)،
-/// وطول القوس الأزرق = [value] من طول المسار (0..1).
 class ArcProgress extends StatelessWidget {
   const ArcProgress({
     super.key,
@@ -61,7 +59,6 @@ class _ArcPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // نفس الـ rect للاتنين: القوس مرسوم على نص سماكة المسار بالضبط.
     final rect = Rect.fromLTWH(
       strokeWidth / 2,
       strokeWidth / 2,

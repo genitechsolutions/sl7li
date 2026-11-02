@@ -53,7 +53,6 @@ class _OfferHeroState extends State<OfferHero> {
               start: 20,
               child: _Pill(
                 height: 24,
-                // العدّاد بالتصميم من اليسار لليمين: "1 / 8".
                 child: Text(
                   '${_page + 1} / ${widget.images.length}',
                   textDirection: TextDirection.ltr,

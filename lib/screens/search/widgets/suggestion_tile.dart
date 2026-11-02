@@ -28,7 +28,6 @@ class SuggestionTile extends StatelessWidget {
         child: Row(
           spacing: 8,
           children: [
-            // الأيقونات بالتصميم ما بتنعكس مع RTL.
             Directionality(
               textDirection: TextDirection.ltr,
               child: Icon(icon, size: 22, color: context.colors.textSecondary),

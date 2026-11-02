@@ -19,6 +19,9 @@
 - **عربي فقط، RTL بالكامل.** لا إنجليزي، لا `intl`. النصوص بتنكتب مباشرة بالـ widgets حرفياً متل التصميم.
 - `EdgeInsetsDirectional` / `AlignmentDirectional` / `PositionedDirectional` / `start`/`end` دائماً. `left`/`right` بس إذا التصميم بيفرضها (وعلّق ليش).
 
+## التعليقات
+- **قليلة وقصيرة:** سطر واحد كحد أقصى، وبس للـ "ليش" (مش للـ "شو"). لا فقرات ولا تعليقات داخل الـ widget trees. الاستثناءات: `// rtl-ok`، `// TODO`، `// ignore:`.
+
 ## State & Navigation
 - **state management = Cubit (`flutter_bloc`)** للبيانات اللي جاية من الخلفية (قوائم، جلسة). حالة الواجهة المحلية (تاب مختار، حقول) تضل `StatefulWidget` + `setState`. `StatelessWidget` افتراضياً.
 - التنقل: `Navigator.push(context, MaterialPageRoute(...))` و`pop`. لا `go_router`.

@@ -52,7 +52,6 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.overlayStyle(context),
       child: Scaffold(
-        // الصفحة بالخلفية الرمادية والكروت فاتحة.
         backgroundColor: colors.pageAlt,
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: 1,

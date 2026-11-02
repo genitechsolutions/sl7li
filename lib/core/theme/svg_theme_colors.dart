@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'app_colors.dart';
 
 /// بيبدّل ألوان الـ SVG الثابتة (الكحلي والرمادي تبع التصميم الفاتح) بألوان الثيم الحالي.
-/// للشعارات والرسومات اللي فيها أكتر من لون (ما بينفع معها colorFilter).
 class SvgThemeColors extends ColorMapper {
   const SvgThemeColors(this.colors);
 

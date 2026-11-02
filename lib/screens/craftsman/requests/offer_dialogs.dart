@@ -237,7 +237,6 @@ Future<bool?> showSendOfferFlow(
       await showAppModal<void>(context, (_) => const _OfferSent());
       return true;
     }
-    // "تعديل": بنرجع للورقة بنفس البيانات.
   }
 }
 

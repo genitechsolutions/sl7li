@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 /// أنماط النصوص — الاسم = الحجم + الوزن. بدون لون: اللون الافتراضي textPrimary
-/// بيجي من الثيم (فاتح/داكن)، وللألوان الثانية copyWith(color: context.colors...).
 abstract final class AppTextStyles {
   static const String fontFamily = 'IBMPlexSansArabic';
 

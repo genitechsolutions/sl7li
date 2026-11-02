@@ -5,7 +5,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/header_action_button.dart';
 
 /// رأس خطوات "طلب خدمة": العنوان، رقم الخطوة، زر (إلغاء افتراضياً)، وشريط التقدم.
-/// [step] أكبر من [totalSteps] يعني كل الخطوات خلصت (كلها خضرا).
 class RequestStepHeader extends StatelessWidget {
   const RequestStepHeader({
     super.key,
@@ -54,7 +53,6 @@ class RequestStepHeader extends StatelessWidget {
                 child: Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    // الخطوات المنتهية خضرا، الحالية كحلية، والجاية رمادية.
                     color: i < step
                         ? context.colors.successLight
                         : i == step

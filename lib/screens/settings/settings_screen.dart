@@ -63,7 +63,6 @@ class SettingsScreen extends StatelessWidget {
     final colors = context.colors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // 20 قبل أول قسم و28 بعدين (+4 هامش الصف = 32 متل التصميم).
     Widget sectionTitle(String text, {double top = 28}) => Padding(
       padding: EdgeInsets.fromLTRB(20, top, 20, 8),
       child: Text(
@@ -76,7 +75,6 @@ class SettingsScreen extends StatelessWidget {
     );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // الهيدر كحلي، فأيقونات شريط الحالة فاتحة دايماً.
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
       ),

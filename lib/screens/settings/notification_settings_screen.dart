@@ -45,7 +45,6 @@ class _NotificationSettingsScreenState
                 value: state[0],
                 onChanged: (v) => setState(() {
                   for (var i = 0; i < state.length; i++) {
-                    // مفتاح المجموعة بيشغّل/بيطفي الكل
                     state[i] = v;
                   }
                 }),

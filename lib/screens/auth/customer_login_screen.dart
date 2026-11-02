@@ -231,8 +231,6 @@ class _CityListState extends State<_CityList> {
       accentBottom: true,
       child: SizedBox(
         height: 294,
-        // الشريط بالتصميم على اليمين (بداية السطر)، وRawScrollbar بيحطه عاليسار بـ RTL.
-        // القائمة بالـ overlay بتورث padding شريط الحالة، وهو بيزيح شريط التمرير.
         child: MediaQuery.removePadding(
           context: context,
           removeTop: true,

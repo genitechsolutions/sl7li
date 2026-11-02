@@ -7,7 +7,6 @@ import '../../../core/theme/svg_theme_colors.dart';
 import '../../../core/widgets/header_action_button.dart';
 
 /// رأس صفحات الدخول: الشعار بالنص، العنوان والشرح تحته،
-/// وزر "العودة" بالزاوية (فوق مستوى الشعار) إذا انعطى [onBack].
 class AuthHeader extends StatelessWidget {
   const AuthHeader({super.key, required this.title, required this.subtitle, this.onBack});
 

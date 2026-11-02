@@ -29,7 +29,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // الخلفية صفرا بالفاتح والداكن، فشريط الحالة غامق دايماً.
       value: AppTheme.overlayStyle(context).copyWith(
         statusBarIconBrightness: Brightness.dark,
       ),
@@ -38,8 +37,6 @@ class _SplashScreenState extends State<SplashScreen> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // نقشة الأيقونة (شفافية 0.2 مخبّاة بالـ SVG)، أكبر من الشاشة ومقصوصة.
-            // Figma: x -87 عن الحافة، وارتفاعها 668 حول مركز الشاشة -30.
             Align(
               alignment: const Alignment(0, -0.034),
               child: OverflowBox(
@@ -48,7 +45,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: SvgPicture.asset('assets/icons/splash_pattern.svg', width: 740, height: 668),
               ),
             ),
-            // الـ Bolt الأبيض: عرضه 494 وبيتجاوز الشاشة من الطرفين (-41).
             Align(
               alignment: Alignment.center,
               child: OverflowBox(
@@ -81,7 +77,6 @@ class _SplashLogo extends StatelessWidget {
       height: 70.21,
       child: Stack(
         children: [
-          // الطاقية
           Positioned(
             left: 141.9,
             top: 0,
@@ -89,7 +84,6 @@ class _SplashLogo extends StatelessWidget {
             height: 70.2,
             child: SvgPicture.asset('assets/icons/splash_logo_186da.svg', fit: BoxFit.fill),
           ),
-          // كلمة "صلّحلي"
           Positioned(
             left: 0,
             top: 3.62,
@@ -97,7 +91,6 @@ class _SplashLogo extends StatelessWidget {
             height: 54.7,
             child: SvgPicture.asset('assets/icons/splash_logo_34079.svg', fit: BoxFit.fill),
           ),
-          // "كلشي بينحل"
           Positioned(
             left: 30.74,
             top: 45.45,

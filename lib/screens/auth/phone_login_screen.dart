@@ -57,7 +57,6 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   }
 
   void _onAuthChanged(BuildContext context, AuthState state) {
-    // الصفحات اللي تحت (هاي الصفحة وراء الـ OTP) ما لازم تتفاعل.
     if (ModalRoute.of(context)?.isCurrent != true) return;
     if (state.status == AuthStatus.codeSent) {
       Navigator.push(

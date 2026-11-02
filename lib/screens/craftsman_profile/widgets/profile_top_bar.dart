@@ -21,7 +21,6 @@ class ProfileTopBar extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          // من لون قريب من الخلفية (#F7F7FA بالفاتح) لـ surface.
           colors: [
             Color.lerp(context.colors.background, context.colors.surface, 0.22)!,
             context.colors.surface,

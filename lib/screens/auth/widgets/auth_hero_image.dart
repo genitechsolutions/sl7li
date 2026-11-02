@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 /// الصورة الكبيرة فوق صفحات الدخول (الطاقية مع النقشة)، بنسخة للفاتح ونسخة للداكن.
-/// الصورتين 3x، فمنحدد حجمهن.
 class AuthHeroImage extends StatelessWidget {
   const AuthHeroImage({super.key});
 
@@ -14,7 +13,6 @@ class AuthHeroImage extends StatelessWidget {
       height: 263,
       width: double.infinity,
       fit: BoxFit.cover,
-      // بدون فلاش بين الصورتين لما يتبدّل الثيم.
       gaplessPlayback: true,
     );
   }

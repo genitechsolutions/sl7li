@@ -39,7 +39,6 @@ class CraftsmanHeader extends StatelessWidget {
                     children: [
                       Text('رضا الكويفاتي', style: AppTextStyles.title18Medium),
                       GestureDetector(
-                        // وضع الزبون: بيفتح الرئيسية العادية.
                         onTap: () => Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const HomeScreen()),
                           (_) => false,

@@ -90,7 +90,6 @@ class _CraftsmanTargetingScreenState extends State<CraftsmanTargetingScreen> {
                       ),
                     ),
                     Text(
-                      // بالتصميم: الكلمة يمين والرقم يسار "(5/3 محدد)".
                       '(محدد $_maxSelected/${_selected.length})',
                       style: AppTextStyles.body14.copyWith(
                         color: context.colors.textSecondary,

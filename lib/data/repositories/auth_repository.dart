@@ -101,7 +101,6 @@ class AmplifyAuthRepository implements AuthRepository {
       );
       _isNew = true;
       _tempPassword = password;
-      // الحساب انأكّد تلقائياً (pre-signup): الموقع بيطلب إرسال الرمز عبر resendOtpSecure.
       if (result.isSignUpComplete) await _sendOtpViaApi(phone);
     } on UsernameExistsException {
       _isNew = false;
@@ -153,7 +152,6 @@ class AmplifyAuthRepository implements AuthRepository {
       await _sendOtpViaApi(phone);
     } on BackendException catch (e) {
       if (e.message != 'NO_ACTIVE_OTP') rethrow;
-      // ما في رمز فعّال: نعيد توليده (متل الموقع).
       if (_isNew) {
         await Amplify.Auth.resendSignUpCode(username: phone);
       } else {

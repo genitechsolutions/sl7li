@@ -6,7 +6,6 @@ import '../core/theme/app_text_styles.dart';
 import 'load_cubit.dart';
 
 /// بيعرض حالة cubit تحميل: أول مرة مؤشر، فشل ← رسالة + "إعادة المحاولة"، فاضي ← نص، وإلا [builder].
-/// بيطلب التحميل لحاله عند أول بناء ([onInit]؛ الافتراضي `load()`).
 class LoadView<C extends LoadCubit<T>, T> extends StatefulWidget {
   const LoadView({
     super.key,

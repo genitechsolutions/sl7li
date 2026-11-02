@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
 /// رسمة النجاح: دائرة خضرا فيها ✓، وحواليها حلقات ونقاط وإشارات +.
-/// المواقع مأخوذة من التصميم (صندوق 198×140).
 class SuccessIllustration extends StatelessWidget {
   const SuccessIllustration({super.key});
 
@@ -12,7 +11,6 @@ class SuccessIllustration extends StatelessWidget {
     return SizedBox(
       width: 198,
       height: 140,
-      // الرسمة بالتصميم مش معكوسة، فمنثبّت المواقع من اليسار.
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(

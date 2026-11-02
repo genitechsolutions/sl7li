@@ -18,7 +18,6 @@ class LoginScreen extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.overlayStyle(context),
       child: Scaffold(
-        // هالصفحة معكوسة: الخلفية surface والكروت background.
         backgroundColor: context.colors.surface,
         body: SafeArea(
           child: ListView(

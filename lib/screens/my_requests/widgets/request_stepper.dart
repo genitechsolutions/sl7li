@@ -5,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// شريط مراحل الطلب: مفتوح ← تم الاتفاق ← قيد التنفيذ ← مكتمل (من اليمين).
-/// [stage] المرحلة الحالية (0..3). اللي قبلها مكتملة (أخضر)، واللي بعدها رمادي. 4 = الكل مكتمل.
 class RequestStepper extends StatelessWidget {
   const RequestStepper({super.key, required this.stage, this.labels = _labels});
 
@@ -36,7 +35,6 @@ class RequestStepper extends StatelessWidget {
           return Stack(
             clipBehavior: Clip.none,
             children: [
-              // الخطوط بين الدوائر: لونها حسب المرحلة اللي قبلها.
               for (var i = 0; i < 3; i++)
                 PositionedDirectional(
                   start: i * step + _circle + 8,

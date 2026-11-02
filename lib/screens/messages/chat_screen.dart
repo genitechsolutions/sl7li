@@ -48,7 +48,6 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _controller.addListener(() => setState(() {}));
     _scroll.addListener(_onScroll);
-    // قيّم زر النزول/العودة بعد أول رسم (قبل أي تمرير).
     WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
     _loadMessages();
   }
@@ -62,7 +61,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!mounted) return;
       setState(() => _messages = [...loaded]);
     } on Object {
-      // بنكمّل بالعينة إذا فشل التحميل.
+      // نكمّل بالعينة.
     }
   }
 
@@ -686,7 +685,6 @@ class _Bubble extends StatelessWidget {
     const r = Radius.circular(12);
 
     return Align(
-      // المرسلة على اليسار والمستلمة على اليمين (متل التصميم).
       alignment: sent
           ? AlignmentDirectional.centerEnd
           : AlignmentDirectional.centerStart,

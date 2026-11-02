@@ -75,7 +75,6 @@ class OfferDetailsScreen extends StatelessWidget {
                                 const CraftsmanProfileScreen(profile: sampleCraftsmanProfile),
                           ),
                         ),
-                        // الأيقونة بالتصميم سهمها لفوق-يمين، فنمنع انعكاسها بـ RTL.
                         child: Directionality(
                           textDirection: TextDirection.ltr,
                           child: Icon(

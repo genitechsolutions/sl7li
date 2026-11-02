@@ -48,7 +48,6 @@ void main() {
     for (var i = 0; i < part.px.length; i += 4) {
       if (!_isBlue(part.px, i)) continue;
       blueInPart++;
-      // لازم يكون أزرق (أو حافة ممزوجة) بالرسم الكامل كمان: يعني ضمن نفس شريط المسار.
       final inFull = _isBlue(full.px, i) || !_isTrack(full.px, i) && full.px[i + 3] > 0;
       if (!inFull) outside++;
     }
@@ -63,7 +62,6 @@ void main() {
     final w = part.w;
     final c = w / 2;
     final mid = (68 - 8) / 2 * scale; // نصف قطر منتصف السماكة
-    // نمشي على دائرة المنتصف زاوية زاوية ونعدّ الأزرق والرمادي.
     var blue = 0;
     var track = 0;
     for (var deg = 0; deg < 360; deg++) {
@@ -75,7 +73,6 @@ void main() {
       if (_isTrack(part.px, i)) track++;
     }
     final total = blue + track;
-    // المسار 270° (± حواف الأطراف المدورة)، الأزرق 67% منه.
     expect(total, inInclusiveRange(268, 290));
     expect(blue / total, closeTo(0.67, 0.03));
   });

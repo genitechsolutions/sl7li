@@ -56,7 +56,6 @@ class ServiceDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // النصوص بالتصميم داخلة 12 عن حواف الصورة والتخصصات.
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Column(

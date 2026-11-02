@@ -78,7 +78,6 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void _onAuthChanged(BuildContext context, AuthState state) {
     if (state.status == AuthStatus.authenticated) {
-      // الدخول نجح ← اختيار نوع الحساب (بتمسح اللي قبل).
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (_) => false,
@@ -197,7 +196,6 @@ class _OtpScreenState extends State<OtpScreen> {
                           ),
                           Flexible(
                             child: GestureDetector(
-                              // الرقم بينكتب بصفحة تسجيل الدخول اللي قبل.
                               onTap: () => Navigator.pop(context),
                               child: Text('تغيير رقم الهاتف', style: link),
                             ),

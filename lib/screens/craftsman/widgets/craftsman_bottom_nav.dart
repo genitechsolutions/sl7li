@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-/// الشريط السفلي للمهني: الرئيسية، الطلبات، عروضي، الرسائل، حسابي.
 /// TODO: ما في تصميم للشريط بإطارات المهني (Figma)؛ هالترتيب مبني على أقسام الصفحة، والأيقونات من أيقونات الزبون.
 class CraftsmanBottomNav extends StatelessWidget {
   const CraftsmanBottomNav({

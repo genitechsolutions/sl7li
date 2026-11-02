@@ -4,9 +4,6 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 /// شريط سفلي ثابت فيه زر رئيسي بعرض الشاشة (اطلب عرض سعر...)،
-/// واختيارياً زر ثانوي بحدود تحته (رجوع للخطوة السابقة).
-/// [note] نص صغير فوق الأزرار (موافقة على الشروط...).
-/// [onPressed] = null يعني الزر معطّل.
 class AppBottomActionBar extends StatelessWidget {
   const AppBottomActionBar({
     super.key,

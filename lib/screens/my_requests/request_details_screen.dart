@@ -40,7 +40,6 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
     final colors = context.colors;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // الهيدر كحلي بالفاتح والداكن، فأيقونات شريط الحالة فاتحة.
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
       ),
@@ -59,7 +58,6 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  // الطلب اللي اتفقنا فيه مع مهني ما إله تاب عروض، بيعرض "العرض المعتمد".
                   if (!widget.request.hasCraftsman)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
