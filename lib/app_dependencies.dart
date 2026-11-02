@@ -41,7 +41,7 @@ class AppDependencies {
       offers: const RemoteOffersRepository(gateway),
       myRequests: RemoteMyRequestsRepository(gateway, auth),
       craftsmanJobs: RemoteCraftsmanJobsRepository(gateway, auth),
-      conversations: const RemoteConversationsRepository(gateway),
+      conversations: RemoteConversationsRepository(gateway, auth),
       notifications: RemoteNotificationsRepository(gateway, auth),
     );
   }

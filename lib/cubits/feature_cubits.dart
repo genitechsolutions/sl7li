@@ -68,6 +68,8 @@ class ConversationsCubit extends LoadCubit<List<Conversation>> {
   @override
   Future<List<Conversation>> fetch() => _repo.list(professionalMode: _professionalMode);
 
+  Future<List<ChatMessage>> messages(String conversationId) => _repo.messages(conversationId);
+
   /// بيحمّل للوضع المطلوب (إذا تغيّر الوضع بنعيد التحميل).
   Future<void> loadFor({required bool professionalMode}) {
     final changed = _professionalMode != professionalMode;

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../cubits/feature_cubits.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/craftsman_avatar.dart';
 import '../../data/chat_data.dart';
@@ -35,7 +37,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
   final _scroll = ScrollController();
-  late final List<ChatMessage> _messages = [...sampleChat];
+  late List<ChatMessage> _messages = [...sampleChat];
 
   // بعد ما نبعد عن بطاقة الطلب (فوق) بنبيّن "العودة للعرض"، وبعد ما نبعد عن الآخر بنبيّن زر النزول.
   bool _showBackToRequest = false;
@@ -48,6 +50,20 @@ class _ChatScreenState extends State<ChatScreen> {
     _scroll.addListener(_onScroll);
     // قيّم زر النزول/العودة بعد أول رسم (قبل أي تمرير).
     WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
+    _loadMessages();
+  }
+
+  /// محادثة حقيقية (إلها id) ← رسائلها من الخلفية؛ غير هيك بنضل على العينة.
+  Future<void> _loadMessages() async {
+    final id = widget.conversation.id;
+    if (id == null) return;
+    try {
+      final loaded = await context.read<ConversationsCubit>().messages(id);
+      if (!mounted) return;
+      setState(() => _messages = [...loaded]);
+    } on Object {
+      // بنكمّل بالعينة إذا فشل التحميل.
+    }
   }
 
   void _onScroll() {

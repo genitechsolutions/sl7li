@@ -44,6 +44,14 @@ query GetSecureUserConversations($isProfessionalMode: Boolean) {
   }
 }''';
 
+  static const getConversationMessages = r'''
+query GetSecureConversationMessages($conversationId: String!, $limit: Int, $beforeTimestamp: String) {
+  getSecureConversationMessages(conversationId: $conversationId, limit: $limit, beforeTimestamp: $beforeTimestamp) {
+    messages
+    error
+  }
+}''';
+
   static const getUserNotifications = r'''
 query GetUserNotifications($category: String, $limit: Int, $nextToken: String, $status: String, $userId: String!) {
   getUserNotifications(category: $category, limit: $limit, nextToken: $nextToken, status: $status, userId: $userId)

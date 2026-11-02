@@ -274,5 +274,19 @@ void liveShapeTests() {
       expect(conv.name, 'صيانة الشامي');
       expect(conv.lastMessage, 'أهلاً');
     });
+
+    test('رسالة دردشة حقيقية: sent حسب senderId', () {
+      final j = {
+        'id': 'm1',
+        'senderId': 'me',
+        'content': 'مرحباً',
+        'status': 'read',
+        'imageAttachments': [],
+        'createdAt': '2026-09-01T18:03:20.978Z',
+      };
+      expect(chatMessageFromJson(j, 'me').message.sent, isTrue);
+      expect(chatMessageFromJson(j, 'other').message.sent, isFalse);
+      expect(chatMessageFromJson(j, 'me').message.text, 'مرحباً');
+    });
   });
 }

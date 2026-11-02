@@ -46,6 +46,9 @@ class _RecordingConversations implements ConversationsRepository {
     modes.add(professionalMode);
     return const [];
   }
+
+  @override
+  Future<List<ChatMessage>> messages(String conversationId) async => const [];
 }
 
 class _FlakyAuth extends FakeAuthRepository {
