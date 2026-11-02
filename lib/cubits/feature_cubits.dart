@@ -2,6 +2,7 @@ import '../data/chat_data.dart';
 import '../data/dummy_data.dart';
 import '../data/my_request.dart';
 import '../data/repositories/conversations_repository.dart';
+import '../data/repositories/profile_repository.dart';
 import '../data/request_draft.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/offers_repository.dart';
@@ -97,4 +98,14 @@ class NotificationsCubit extends LoadCubit<NotificationsData> {
     await _repo.markAllRead();
     await load(force: true);
   }
+}
+
+/// بيانات حساب المستخدم (الاسم/الرقم) للإعدادات.
+class ProfileCubit extends LoadCubit<UserProfile> {
+  ProfileCubit(this._repo);
+
+  final ProfileRepository _repo;
+
+  @override
+  Future<UserProfile> fetch() => _repo.load();
 }

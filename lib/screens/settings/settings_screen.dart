@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../cubits/feature_cubits.dart';
 import '../../app_providers.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -102,18 +104,7 @@ class SettingsScreen extends StatelessWidget {
               onEdit: () => _push(context, const ProfileScreen()),
             ),
             const SizedBox(height: 12),
-            Center(child: Text('رضا الكويفاتي', style: AppTextStyles.title20)),
-            const SizedBox(height: 4),
-            Center(
-              child: Text(
-                '+963 939 316 463',
-                textDirection: TextDirection.ltr,
-                style: AppTextStyles.body18.copyWith(
-                  color: colors.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-            ),
+            const _NameAndPhone(),
             sectionTitle('التطبيق', top: 20),
             _Row(
               icon: 'assets/icons/ic_set_profile.svg',
@@ -601,6 +592,41 @@ Future<void> confirmDeleteAccount(BuildContext context) async {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
       (_) => false,
+    );
+  }
+}
+
+/// الاسم + الرقم من بيانات الحساب (حقيقية بالوضع الحقيقي).
+class _NameAndPhone extends StatefulWidget {
+  const _NameAndPhone();
+
+  @override
+  State<_NameAndPhone> createState() => _NameAndPhoneState();
+}
+
+class _NameAndPhoneState extends State<_NameAndPhone> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfileCubit>().load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = context.select((ProfileCubit c) => c.state.data);
+    return Column(
+      children: [
+        Text(profile?.name ?? '', style: AppTextStyles.title20),
+        const SizedBox(height: 4),
+        Text(
+          profile?.displayPhone ?? '',
+          textDirection: TextDirection.ltr,
+          style: AppTextStyles.body18.copyWith(
+            color: context.colors.textSecondary,
+            height: 1.5,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -26,6 +26,7 @@ class AppProviders extends StatelessWidget {
         BlocProvider(create: (_) => CraftsmanJobsCubit(d.craftsmanJobs)),
         BlocProvider(create: (_) => ConversationsCubit(d.conversations)),
         BlocProvider(create: (_) => NotificationsCubit(d.notifications)),
+        BlocProvider(create: (_) => ProfileCubit(d.profile)),
       ],
       child: child,
     );
@@ -40,6 +41,7 @@ Future<void> signOutAndReset(BuildContext context) async {
     context.read<CraftsmanJobsCubit>(),
     context.read<ConversationsCubit>(),
     context.read<NotificationsCubit>(),
+    context.read<ProfileCubit>(),
   ];
   await auth.signOut();
   for (final c in cubits) {

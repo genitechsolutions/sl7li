@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../cubits/feature_cubits.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -23,9 +25,19 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   static const _labelPadding = EdgeInsetsDirectional.symmetric(horizontal: 12);
 
-  final _name = TextEditingController(text: 'رضا الكويفاتي');
-  final _phone = TextEditingController(text: '939316463');
+  final _name = TextEditingController();
+  final _phone = TextEditingController();
   final _district = TextEditingController(text: 'مركز المدينة');
+
+  @override
+  void initState() {
+    super.initState();
+    final p = context.read<ProfileCubit>().state.data;
+    if (p != null) {
+      _name.text = p.name;
+      _phone.text = p.localPhone;
+    }
+  }
 
   @override
   void dispose() {
