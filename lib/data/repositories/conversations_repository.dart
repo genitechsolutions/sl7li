@@ -37,6 +37,7 @@ class RemoteConversationsRepository implements ConversationsRepository {
 /// حقول Conversation + اسم الطرف الآخر (الخلفية بتضيفه بالرد؛ أسماء بديلة للاحتياط).
 Conversation conversationFromJson(Map<String, dynamic> j) {
   final name =
+      str(j, 'displayName') ??
       str(j, 'otherParticipantName') ??
       str(j, 'participantName') ??
       str(j, 'otherUserName') ??

@@ -9,6 +9,7 @@ import 'package:khaled_flutter/data/repositories/offers_repository.dart';
 import 'package:khaled_flutter/data/repositories/requests_repository.dart';
 
 void main() {
+  liveShapeTests();
   group('json utils', () {
     test('asMapList يفك قائمة AWSJSON (نصوص JSON)', () {
       final list = asMapList(['{"a":1}', '{"b":2}']);
@@ -41,10 +42,25 @@ void main() {
 
     test('arabicTime: الآن / اليوم 12 ساعة / تاريخ', () {
       final now = DateTime(2026, 8, 5, 15, 0);
-      expect(arabicTime(DateTime(2026, 8, 5, 14, 59, 40).toIso8601String(), now: now), 'الآن');
-      expect(arabicTime(DateTime(2026, 8, 5, 14, 10).toIso8601String(), now: now), '2:10 م');
-      expect(arabicTime(DateTime(2026, 8, 5, 0, 5).toIso8601String(), now: now), '12:05 ص');
-      expect(arabicTime(DateTime(2026, 8, 1, 9).toIso8601String(), now: now), '1 آب');
+      expect(
+        arabicTime(
+          DateTime(2026, 8, 5, 14, 59, 40).toIso8601String(),
+          now: now,
+        ),
+        'الآن',
+      );
+      expect(
+        arabicTime(DateTime(2026, 8, 5, 14, 10).toIso8601String(), now: now),
+        '2:10 م',
+      );
+      expect(
+        arabicTime(DateTime(2026, 8, 5, 0, 5).toIso8601String(), now: now),
+        '12:05 ص',
+      );
+      expect(
+        arabicTime(DateTime(2026, 8, 1, 9).toIso8601String(), now: now),
+        '1 آب',
+      );
     });
 
     test('resourceUrl بيضيف مضيف الموارد للمفاتيح فقط', () {
@@ -70,7 +86,12 @@ void main() {
     });
 
     test('عرض بسعر وبدون صور بياخد الصورة الافتراضية', () {
-      final o = offerFromJson({'title': 't', 'price': 1000.0, 'currency': 'ل.س', 'cityCode': 'damascus'});
+      final o = offerFromJson({
+        'title': 't',
+        'price': 1000.0,
+        'currency': 'ل.س',
+        'cityCode': 'damascus',
+      });
       expect(o.discount, '1000 ل.س');
       expect(o.image, 'assets/images/offer_carpentry.jpg');
       expect(o.location, 'damascus');
@@ -78,7 +99,11 @@ void main() {
   });
 
   group('طلبات الزبون', () {
-    Map<String, dynamic> job(String status, {String urgency = 'normal', Map<String, dynamic>? extra}) => {
+    Map<String, dynamic> job(
+      String status, {
+      String urgency = 'normal',
+      Map<String, dynamic>? extra,
+    }) => {
       'job_id': 'j1',
       'title': 'تصليح',
       'description': 'وصف',
@@ -98,14 +123,33 @@ void main() {
     });
 
     test('الأولوية من الإلحاح', () {
-      expect(myRequestFromJson(job('open', urgency: 'emergency')).priority, RequestPriority.emergency);
-      expect(myRequestFromJson(job('open', urgency: 'urgent')).priority, RequestPriority.urgent);
-      expect(myRequestFromJson(job('open', urgency: 'flexible')).priority, RequestPriority.normal);
+      expect(
+        myRequestFromJson(job('open', urgency: 'emergency')).priority,
+        RequestPriority.emergency,
+      );
+      expect(
+        myRequestFromJson(job('open', urgency: 'urgent')).priority,
+        RequestPriority.urgent,
+      );
+      expect(
+        myRequestFromJson(job('open', urgency: 'flexible')).priority,
+        RequestPriority.normal,
+      );
     });
 
     test('مراحل الحالة', () {
-      expect(myRequestFromJson(job('professional_selected', extra: {'accepted_pro_name': 'أبو أحمد'})).stage, 1);
-      final inProgress = myRequestFromJson(job('in_progress', extra: {'accepted_pro_name': 'أبو أحمد'}));
+      expect(
+        myRequestFromJson(
+          job(
+            'professional_selected',
+            extra: {'accepted_pro_name': 'أبو أحمد'},
+          ),
+        ).stage,
+        1,
+      );
+      final inProgress = myRequestFromJson(
+        job('in_progress', extra: {'accepted_pro_name': 'أبو أحمد'}),
+      );
       expect(inProgress.stage, 2);
       expect(inProgress.hasCraftsman, isTrue);
       expect(inProgress.offersCount, isNull);
@@ -118,7 +162,10 @@ void main() {
       final cancelled = myRequestFromJson(job('cancelled'));
       expect(cancelled.status, RequestStatus.canceled);
       expect(cancelled.cancelNote, 'تم إلغاء الطلب');
-      expect(myRequestFromJson(job('expired')).cancelNote, 'لقد انتهت مدة طلبك');
+      expect(
+        myRequestFromJson(job('expired')).cancelNote,
+        'لقد انتهت مدة طلبك',
+      );
     });
   });
 
@@ -144,8 +191,12 @@ void main() {
     });
 
     test('مهمة بحسب statusByProfessional', () {
-      CraftsmanRequest of(String s) =>
-          craftsmanRequestFromJson({'job_id': 'x', 'title': 't', 'description': 'd', 'statusByProfessional': s});
+      CraftsmanRequest of(String s) => craftsmanRequestFromJson({
+        'job_id': 'x',
+        'title': 't',
+        'description': 'd',
+        'statusByProfessional': s,
+      });
       expect(of('in_progress').state, CraftsmanRequestState.task);
       expect(of('in_progress').stage, 2);
       expect(of('completed').state, CraftsmanRequestState.done);
@@ -171,7 +222,8 @@ void main() {
     });
 
     test('نوع الإشعار من النوع/التصنيف', () {
-      NotificationKind k(String type) => notificationFromJson({'type': type, 'title': 't', 'body': 'b'}).kind;
+      NotificationKind k(String type) =>
+          notificationFromJson({'type': type, 'title': 't', 'body': 'b'}).kind;
       expect(k('new_message'), NotificationKind.message);
       expect(k('job_completed'), NotificationKind.completion);
       expect(k('proposal_withdrawn'), NotificationKind.withdrawn);
@@ -181,14 +233,46 @@ void main() {
     test('تجميع الإشعارات: مهم / اليوم / قبل', () {
       final now = DateTime(2026, 8, 5, 15);
       final data = groupNotifications([
-        {'type': 'job_completed', 'title': 'a', 'body': 'b', 'action_required': true, 'status': 'unread', 'createdAt': now.toIso8601String()},
-        {'type': 'new_message', 'title': 'c', 'body': 'd', 'status': 'read', 'createdAt': DateTime(2026, 8, 5, 9).toIso8601String()},
-        {'type': 'new_proposal', 'title': 'e', 'body': 'f', 'status': 'unread', 'createdAt': DateTime(2026, 7, 30).toIso8601String()},
+        {
+          'type': 'job_completed',
+          'title': 'a',
+          'body': 'b',
+          'action_required': true,
+          'status': 'unread',
+          'createdAt': now.toIso8601String(),
+        },
+        {
+          'type': 'new_message',
+          'title': 'c',
+          'body': 'd',
+          'status': 'read',
+          'createdAt': DateTime(2026, 8, 5, 9).toIso8601String(),
+        },
+        {
+          'type': 'new_proposal',
+          'title': 'e',
+          'body': 'f',
+          'status': 'unread',
+          'createdAt': DateTime(2026, 7, 30).toIso8601String(),
+        },
       ], now: now);
       expect(data.important, hasLength(1));
       expect(data.today, hasLength(1));
       expect(data.lastWeek, hasLength(1));
       expect(data.unread, 2);
+    });
+  });
+}
+
+void liveShapeTests() {
+  group('شكل الردود الحقيقية (devqa)', () {
+    test('asMap بيفك JSON مرمّز مرتين', () {
+      const doubled =
+          r'"{\"id\":\"c1\",\"displayName\":\"صيانة الشامي\",\"lastMessage\":\"أهلاً\"}"';
+      final conv = conversationFromJson(asMapList([doubled]).single);
+      expect(conv.id, 'c1');
+      expect(conv.name, 'صيانة الشامي');
+      expect(conv.lastMessage, 'أهلاً');
     });
   });
 }

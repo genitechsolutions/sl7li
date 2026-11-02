@@ -7,14 +7,16 @@ import 'backend_exception.dart';
 Map<String, dynamic> asMap(Object? value) {
   if (value == null) return const {};
   if (value is Map) return Map<String, dynamic>.from(value);
-  if (value is String && value.trim().isNotEmpty) {
+  // الخلفية أحياناً بترجع JSON مرمّز مرتين (نص جوا نص): نفك لحد ما يطلع Map.
+  Object? v = value;
+  for (var i = 0; i < 3 && v is String && v.trim().isNotEmpty; i++) {
     try {
-      final decoded = jsonDecode(value);
-      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      v = jsonDecode(v);
     } on FormatException {
       return const {};
     }
   }
+  if (v is Map) return Map<String, dynamic>.from(v);
   return const {};
 }
 
@@ -37,7 +39,10 @@ List<Map<String, dynamic>> asMapList(Object? value) {
     return const [];
   }
   if (v is! List) return const [];
-  return [for (final e in v) if (asMap(e).isNotEmpty) asMap(e)];
+  return [
+    for (final e in v)
+      if (asMap(e).isNotEmpty) asMap(e),
+  ];
 }
 
 String? str(Map<String, dynamic> m, String key) {
