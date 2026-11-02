@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import '../../core/backend/backend_exception.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
@@ -5,6 +8,7 @@ import '../../core/backend/json_utils.dart';
 import '../craftsman_data.dart';
 import '../dummy_data.dart';
 import '../my_request.dart';
+import '../request_draft.dart';
 import 'auth_repository.dart';
 
 /// قوائم طلبات الزبون ("طلباتي").
@@ -12,6 +16,9 @@ abstract class MyRequestsRepository {
   Future<List<MyRequest>> list();
 
   Future<void> cancel(String jobId, {String? reason});
+
+  /// بيرسل طلب خدمة جديد (من خطوات "طلب خدمة").
+  Future<void> create(RequestDraft draft);
 }
 
 class FakeMyRequestsRepository implements MyRequestsRepository {
@@ -26,6 +33,9 @@ class FakeMyRequestsRepository implements MyRequestsRepository {
 
   @override
   Future<void> cancel(String jobId, {String? reason}) async {}
+
+  @override
+  Future<void> create(RequestDraft draft) async {}
 }
 
 class RemoteMyRequestsRepository implements MyRequestsRepository {
@@ -60,6 +70,53 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
     );
     throwIfBackendError(asMap(data['cancelJobSecure']));
   }
+
+  @override
+  Future<void> create(RequestDraft draft) async {
+    final data = await _gateway.run(
+      Gql.createJob,
+      variables: {'input': jsonEncode(createJobInput(draft))},
+      mutation: true,
+    );
+    throwIfBackendError(asMap(data['createJobSecure']));
+  }
+}
+
+/// حقول createJobSecure من مسودة الطلب. (service_id=general لأن التصنيف الدقيق بيصير بالخلفية.)
+Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId}) {
+  const cityCodes = {
+    'دمشق': 'damascus',
+    'حلب': 'aleppo',
+    'حمص': 'homs',
+    'حماة': 'hama',
+  };
+  const urgency = ['normal', 'urgent', 'emergency'];
+  final extra = [
+    if (d.serviceType != null) 'نوع الخدمة: ${d.serviceType}',
+    if (d.subSpecialty != null) 'التخصص: ${d.subSpecialty}',
+  ].join(' - ');
+  final title = (d.serviceType ?? 'طلب خدمة');
+  return {
+    'job_id': jobId ?? _uuid(),
+    'service_id': 'general',
+    'title': title,
+    'description': extra.isEmpty ? d.description : '${d.description}\n$extra',
+    'country_code': 'syria',
+    'city_code': cityCodes[d.city] ?? 'damascus',
+    'urgency': urgency[d.urgency.clamp(0, 2)],
+    'specialties_requested': <String>[],
+    'images': <String>[],
+    'share_whatsapp_with_professionals': d.allowWhatsapp,
+    if (d.onBehalf && d.customerName.trim().isNotEmpty)
+      'customer_name': d.customerName.trim(),
+  };
+}
+
+String _uuid() {
+  final r = Random.secure();
+  String h(int n) =>
+      List.generate(n, (_) => r.nextInt(16).toRadixString(16)).join();
+  return '${h(8)}-${h(4)}-4${h(3)}-${(8 + r.nextInt(4)).toRadixString(16)}${h(3)}-${h(12)}';
 }
 
 /// طلبات واردة/مهام المهني.
@@ -95,7 +152,11 @@ class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
   );
 
   @override
-  Future<void> ignore(String jobId, {required String reason, String? other}) async {}
+  Future<void> ignore(
+    String jobId, {
+    required String reason,
+    String? other,
+  }) async {}
 }
 
 class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
@@ -118,7 +179,9 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
         variables: {'professionalId': userId},
       ),
     ]);
-    final availableRes = asMap(results[0]['getAvailableJobsForProfessionalSecure']);
+    final availableRes = asMap(
+      results[0]['getAvailableJobsForProfessionalSecure'],
+    );
     final tasksRes = asMap(results[1]['getCurrentTasksForProfessionalSecure']);
     throwIfBackendError(availableRes);
     throwIfBackendError(tasksRes);
@@ -126,7 +189,9 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
     final available = asMapList(availableRes['jobs'])
         .map((j) => craftsmanRequestFromJson(j, open: true))
         .toList();
-    final all = asMapList(tasksRes['jobs']).map(craftsmanRequestFromJson).toList();
+    final all = asMapList(tasksRes['jobs'])
+        .map(craftsmanRequestFromJson)
+        .toList();
     return CraftsmanJobs(
       available: available,
       tasks: all.where((r) => r.state == CraftsmanRequestState.task).toList(),
@@ -142,7 +207,11 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
   }
 
   @override
-  Future<void> ignore(String jobId, {required String reason, String? other}) async {
+  Future<void> ignore(
+    String jobId, {
+    required String reason,
+    String? other,
+  }) async {
     final data = await _gateway.run(
       Gql.ignoreJob,
       variables: {'jobId': jobId, 'ignoreReason': reason, 'otherReason': other},
@@ -167,9 +236,10 @@ String _urgencyLabel(String? urgency) => switch (urgency) {
 };
 
 String _locationOf(Map<String, dynamic> j) {
-  final parts = [str(j, 'city_code'), str(j, 'neighborhood_code')]
-      .whereType<String>()
-      .toList();
+  final parts = [
+    str(j, 'city_code'),
+    str(j, 'neighborhood_code'),
+  ].whereType<String>().toList();
   return parts.join(', ');
 }
 
@@ -177,7 +247,12 @@ String _locationOf(Map<String, dynamic> j) {
 MyRequest myRequestFromJson(Map<String, dynamic> j) {
   final status = str(j, 'status') ?? 'open';
   final done = status == 'completed';
-  final canceled = const {'cancelled', 'canceled', 'expired', 'closed'}.contains(status);
+  final canceled = const {
+    'cancelled',
+    'canceled',
+    'expired',
+    'closed',
+  }.contains(status);
   final stage = switch (status) {
     'professional_selected' || 'selected' => 1,
     'in_progress' => 2,
@@ -199,7 +274,9 @@ MyRequest myRequestFromJson(Map<String, dynamic> j) {
     cancelNote: canceled
         ? (status == 'expired' ? 'لقد انتهت مدة طلبك' : 'تم إلغاء الطلب')
         : null,
-    offersCount: stage == 0 && !canceled ? (intOf(j, 'response_count') ?? 0) : null,
+    offersCount: stage == 0 && !canceled
+        ? (intOf(j, 'response_count') ?? 0)
+        : null,
     craftsmanName: str(j, 'accepted_pro_name'),
   );
 }
@@ -209,7 +286,12 @@ CraftsmanRequest craftsmanRequestFromJson(
   bool open = false,
 }) {
   final status = str(j, 'statusByProfessional') ?? str(j, 'status') ?? 'open';
-  final cancelled = const {'cancelled', 'canceled', 'expired', 'closed'}.contains(status);
+  final cancelled = const {
+    'cancelled',
+    'canceled',
+    'expired',
+    'closed',
+  }.contains(status);
   final done = status == 'completed';
   final state = open
       ? CraftsmanRequestState.open

@@ -3,6 +3,7 @@ import 'package:khaled_flutter/core/backend/json_utils.dart';
 import 'package:khaled_flutter/data/chat_data.dart';
 import 'package:khaled_flutter/data/craftsman_data.dart';
 import 'package:khaled_flutter/data/my_request.dart';
+import 'package:khaled_flutter/data/request_draft.dart';
 import 'package:khaled_flutter/data/repositories/conversations_repository.dart';
 import 'package:khaled_flutter/data/repositories/notifications_repository.dart';
 import 'package:khaled_flutter/data/repositories/offers_repository.dart';
@@ -273,6 +274,19 @@ void liveShapeTests() {
       expect(conv.id, 'c1');
       expect(conv.name, 'صيانة الشامي');
       expect(conv.lastMessage, 'أهلاً');
+    });
+
+    test('createJobInput: الحقول المطلوبة بالخلفية موجودة', () {
+      final d = RequestDraft()
+        ..description = 'غسالة لا تصرف'
+        ..serviceType = 'صيانة أجهزة'
+        ..urgency = 1;
+      final j = createJobInput(d, jobId: 'abc');
+      for (final k in ['job_id', 'service_id', 'title', 'description']) {
+        expect(j[k], isNotEmpty, reason: k);
+      }
+      expect(j['urgency'], 'urgent');
+      expect(j['city_code'], 'damascus');
     });
 
     test('رسالة دردشة حقيقية: sent حسب senderId', () {

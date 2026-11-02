@@ -2,6 +2,7 @@ import '../data/chat_data.dart';
 import '../data/dummy_data.dart';
 import '../data/my_request.dart';
 import '../data/repositories/conversations_repository.dart';
+import '../data/request_draft.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/offers_repository.dart';
 import '../data/repositories/requests_repository.dart';
@@ -35,6 +36,12 @@ class MyRequestsCubit extends LoadCubit<List<MyRequest>> {
 
   @override
   Future<List<MyRequest>> fetch() => _repo.list();
+
+  /// بيرسل طلب جديد وبيحدّث القائمة.
+  Future<void> create(RequestDraft draft) async {
+    await _repo.create(draft);
+    await load(force: true);
+  }
 
   /// بيلغي الطلب وبيحدّث القائمة.
   Future<void> cancel(String jobId, {String? reason}) async {

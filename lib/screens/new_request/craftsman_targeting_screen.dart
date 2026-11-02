@@ -7,17 +7,26 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_bottom_action_bar.dart';
 import '../../core/widgets/header_action_button.dart';
 import '../../data/dummy_data.dart';
+import '../../data/request_draft.dart';
 import 'request_sent_screen.dart';
 import 'widgets/selectable_craftsman_card.dart';
 
 /// "استهداف المهنيين": اختيار حتى 5 مهنيين لإرسال الطلب إلهم بشكل خاص.
 class CraftsmanTargetingScreen extends StatefulWidget {
-  const CraftsmanTargetingScreen({super.key, required this.craftsmen});
+  const CraftsmanTargetingScreen({
+    super.key,
+    required this.craftsmen,
+    this.draft,
+  });
+
+  /// مسودة الطلب اللي رح تنبعت (null بالعرض فقط).
+  final RequestDraft? draft;
 
   final List<Craftsman> craftsmen;
 
   @override
-  State<CraftsmanTargetingScreen> createState() => _CraftsmanTargetingScreenState();
+  State<CraftsmanTargetingScreen> createState() =>
+      _CraftsmanTargetingScreenState();
 }
 
 class _CraftsmanTargetingScreenState extends State<CraftsmanTargetingScreen> {
@@ -27,7 +36,9 @@ class _CraftsmanTargetingScreenState extends State<CraftsmanTargetingScreen> {
 
   void _toggle(int index) {
     setState(() {
-      if (!_selected.remove(index) && _selected.length < _maxSelected) _selected.add(index);
+      if (!_selected.remove(index) && _selected.length < _maxSelected) {
+        _selected.add(index);
+      }
     });
   }
 
@@ -39,7 +50,14 @@ class _CraftsmanTargetingScreenState extends State<CraftsmanTargetingScreen> {
         backgroundColor: context.colors.background,
         bottomNavigationBar: AppBottomActionBar(
           label: 'إرسال الطلب',
-          onPressed: _selected.isEmpty ? null : () => RequestSentScreen.open(context),
+          onPressed: _selected.isEmpty
+              ? null
+              : () {
+                  final draft = widget.draft;
+                  draft == null
+                      ? RequestSentScreen.open(context)
+                      : RequestSentScreen.submit(context, draft);
+                },
         ),
         body: SafeArea(
           bottom: false,
@@ -48,8 +66,16 @@ class _CraftsmanTargetingScreenState extends State<CraftsmanTargetingScreen> {
             children: [
               Row(
                 children: [
-                  const Expanded(child: Text('استهداف المهنيين', style: AppTextStyles.title22Bold)),
-                  HeaderActionButton(label: 'إلغاء', onPressed: () => Navigator.pop(context)),
+                  const Expanded(
+                    child: Text(
+                      'استهداف المهنيين',
+                      style: AppTextStyles.title22Bold,
+                    ),
+                  ),
+                  HeaderActionButton(
+                    label: 'إلغاء',
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ],
               ),
               const SizedBox(height: 34),
@@ -58,12 +84,17 @@ class _CraftsmanTargetingScreenState extends State<CraftsmanTargetingScreen> {
                 child: Row(
                   children: [
                     const Expanded(
-                      child: Text('اختر الحرفيين المناسبين', style: AppTextStyles.body14Medium),
+                      child: Text(
+                        'اختر الحرفيين المناسبين',
+                        style: AppTextStyles.body14Medium,
+                      ),
                     ),
                     Text(
                       // بالتصميم: الكلمة يمين والرقم يسار "(5/3 محدد)".
                       '(محدد $_maxSelected/${_selected.length})',
-                      style: AppTextStyles.body14.copyWith(color: context.colors.textSecondary),
+                      style: AppTextStyles.body14.copyWith(
+                        color: context.colors.textSecondary,
+                      ),
                     ),
                   ],
                 ),

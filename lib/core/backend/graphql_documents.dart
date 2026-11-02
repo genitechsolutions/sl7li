@@ -96,6 +96,23 @@ mutation ResendOtpSecure($phoneNumber: String!) {
   }
 }''';
 
+  static const createJob = r'''
+mutation CreateJobSecure($input: AWSJSON!) {
+  createJobSecure(input: $input) {
+    job
+    error
+  }
+}''';
+
+  static const markMessagesRead = r'''
+mutation MarkMessagesAsReadSecure($conversationId: String!) {
+  markMessagesAsReadSecure(conversationId: $conversationId) {
+    success
+    updatedCount
+    error
+  }
+}''';
+
   static const cancelJob = r'''
 mutation CancelJobSecure($jobId: String!, $cancellationReasonCategory: String, $cancellationReason: String) {
   cancelJobSecure(jobId: $jobId, cancellationReasonCategory: $cancellationReasonCategory, cancellationReason: $cancellationReason) {

@@ -6,6 +6,7 @@ import 'package:khaled_flutter/cubits/load_cubit.dart';
 import 'package:khaled_flutter/data/chat_data.dart';
 import 'package:khaled_flutter/data/dummy_data.dart';
 import 'package:khaled_flutter/data/my_request.dart';
+import 'package:khaled_flutter/data/request_draft.dart';
 import 'package:khaled_flutter/data/repositories/auth_repository.dart';
 import 'package:khaled_flutter/data/repositories/conversations_repository.dart';
 import 'package:khaled_flutter/data/repositories/offers_repository.dart';
@@ -36,6 +37,9 @@ class _CountingRequests implements MyRequestsRepository {
 
   @override
   Future<void> cancel(String jobId, {String? reason}) async => cancelled.add(jobId);
+
+  @override
+  Future<void> create(RequestDraft draft) async {}
 }
 
 class _RecordingConversations implements ConversationsRepository {

@@ -28,7 +28,16 @@ class _RequestConfirmScreenState extends State<RequestConfirmScreen> {
   static const _labelPadding = EdgeInsetsDirectional.symmetric(horizontal: 12);
 
   final _termsTap = TapGestureRecognizer()..onTap = () {}; // TODO: open terms
-  final _privacyTap = TapGestureRecognizer()..onTap = () {}; // TODO: open privacy policy
+  final _privacyTap = TapGestureRecognizer()
+    ..onTap = () {}; // TODO: open privacy policy
+
+  bool _sending = false;
+
+  Future<void> _send() async {
+    setState(() => _sending = true);
+    final ok = await RequestSentScreen.submit(context, widget.draft);
+    if (!ok && mounted) setState(() => _sending = false);
+  }
 
   @override
   void dispose() {
@@ -53,17 +62,27 @@ class _RequestConfirmScreenState extends State<RequestConfirmScreen> {
         backgroundColor: context.colors.background,
         bottomNavigationBar: AppBottomActionBar(
           label: 'إرسال الطلب',
-          onPressed: () => RequestSentScreen.open(context),
+          onPressed: _sending ? null : _send,
           secondaryLabel: 'رجوع للخطوة السابقة',
           onSecondaryPressed: () => Navigator.pop(context),
           note: Text.rich(
             TextSpan(
-              style: AppTextStyles.body12.copyWith(color: context.colors.textSecondary),
+              style: AppTextStyles.body12.copyWith(
+                color: context.colors.textSecondary,
+              ),
               children: [
                 const TextSpan(text: 'بإرسال الطلب أنت توافق على '),
-                TextSpan(text: 'الشروط والأحكام', style: linkStyle, recognizer: _termsTap),
+                TextSpan(
+                  text: 'الشروط والأحكام',
+                  style: linkStyle,
+                  recognizer: _termsTap,
+                ),
                 const TextSpan(text: ' و '),
-                TextSpan(text: 'سياسة الخصوصية', style: linkStyle, recognizer: _privacyTap),
+                TextSpan(
+                  text: 'سياسة الخصوصية',
+                  style: linkStyle,
+                  recognizer: _privacyTap,
+                ),
               ],
             ),
             textAlign: TextAlign.center,
@@ -80,7 +99,12 @@ class _RequestConfirmScreenState extends State<RequestConfirmScreen> {
                 onCancel: () => NewRequestScreen.cancelFlow(context),
               ),
               const SizedBox(height: 22),
-              const Center(child: Text('تأكيد إرسال الطلب', style: AppTextStyles.title24Bold)),
+              const Center(
+                child: Text(
+                  'تأكيد إرسال الطلب',
+                  style: AppTextStyles.title24Bold,
+                ),
+              ),
               const SizedBox(height: 24),
               for (final (label, value) in summary)
                 _SummaryRow(label: label, value: value, showDivider: true),
@@ -91,7 +115,10 @@ class _RequestConfirmScreenState extends State<RequestConfirmScreen> {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const CraftsmanTargetingScreen(craftsmen: targetableCraftsmen),
+                    builder: (_) => CraftsmanTargetingScreen(
+                      craftsmen: targetableCraftsmen,
+                      draft: draft,
+                    ),
                   ),
                 ),
               ),
@@ -103,13 +130,18 @@ class _RequestConfirmScreenState extends State<RequestConfirmScreen> {
               const SizedBox(height: 10),
               Text(
                 draft.description,
-                style: AppTextStyles.body16.copyWith(color: context.colors.textSecondary),
+                style: AppTextStyles.body16.copyWith(
+                  color: context.colors.textSecondary,
+                ),
               ),
               if (draft.photos.isNotEmpty) ...[
                 const SizedBox(height: 32),
                 const Padding(
                   padding: _labelPadding,
-                  child: Text('الصور المرفوعة', style: AppTextStyles.body16Medium),
+                  child: Text(
+                    'الصور المرفوعة',
+                    style: AppTextStyles.body16Medium,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 GridView.count(
@@ -156,21 +188,34 @@ class _SummaryRow extends StatelessWidget {
     final row = Container(
       height: 41,
       decoration: BoxDecoration(
-        border: showDivider ? Border(bottom: BorderSide(color: context.colors.border)) : null,
+        border: showDivider
+            ? Border(bottom: BorderSide(color: context.colors.border))
+            : null,
       ),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: AppTextStyles.body16.copyWith(color: context.colors.textSecondary),
+              style: AppTextStyles.body16.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
           ),
           if (onTap == null)
             Text(value, style: AppTextStyles.body16Medium)
           else ...[
-            Text(value, style: AppTextStyles.body16Medium.copyWith(color: context.colors.link)),
-            Icon(Icons.keyboard_arrow_left_rounded, size: 22, color: context.colors.link),
+            Text(
+              value,
+              style: AppTextStyles.body16Medium.copyWith(
+                color: context.colors.link,
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_left_rounded,
+              size: 22,
+              color: context.colors.link,
+            ),
           ],
         ],
       ),
@@ -178,6 +223,10 @@ class _SummaryRow extends StatelessWidget {
 
     return onTap == null
         ? row
-        : GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: row);
+        : GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: row,
+          );
   }
 }
