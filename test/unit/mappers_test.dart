@@ -289,6 +289,18 @@ void liveShapeTests() {
       expect(j['city_code'], 'damascus');
     });
 
+    test('طلب المهني بعد موافقة الزبون = مرحلة تم الاتفاق + موقع بالعربي', () {
+      final r = craftsmanRequestFromJson({
+        'job_id': 'j1',
+        'statusByProfessional': 'approved',
+        'status': 'professional_selected',
+        'city_code': 'damascus',
+        'neighborhood_code': 'damascus_center',
+      });
+      expect(r.stage, 1);
+      expect(r.location, 'دمشق, مركز المدينة');
+    });
+
     test('رسالة دردشة حقيقية: sent حسب senderId', () {
       final j = {
         'id': 'm1',

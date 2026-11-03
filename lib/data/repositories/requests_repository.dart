@@ -235,11 +235,19 @@ String _urgencyLabel(String? urgency) => switch (urgency) {
   _ => 'عادي',
 };
 
+const _placeNames = {
+  'damascus': 'دمشق',
+  'aleppo': 'حلب',
+  'homs': 'حمص',
+  'hama': 'حماة',
+  'damascus_center': 'مركز المدينة',
+};
+
 String _locationOf(Map<String, dynamic> j) {
   final parts = [
     str(j, 'city_code'),
     str(j, 'neighborhood_code'),
-  ].whereType<String>().toList();
+  ].whereType<String>().map((c) => _placeNames[c] ?? c).toList();
   return parts.join(', ');
 }
 
@@ -303,7 +311,7 @@ CraftsmanRequest craftsmanRequestFromJson(
   final stage = open
       ? null
       : switch (status) {
-          'professional_selected' || 'selected' => 1,
+          'professional_selected' || 'selected' || 'approved' => 1,
           'in_progress' => 2,
           'completed' => 3,
           _ => 0,
