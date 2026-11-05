@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app_dependencies.dart';
 import 'cubits/auth/auth_cubit.dart';
+import 'cubits/craftsman_signup_cubit.dart';
 import 'cubits/feature_cubits.dart';
 import 'cubits/professional_profile_cubit.dart';
 import 'cubits/load_cubit.dart';
@@ -33,6 +34,7 @@ class AppProviders extends StatelessWidget {
         BlocProvider(create: (_) => WalletTxCubit(d.wallet)),
         RepositoryProvider<PublicProfileRepository>.value(value: d.publicProfile),
         BlocProvider(create: (_) => ProfessionalProfileCubit(d.professionalProfile)),
+        BlocProvider(create: (_) => CraftsmanSignupCubit(d.craftsmanSignup)),
       ],
       child: child,
     );

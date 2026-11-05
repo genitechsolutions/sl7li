@@ -21,13 +21,51 @@ class CraftsmanSignupDraft {
   String workshopAddress = '';
   String bio = '';
   bool locationSet = false;
+  double? latitude;
+  double? longitude;
+
+  // مؤهلات مطلوبة من الخلفية (بالخطوتين 1 و3)؛ الاختيارات نصوص عربية وبتتحوّل لأكواد بالمحوّل.
+  String? registrationSource;
+  String registrationOrganizationName = '';
+  String? businessType;
+  String age = '';
+  bool hasEngineeringDegree = false;
+  bool hasProfessionalLicense = false;
+  String? projectScales;
+  bool hasTeam = false;
+  String teamSize = '';
+
+  /// العمر كرقم (null = فاضي أو مش رقم).
+  int? get ageValue => int.tryParse(age.trim());
+
+  /// عدد أعضاء الفريق كرقم (null = فاضي أو مش رقم).
+  int? get teamSizeValue => int.tryParse(teamSize.trim());
+
+  bool get registrationValid =>
+      registrationSource != null &&
+      (registrationSource != craftsmanOrganizationSource ||
+          registrationOrganizationName.trim().isNotEmpty);
+
+  bool get ageValid => (ageValue ?? 0) >= craftsmanMinAge && ageValue! <= 100;
+
+  bool get teamValid =>
+      !hasTeam || ((teamSizeValue ?? 0) >= 1 && teamSizeValue! <= 1000);
 
   bool get step1Valid =>
-      businessName.trim().isNotEmpty && city != null && districts.isNotEmpty;
+      businessName.trim().isNotEmpty &&
+      city != null &&
+      districts.isNotEmpty &&
+      businessType != null &&
+      ageValid &&
+      registrationValid;
   bool get step2Valid =>
       services.isNotEmpty &&
       services.every((s) => (specialties[s] ?? {}).isNotEmpty);
-  bool get step3Valid => years.trim().isNotEmpty && transport != null;
+  bool get step3Valid =>
+      years.trim().isNotEmpty &&
+      transport != null &&
+      projectScales != null &&
+      teamValid;
   bool get step4Valid =>
       workshopAddress.trim().isNotEmpty && bio.trim().isNotEmpty;
 }
@@ -41,6 +79,28 @@ const craftsmanServiceOptions = [
 ];
 
 const craftsmanMaxServices = 3;
+
+/// الحد الأدنى للعمر (رسالة الخلفية: "Minimum age to join is 20").
+const craftsmanMinAge = 20;
+
+const craftsmanOrganizationSource = 'منظمة أو جمعية';
+
+/// (النص، الكود بالخلفية).
+const craftsmanRegistrationSources = [
+  ('من الإعلانات', 'ads'),
+  ('من صديق أو قريب', 'friend_family'),
+  (craftsmanOrganizationSource, 'organization'),
+  ('من مصدر آخر', 'other'),
+];
+
+const craftsmanBusinessTypes = [('فرد', 'individual'), ('شركة', 'company')];
+
+/// حجم المشاريع: كود واحد أو أكتر (كلاهما = الاتنين).
+const craftsmanProjectScaleOptions = [
+  ('أعمال منزلية ومحلات', ['residential_small_business']),
+  ('مشاريع كبيرة وصناعية', ['large_industrial']),
+  ('كلاهما', ['residential_small_business', 'large_industrial']),
+];
 
 /// تخصصات كل خدمة (وهمية).
 const craftsmanSpecialtiesByService = {
