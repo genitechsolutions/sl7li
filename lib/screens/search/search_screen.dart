@@ -7,7 +7,7 @@ import '../../core/widgets/craftsman_card.dart';
 import '../../core/widgets/filter_chip_button.dart';
 import '../../core/widgets/promo_banner.dart';
 import '../../data/dummy_data.dart';
-import '../craftsman_profile/craftsman_profile_screen.dart';
+import '../craftsman_profile/craftsman_profile_loader.dart';
 import '../new_request/new_request_screen.dart';
 import 'widgets/search_top_bar.dart';
 import 'widgets/suggestion_tile.dart';
@@ -140,12 +140,8 @@ class _SearchScreenState extends State<SearchScreen> {
             child: CraftsmanCard(
               craftsman: craftsman,
               color: context.colors.background,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const CraftsmanProfileScreen(profile: sampleCraftsmanProfile),
-                ),
-              ),
+              onTap: () =>
+                  openCraftsmanProfile(context, professionalId: craftsman.professionalId),
             ),
           ),
       ],

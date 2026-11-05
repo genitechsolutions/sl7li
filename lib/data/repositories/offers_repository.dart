@@ -78,5 +78,6 @@ Offer offerFromJson(Map<String, dynamic> j) {
     image: image == null ? 'assets/images/offer_carpentry.jpg' : resourceUrl(image),
     discount: discount,
     tags: [if (str(j, 'serviceCategory') != null) str(j, 'serviceCategory')!],
+    professionalId: str(j, 'professionalId'),
   );
 }

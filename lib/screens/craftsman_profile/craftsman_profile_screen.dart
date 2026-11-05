@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_bottom_action_bar.dart';
 import '../../core/widgets/app_chip.dart';
+import '../../core/widgets/app_image.dart';
 import '../../core/widgets/app_segmented_control.dart';
 import '../../core/widgets/craftsman_header.dart';
 import '../../core/widgets/offer_card.dart';
@@ -213,7 +214,7 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
         for (final image in works)
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(image, fit: BoxFit.cover),
+            child: AppImage(image),
           ),
       ],
     );

@@ -7,6 +7,7 @@ import 'data/repositories/wallet_repository.dart';
 import 'data/repositories/notifications_repository.dart';
 import 'data/repositories/my_offers_repository.dart';
 import 'data/repositories/offers_repository.dart';
+import 'data/repositories/public_profile_repository.dart';
 import 'data/repositories/requests_repository.dart';
 
 /// كل الـ repositories بمكان واحد. `fake` للتصميم/الاختبارات، `amplify` للخلفية الحقيقية.
@@ -21,6 +22,7 @@ class AppDependencies {
     required this.wallet,
     required this.notifications,
     required this.myOffers,
+    required this.publicProfile,
   });
 
   final AuthRepository auth;
@@ -32,6 +34,7 @@ class AppDependencies {
   final WalletRepository wallet;
   final NotificationsRepository notifications;
   final MyOffersRepository myOffers;
+  final PublicProfileRepository publicProfile;
 
   factory AppDependencies.fake() => AppDependencies(
     auth: FakeAuthRepository(),
@@ -43,6 +46,7 @@ class AppDependencies {
     wallet: const FakeWalletRepository(),
     notifications: const FakeNotificationsRepository(),
     myOffers: const FakeMyOffersRepository(),
+    publicProfile: const FakePublicProfileRepository(),
   );
 
   factory AppDependencies.amplify() {
@@ -58,6 +62,7 @@ class AppDependencies {
       wallet: const RemoteWalletRepository(gateway),
       notifications: RemoteNotificationsRepository(gateway, auth),
       myOffers: const RemoteMyOffersRepository(gateway),
+      publicProfile: const RemotePublicProfileRepository(gateway),
     );
   }
 

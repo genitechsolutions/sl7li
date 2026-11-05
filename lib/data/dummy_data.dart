@@ -30,6 +30,7 @@ class Offer {
     required this.discount,
     this.tags = const [],
     this.craftsman,
+    this.professionalId,
   });
 
   final String title;
@@ -38,6 +39,7 @@ class Offer {
   final String discount;
   final List<String> tags;
   final Craftsman? craftsman;
+  final String? professionalId;
 }
 
 class Craftsman {
@@ -51,6 +53,7 @@ class Craftsman {
     this.isPro = false,
     this.isVerified = false,
     this.isRecommended = false,
+    this.professionalId,
   });
 
   final String name;
@@ -62,6 +65,9 @@ class Craftsman {
   final bool isPro;
   final bool isVerified;
   final bool isRecommended;
+
+  /// معرّف المهني بالخلفية (null بالبيانات الوهمية).
+  final String? professionalId;
 }
 
 class OfferDetails {
