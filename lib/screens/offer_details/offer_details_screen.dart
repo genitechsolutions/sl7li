@@ -12,7 +12,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/craftsman_header.dart';
-import '../craftsman_profile/craftsman_profile_screen.dart';
+import '../craftsman_profile/craftsman_profile_loader.dart';
 import '../../data/dummy_data.dart';
 import 'widgets/offer_hero.dart';
 
@@ -94,12 +94,9 @@ class _OfferDetailsView extends StatelessWidget {
                     CraftsmanHeader(
                       craftsman: details.craftsman,
                       trailing: GestureDetector(
-                        onTap: () => Navigator.push(
+                        onTap: () => openCraftsmanProfile(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const CraftsmanProfileScreen(profile: sampleCraftsmanProfile),
-                          ),
+                          professionalId: details.craftsman.professionalId,
                         ),
                         child: Directionality(
                           textDirection: TextDirection.ltr,

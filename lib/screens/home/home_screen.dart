@@ -7,7 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../data/dummy_data.dart';
-import '../craftsman_profile/craftsman_profile_screen.dart';
+import '../craftsman_profile/craftsman_profile_loader.dart';
 import '../offer_details/offer_details_screen.dart';
 import '../messages/messages_screen.dart';
 import '../settings/settings_screen.dart';
@@ -124,13 +124,8 @@ class HomeScreen extends StatelessWidget {
                     padding: _padding.copyWith(bottom: 12),
                     child: CraftsmanCard(
                       craftsman: craftsman,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              const CraftsmanProfileScreen(profile: sampleCraftsmanProfile),
-                        ),
-                      ),
+                      onTap: () =>
+                          openCraftsmanProfile(context, professionalId: craftsman.professionalId),
                     ),
                   ),
                 const SizedBox(height: 12),

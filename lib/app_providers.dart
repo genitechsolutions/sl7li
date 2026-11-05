@@ -5,6 +5,7 @@ import 'app_dependencies.dart';
 import 'cubits/auth/auth_cubit.dart';
 import 'cubits/feature_cubits.dart';
 import 'cubits/load_cubit.dart';
+import 'data/repositories/public_profile_repository.dart';
 
 /// بيوفّر الـ cubits لكل التطبيق (فوق MaterialApp عشان توصل لكل الصفحات).
 class AppProviders extends StatelessWidget {
@@ -29,6 +30,7 @@ class AppProviders extends StatelessWidget {
         BlocProvider(create: (_) => WalletCubit(d.wallet)),
         BlocProvider(create: (_) => MyOffersCubit(d.myOffers)),
         BlocProvider(create: (_) => WalletTxCubit(d.wallet)),
+        RepositoryProvider<PublicProfileRepository>.value(value: d.publicProfile),
       ],
       child: child,
     );

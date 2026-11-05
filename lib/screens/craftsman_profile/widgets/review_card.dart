@@ -55,17 +55,19 @@ class ReviewCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            decoration: BoxDecoration(
-              color: context.colors.tag,
-              borderRadius: BorderRadius.circular(20),
+          if (review.tag.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+              decoration: BoxDecoration(
+                color: context.colors.tag,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                review.tag,
+                style: AppTextStyles.body14.copyWith(color: context.colors.tagText),
+              ),
             ),
-            child: Text(
-              review.tag,
-              style: AppTextStyles.body14.copyWith(color: context.colors.tagText),
-            ),
-          ),
+          ],
           const SizedBox(height: 16),
           Text(
             review.comment,

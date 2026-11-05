@@ -4,13 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../cubits/auth/auth_cubit.dart';
 import '../../../cubits/feature_cubits.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
 import '../../../core/widgets/dashed_border_box.dart';
 import '../../../data/craftsman_verification.dart';
-import '../../../data/dummy_data.dart';
-import '../../craftsman_profile/craftsman_profile_screen.dart';
+import '../../craftsman_profile/craftsman_profile_loader.dart';
 import '../../home/home_screen.dart';
 import '../../notifications/notifications_screen.dart';
 import '../../settings/settings_screen.dart';
@@ -194,14 +194,10 @@ class CraftsmanProfileTab extends StatelessWidget {
                             color: colors.barrier,
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.push(
+                            onTap: () => openCraftsmanProfile(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => const CraftsmanProfileScreen(
-                                  profile: sampleCraftsmanProfile,
-                                  selfView: true,
-                                ),
-                              ),
+                              professionalId: context.read<AuthCubit>().state.session?.userId,
+                              selfView: true,
                             ),
                             child: Row(
                               children: [
