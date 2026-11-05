@@ -8,6 +8,7 @@ import 'cubits/feature_cubits.dart';
 import 'cubits/professional_profile_cubit.dart';
 import 'cubits/load_cubit.dart';
 import 'data/repositories/public_profile_repository.dart';
+import 'data/repositories/service_classifier_repository.dart';
 
 /// بيوفّر الـ cubits لكل التطبيق (فوق MaterialApp عشان توصل لكل الصفحات).
 class AppProviders extends StatelessWidget {
@@ -19,7 +20,9 @@ class AppProviders extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = dependencies;
-    return MultiBlocProvider(
+    return RepositoryProvider<ServiceClassifier>.value(
+      value: d.classifier,
+      child: MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => AuthCubit(d.auth)..restore()),
         BlocProvider(create: (_) => OffersCubit(d.offers)),
@@ -37,6 +40,7 @@ class AppProviders extends StatelessWidget {
         BlocProvider(create: (_) => CraftsmanSignupCubit(d.craftsmanSignup)),
       ],
       child: child,
+      ),
     );
   }
 }

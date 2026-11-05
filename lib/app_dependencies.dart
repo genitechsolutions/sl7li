@@ -11,6 +11,7 @@ import 'data/repositories/my_offers_repository.dart';
 import 'data/repositories/offers_repository.dart';
 import 'data/repositories/public_profile_repository.dart';
 import 'data/repositories/requests_repository.dart';
+import 'data/repositories/service_classifier_repository.dart';
 
 /// كل الـ repositories بمكان واحد. `fake` للتصميم/الاختبارات، `amplify` للخلفية الحقيقية.
 class AppDependencies {
@@ -27,7 +28,10 @@ class AppDependencies {
     required this.publicProfile,
     required this.professionalProfile,
     required this.craftsmanSignup,
+    this.classifier = const FakeServiceClassifier(),
   });
+
+  final ServiceClassifier classifier;
 
   final AuthRepository auth;
   final OffersRepository offers;
@@ -73,6 +77,7 @@ class AppDependencies {
       publicProfile: const RemotePublicProfileRepository(gateway),
       professionalProfile: const RemoteProfessionalProfileRepository(gateway),
       craftsmanSignup: const RemoteCraftsmanSignupRepository(gateway),
+      classifier: const RemoteServiceClassifier(gateway),
     );
   }
 

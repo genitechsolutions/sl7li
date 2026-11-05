@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
@@ -13,6 +14,8 @@ import '../../core/widgets/form/form_label.dart';
 import '../../core/widgets/form/options_sheet.dart';
 import '../../core/widgets/form/phone_field.dart';
 import '../../data/dummy_data.dart';
+import '../../data/repositories/craftsman_signup_repository.dart';
+import '../../data/repositories/service_classifier_repository.dart';
 import '../../data/request_draft.dart';
 import 'request_details_screen.dart';
 import 'widgets/request_step_header.dart';
@@ -53,6 +56,9 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   String? _serviceType;
   bool _autoClassifyFailed = false;
   String? _subSpecialty;
+  String? _serviceId;
+  String? _specialtyId;
+  bool _classifying = false;
   bool _onBehalf = false;
   String _city = requestCities.first;
 
@@ -70,6 +76,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       ..description = _description.text.trim()
       ..serviceType = _autoClassifyFailed ? null : _serviceType
       ..subSpecialty = _subSpecialty
+      ..serviceId = _autoClassifyFailed ? null : _serviceId
+      ..specialtyId = _autoClassifyFailed ? null : _specialtyId
       ..onBehalf = _onBehalf
       ..customerName = _customerName.text
       ..phone = _phone.text
@@ -85,15 +93,30 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       _serviceType = type;
       _autoClassifyFailed = false;
       _subSpecialty = null;
+      _serviceId = serviceIdForLabel(type);
+      _specialtyId = null;
     });
   }
 
-  // TODO: التصنيف التلقائي الحقيقي بيحتاج backend؛ هلق بنعرض حالة الفشل متل التصميم.
-  void _classifyAutomatically() {
+  Future<void> _classifyAutomatically() async {
+    if (_classifying) return;
+    final classifier = context.read<ServiceClassifier>();
+    final description = _description.text.trim();
+    setState(() => _classifying = true);
+    ServiceClassification? result;
+    try {
+      if (description.isNotEmpty) result = await classifier.classify(description);
+    } catch (_) {
+      result = null;
+    }
+    if (!mounted) return;
     setState(() {
-      _serviceType = _autoClassify;
-      _autoClassifyFailed = true;
-      _subSpecialty = null;
+      _classifying = false;
+      _autoClassifyFailed = result == null;
+      _serviceType = result?.serviceLabel ?? _autoClassify;
+      _serviceId = result?.serviceId;
+      _subSpecialty = result?.specialtyLabel;
+      _specialtyId = result?.specialtyId;
     });
   }
 
@@ -103,7 +126,12 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       title: 'التخصص الفرعي',
       options: sampleServiceDetails.specialties.toSet().toList(),
     );
-    if (value != null) setState(() => _subSpecialty = value);
+    if (value != null) {
+      setState(() {
+        _subSpecialty = value;
+        _specialtyId = craftsmanSpecialtyIds[value];
+      });
+    }
   }
 
   Future<void> _pickCity() async {

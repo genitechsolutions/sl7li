@@ -121,11 +121,28 @@ const _placeNames = {
   'aleppo': 'حلب',
   'homs': 'حمص',
   'hama': 'حماة',
+  'latakia': 'اللاذقية',
+  'tartus': 'طرطوس',
+  'daraa': 'درعا',
   'damascus_center': 'مركز المدينة',
+  'aleppo_center': 'مركز حلب',
+  'homs_center': 'مركز حمص',
+  'hama_center': 'مركز حماة',
+  'latakia_center': 'مركز اللاذقية',
+  'tartus_center': 'مركز طرطوس',
+  'daraa_center': 'مركز درعا',
 };
 
 /// اسم المدينة/الحي بالعربي إذا معروف، وإلا الرمز نفسه.
-String placeName(String code) => _placeNames[code] ?? code;
+String placeName(String code) {
+  final known = _placeNames[code];
+  if (known != null) return known;
+  if (code.endsWith('_center')) {
+    final city = _placeNames[code.substring(0, code.length - 7)];
+    if (city != null) return 'مركز $city';
+  }
+  return code.contains('_') && RegExp(r'^[a-z_]+$').hasMatch(code) ? code.replaceAll('_', ' ') : code;
+}
 
 /// رقم بفواصل آلاف: 120000 ← 120,000.
 String formatMoney(Object? v) {

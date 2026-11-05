@@ -118,7 +118,7 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
   }
 }
 
-/// حقول createJobSecure من مسودة الطلب. (service_id=general لأن التصنيف الدقيق بيصير بالخلفية.)
+/// حقول createJobSecure من مسودة الطلب. (service_id=general إذا ما انصنّف الطلب.)
 Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId, List<String> images = const []}) {
   const cityCodes = {
     'دمشق': 'damascus',
@@ -134,13 +134,13 @@ Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId, List<String>
   final title = (d.serviceType ?? 'طلب خدمة');
   return {
     'job_id': jobId ?? _uuid(),
-    'service_id': 'general',
+    'service_id': d.serviceId ?? 'general',
     'title': title,
     'description': extra.isEmpty ? d.description : '${d.description}\n$extra',
     'country_code': 'syria',
     'city_code': cityCodes[d.city] ?? 'damascus',
     'urgency': urgency[d.urgency.clamp(0, 2)],
-    'specialties_requested': <String>[],
+    'specialties_requested': <String>[if (d.specialtyId != null) d.specialtyId!],
     'images': images,
     if (d.latitude != null && d.longitude != null) ...{
       'approximate_latitude': d.latitude,
