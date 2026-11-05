@@ -72,6 +72,9 @@ class _RecordingConversations implements ConversationsRepository {
   Future<void> markRead(String conversationId) async {}
 
   @override
+  Future<void> ensureJobConversation(String jobId, String customerId) async {}
+
+  @override
   Stream<ChatMessage> liveMessages(Conversation conversation) => const Stream.empty();
 }
 

@@ -351,6 +351,7 @@ CraftsmanRequest craftsmanRequestFromJson(
     stage: stage,
     photos: strList(j, 'images').length,
     images: strList(j, 'images').map(resourceUrl).toList(),
+    customerId: str(j, 'customer_id') ?? str(j, 'owner'),
     state: state,
     note: str(j, 'cancellation_reason'),
   );

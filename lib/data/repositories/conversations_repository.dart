@@ -30,6 +30,9 @@ abstract class ConversationsRepository {
 
   Future<void> markRead(String conversationId);
 
+  /// بيفتح (أو بيعمل) محادثة الطلب بين الزبون والمهني الحالي.
+  Future<void> ensureJobConversation(String jobId, String customerId);
+
   /// رسائل جديدة مباشرة (من الطرف التاني ومن أجهزتي).
   Stream<ChatMessage> liveMessages(Conversation conversation);
 }
@@ -69,6 +72,9 @@ class FakeConversationsRepository implements ConversationsRepository {
 
   @override
   Future<void> markRead(String conversationId) async {}
+
+  @override
+  Future<void> ensureJobConversation(String jobId, String customerId) async {}
 
   @override
   Stream<ChatMessage> liveMessages(Conversation conversation) => const Stream.empty();
@@ -152,6 +158,17 @@ class RemoteConversationsRepository implements ConversationsRepository {
     final created = asMap(res['createMessage']);
     if (created.isEmpty) throw const BackendException('تعذّر إرسال الرسالة');
     return str(created, 'id');
+  }
+
+  @override
+  Future<void> ensureJobConversation(String jobId, String customerId) async {
+    final me = _auth.currentUserId;
+    if (me == null) throw BackendException.unauthenticated;
+    await _gateway.run(
+      Gql.findOrCreateJobConversation,
+      variables: {'a': customerId, 'b': me, 'j': jobId},
+      mutation: true,
+    );
   }
 
   @override

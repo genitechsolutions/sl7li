@@ -14,7 +14,10 @@ class CraftsmanRequest {
     this.rated = false,
     this.id,
     this.images = const [],
+    this.customerId,
   });
+
+  final String? customerId;
 
   /// صور الطلب (روابط)؛ فاضية بالبيانات الوهمية.
   final List<String> images;

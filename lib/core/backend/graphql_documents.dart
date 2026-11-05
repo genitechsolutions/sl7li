@@ -84,6 +84,14 @@ mutation CreateMessage($input: CreateMessageInput!) {
   }
 }''';
 
+  static const findOrCreateJobConversation = r'''
+mutation FindOrCreateJobConversation($a: String!, $b: String!, $j: String!) {
+  findOrCreateJobConversation(participant1Id: $a, participant2Id: $b, jobId: $j) {
+    id
+    error
+  }
+}''';
+
   static const getMyProposal = r'''
 query GetMyProposalForJobSecure($jobId: String!) {
   getMyProposalForJobSecure(jobId: $jobId) {

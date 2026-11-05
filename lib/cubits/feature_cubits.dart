@@ -92,6 +92,25 @@ class ConversationsCubit extends LoadCubit<List<Conversation>> {
 
   Future<void> markRead(String conversationId) => _repo.markRead(conversationId);
 
+  /// محادثة طلب (بتنعمل إذا ما كانت موجودة) بوضع المهني.
+  Future<Conversation?> openForJob(String jobId, String? customerId) async {
+    Conversation? find() {
+      for (final c in state.data ?? const <Conversation>[]) {
+        if (c.jobId == jobId) return c;
+      }
+      return null;
+    }
+
+    await loadFor(professionalMode: true);
+    var found = find();
+    if (found == null && customerId != null) {
+      await _repo.ensureJobConversation(jobId, customerId);
+      await load(force: true);
+      found = find();
+    }
+    return found;
+  }
+
   Stream<ChatMessage> liveMessages(Conversation c) => _repo.liveMessages(c);
 
   /// بيحمّل للوضع المطلوب (إذا تغيّر الوضع بنعيد التحميل).

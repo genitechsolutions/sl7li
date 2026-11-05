@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/backend/backend_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../cubits/feature_cubits.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
+import '../../../data/chat_data.dart';
 import '../../../data/craftsman_data.dart';
 import '../../../data/my_request.dart';
 import '../../messages/chat_screen.dart';
@@ -73,21 +75,27 @@ class _CraftsmanRequestDetailsScreenState
     var conversation = sampleConversations[0];
     final jobId = widget.request.id;
     if (jobId != null) {
-      final cubit = context.read<ConversationsCubit>();
-      await cubit.loadFor(professionalMode: true);
-      final match = (cubit.state.data ?? const []).where(
-        (c) => c.jobId == jobId,
-      );
-      if (!mounted) return;
-      if (match.isEmpty) {
+      Conversation? found;
+      try {
+        found = await context.read<ConversationsCubit>().openForJob(
+          jobId,
+          widget.request.customerId,
+        );
+      } on BackendException catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('ما في محادثة لهالطلب بعد')),
-          );
+          ..showSnackBar(SnackBar(content: Text(e.message)));
         return;
       }
-      conversation = match.first;
+      if (!mounted) return;
+      if (found == null) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(content: Text('تعذّر فتح المحادثة')));
+        return;
+      }
+      conversation = found;
     }
     await Navigator.push(
       context,

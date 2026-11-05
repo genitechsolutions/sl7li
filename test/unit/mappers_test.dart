@@ -330,6 +330,11 @@ void liveShapeTests() {
       expect(r.location, 'دمشق, مركز المدينة');
     });
 
+    test('طلب المهني: معرّف الزبون من owner لما customer_id مخفي', () {
+      final r = craftsmanRequestFromJson({'job_id': 'j', 'owner': 'cust-1'});
+      expect(r.customerId, 'cust-1');
+    });
+
     test('رسالة دردشة حقيقية: sent حسب senderId', () {
       final j = {
         'id': 'm1',
