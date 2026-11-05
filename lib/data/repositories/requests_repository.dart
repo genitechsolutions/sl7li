@@ -172,6 +172,9 @@ abstract class CraftsmanJobsRepository {
 
   /// العرض اللي قدّمه المهني على الطلب (null = ما قدّم).
   Future<RequestOffer?> myProposal(String jobId);
+
+  /// بيرسل عرض سعر على طلب (بيخصم نقطة من المحفظة).
+  Future<void> sendProposal(Map<String, Object?> input);
 }
 
 class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
@@ -194,6 +197,9 @@ class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
 
   @override
   Future<RequestOffer?> myProposal(String jobId) async => null;
+
+  @override
+  Future<void> sendProposal(Map<String, Object?> input) async {}
 }
 
 class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
@@ -250,6 +256,16 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
     throwIfBackendError(res);
     final j = asMap(res['proposal']);
     return j.isEmpty ? null : requestOfferFromJson(j);
+  }
+
+  @override
+  Future<void> sendProposal(Map<String, Object?> input) async {
+    final data = await _gateway.run(
+      Gql.createJobProposal,
+      variables: {'input': jsonEncode(input)},
+      mutation: true,
+    );
+    throwIfBackendError(asMap(data['createJobProposalSecure']));
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/craftsman_verification.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -37,7 +38,16 @@ class _CraftsmanHomeScreenState extends State<CraftsmanHomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ProfileCubit>().load();
+    final profile = context.read<ProfileCubit>();
+    profile.load().then((_) {
+      final st = profile.state.data?.idStatus;
+      if (st == null) return;
+      verificationNotifier.value = switch (st) {
+        'approved' => VerificationStatus.verified,
+        'rejected' => VerificationStatus.rejected,
+        _ => VerificationStatus.pending,
+      };
+    });
     context.read<WalletCubit>().load();
   }
 

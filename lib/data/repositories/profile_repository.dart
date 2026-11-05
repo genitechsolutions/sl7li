@@ -11,7 +11,11 @@ class UserProfile {
     this.cityCode,
     this.neighborhoodCode,
     this.isProfessional = false,
+    this.idStatus,
   });
+
+  /// حالة توثيق الهوية بالخلفية (approved/pending/rejected)، null = ما في طلب.
+  final String? idStatus;
 
   /// عنده ملف مهني بالخلفية (مو بس الدور بالحساب).
   final bool isProfessional;
@@ -63,7 +67,25 @@ class RemoteProfileRepository implements ProfileRepository {
     } on BackendException {
       professional = false;
     }
-    return userProfileFromJson(asMap(res['user']), professional: professional);
+    String? idStatus;
+    if (professional) {
+      try {
+        final v = await _gateway.run(Gql.getIdVerificationStatus);
+        final r = asMap(v['getGovernmentIdVerificationStatusSecure']);
+        idStatus = str(r, 'status');
+      } on BackendException {
+        idStatus = null;
+      }
+    }
+    final base = userProfileFromJson(asMap(res['user']), professional: professional);
+    return UserProfile(
+      name: base.name,
+      phone: base.phone,
+      cityCode: base.cityCode,
+      neighborhoodCode: base.neighborhoodCode,
+      isProfessional: professional,
+      idStatus: idStatus,
+    );
   }
 }
 

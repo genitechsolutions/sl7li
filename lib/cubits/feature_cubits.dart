@@ -71,6 +71,11 @@ class CraftsmanJobsCubit extends LoadCubit<CraftsmanJobs> {
 
   Future<RequestOffer?> myProposal(String jobId) => _repo.myProposal(jobId);
 
+  Future<void> sendProposal(Map<String, Object?> input) async {
+    await _repo.sendProposal(input);
+    await load(force: true);
+  }
+
   Future<void> ignore(String jobId, {required String reason, String? other}) async {
     await _repo.ignore(jobId, reason: reason, other: other);
     await load(force: true);

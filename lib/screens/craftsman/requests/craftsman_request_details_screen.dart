@@ -61,6 +61,7 @@ class _CraftsmanRequestDetailsScreenState
     final sent = await showSendOfferFlow(
       context,
       requestTitle: widget.request.title,
+      jobId: widget.request.id,
     );
     if (sent == true) setState(() => _offerSent = true);
   }

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../core/backend/backend_exception.dart';
+import '../../../cubits/feature_cubits.dart';
 
 import '../../../data/craftsman_verification.dart';
 import '../profile/verification_dialog.dart';
@@ -33,6 +37,35 @@ class OfferDraft {
     'نطاق سعري' => '$price - $priceTo',
     _ => price,
   };
+
+  Map<String, Object?> toInput(String jobId) {
+    final range = pricing == 'نطاق سعري';
+    return {
+      'job_id': jobId,
+      'pricing_type': switch (pricing) {
+        'نطاق سعري' => 'range',
+        'سعر بالساعة' => 'hourly',
+        _ => 'fixed',
+      },
+      'quote_amount': _num(price),
+      if (range) 'quote_amount_max': _num(priceTo),
+      'quote_currency': 'SYP',
+      'inspection_fee_type': freeVisit ? 'free' : 'fixed',
+      if (!freeVisit) ...{
+        'inspection_fee_amount': _num(visitFee),
+        'inspection_fee_currency': 'SYP',
+      },
+      'includes_materials': materialsIncluded,
+      if (!materialsIncluded && materialsFee.trim().isNotEmpty) ...{
+        'materials_cost': _num(materialsFee),
+        'materials_currency': 'SYP',
+      },
+      'estimated_duration': '',
+    };
+  }
+
+  static num _num(String v) =>
+      num.tryParse(v.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
 
   String get unit =>
       pricing == 'سعر بالساعة' ? 'ليرة جديدة / ساعة' : 'ليرة جديدة';
@@ -210,6 +243,7 @@ class _IgnoreDialogState extends State<_IgnoreDialog> {
 Future<bool?> showSendOfferFlow(
   BuildContext context, {
   required String requestTitle,
+  String? jobId,
 }) async {
   // لازم يكون الحساب موثّق (أو بانتظار المراجعة) قبل إرسال عروض.
   if (verificationNotifier.value == VerificationStatus.none) {
@@ -234,6 +268,21 @@ Future<bool?> showSendOfferFlow(
     );
     if (confirmed == null || !context.mounted) return null;
     if (confirmed) {
+      if (jobId != null) {
+        try {
+          await context.read<CraftsmanJobsCubit>().sendProposal(
+            draft.toInput(jobId),
+          );
+        } on BackendException catch (e) {
+          if (!context.mounted) return false;
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(e.message)));
+          return false;
+        }
+        if (!context.mounted) return true;
+        context.read<WalletCubit>().load(force: true);
+      }
       await showAppModal<void>(context, (_) => const _OfferSent());
       return true;
     }

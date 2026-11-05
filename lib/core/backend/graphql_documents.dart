@@ -193,6 +193,22 @@ mutation CancelJobSecure($jobId: String!, $cancellationReasonCategory: String, $
   }
 }''';
 
+  static const getIdVerificationStatus = r'''
+query GetGovernmentIdVerificationStatusSecure {
+  getGovernmentIdVerificationStatusSecure {
+    status
+    error
+  }
+}''';
+
+  static const createJobProposal = r'''
+mutation CreateJobProposalSecure($input: AWSJSON!) {
+  createJobProposalSecure(input: $input) {
+    proposal
+    error
+  }
+}''';
+
   static const ignoreJob = r'''
 mutation IgnoreJobForProfessionalSecure($jobId: String!, $ignoreReason: String!, $otherReason: String, $notes: String) {
   ignoreJobForProfessionalSecure(jobId: $jobId, ignoreReason: $ignoreReason, otherReason: $otherReason, notes: $notes) {

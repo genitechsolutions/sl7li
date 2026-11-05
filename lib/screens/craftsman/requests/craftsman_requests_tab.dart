@@ -209,6 +209,7 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                             _ => showSendOfferFlow(
                               context,
                               requestTitle: r.title,
+                              jobId: r.id,
                             ),
                           },
                           onMore: showRequestMoreMenu,
