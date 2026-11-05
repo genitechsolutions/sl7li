@@ -15,7 +15,10 @@ import '../../core/widgets/form/app_select_field.dart';
 import '../../core/widgets/form/app_text_field.dart';
 import '../../core/widgets/form/field_icons.dart';
 import '../../core/widgets/form/form_label.dart';
+import '../../core/widgets/form/options_sheet.dart';
 import '../../core/widgets/form/phone_field.dart';
+import '../../core/backend/json_utils.dart';
+import '../../data/dummy_data.dart';
 
 /// "الملف الشخصي": تعديل الاسم والرقم والمدينة والحي.
 class ProfileScreen extends StatefulWidget {
@@ -30,7 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final _name = TextEditingController();
   final _phone = TextEditingController();
-  final _district = TextEditingController(text: 'مركز المدينة');
+  final _district = TextEditingController();
+  String? _city;
 
   @override
   void initState() {
@@ -39,10 +43,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (p != null) {
       _name.text = p.name;
       _phone.text = p.localPhone;
+      final c = p.cityCode;
+      if (c != null && c.isNotEmpty) _city = placeName(c);
+      final n = p.neighborhoodCode;
+      if (n != null && n.isNotEmpty) _district.text = placeName(n);
+    } else {
+      _city = 'دمشق';
+      _district.text = 'مركز المدينة';
     }
   }
 
   String? _avatar;
+
+  Future<void> _pickCity() async {
+    final v = await showOptionsSheet(context, title: 'المدينة', options: loginCities);
+    if (v != null && mounted) setState(() => _city = v);
+  }
 
   Future<void> _pickAvatar() async {
     final picked = await pickPhotos(max: 1);
@@ -56,7 +72,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final cubit = context.read<ProfileCubit>();
       if (_avatar != null) await cubit.saveAvatar(_avatar!);
-      await cubit.saveName(_name.text);
+      await cubit.saveDetails(
+        name: _name.text,
+        city: _city,
+        neighborhood: _district.text.trim(),
+      );
       nav.pop();
     } on BackendException catch (e) {
       messenger
@@ -200,11 +220,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: FormLabel('المدينة'),
                     ),
                     const SizedBox(height: 8),
-                    // TODO: قائمة المدن (متل شاشة دخول الزبائن)
                     AppSelectField(
                       hint: 'المدينة',
-                      value: 'دمشق',
-                      onTap: () {},
+                      value: _city,
+                      onTap: _pickCity,
                     ),
                     const SizedBox(height: 20),
                     const Padding(

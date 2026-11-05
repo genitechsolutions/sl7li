@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/backend/backend_exception.dart';
+import '../../cubits/feature_cubits.dart';
+import '../../data/repositories/profile_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -21,6 +25,46 @@ class _NotificationSettingsScreenState
   // [التطبيق: الكل، طلبات، عروض، رسائل، ترويجية] و[الواتساب: نفس الترتيب]. الترويجية مطفية متل التصميم.
   final _app = [true, true, true, true, false];
   final _whatsapp = [true, true, true, true, false];
+
+  @override
+  void initState() {
+    super.initState();
+    final cubit = context.read<ProfileCubit>();
+    if (cubit.state.hasData) {
+      _apply(cubit.state.data!.notificationPrefs);
+    } else {
+      cubit.load().then((_) {
+        final p = cubit.state.data;
+        if (mounted && p != null) setState(() => _apply(p.notificationPrefs));
+      });
+    }
+  }
+
+  // الخلفية بتحفظ تطبيق/واتساب كاملين؛ المفتاح المطفي بيطفي كل بنوده.
+  void _apply(NotificationPrefs prefs) {
+    if (!prefs.push) _app.fillRange(0, _app.length, false);
+    if (!prefs.whatsapp) _whatsapp.fillRange(0, _whatsapp.length, false);
+  }
+
+  Future<void> _save() async {
+    final cubit = context.read<ProfileCubit>();
+    final current = cubit.state.data;
+    if (current == null) return;
+    final next = current.notificationPrefs.copyWith(
+      push: _app.skip(1).any((v) => v),
+      whatsapp: _whatsapp.skip(1).any((v) => v),
+    );
+    final old = current.notificationPrefs;
+    if (next.push == old.push && next.whatsapp == old.whatsapp) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await cubit.saveNotificationPrefs(next);
+    } on BackendException catch (e) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
 
   static const _items = [
     ('إشعارات الطلبات', 'تحديثات حالة طلباتك'),
@@ -43,11 +87,14 @@ class _NotificationSettingsScreenState
               const Spacer(),
               AppToggle(
                 value: state[0],
-                onChanged: (v) => setState(() {
-                  for (var i = 0; i < state.length; i++) {
-                    state[i] = v;
-                  }
-                }),
+                onChanged: (v) {
+                  setState(() {
+                    for (var i = 0; i < state.length; i++) {
+                      state[i] = v;
+                    }
+                  });
+                  _save();
+                },
               ),
             ],
           ),
@@ -83,7 +130,10 @@ class _NotificationSettingsScreenState
                   ),
                   AppToggle(
                     value: state[i + 1],
-                    onChanged: (v) => setState(() => state[i + 1] = v),
+                    onChanged: (v) {
+                      setState(() => state[i + 1] = v);
+                      _save();
+                    },
                   ),
                 ],
               ),
