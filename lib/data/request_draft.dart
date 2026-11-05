@@ -6,6 +6,8 @@ class RequestDraft {
   String description = '';
   String? serviceType;
   String? subSpecialty;
+  String? serviceId;
+  String? specialtyId;
   bool onBehalf = false;
   String customerName = '';
   String phone = '';

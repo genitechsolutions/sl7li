@@ -9,6 +9,7 @@ import 'data/repositories/notifications_repository.dart';
 import 'data/repositories/my_offers_repository.dart';
 import 'data/repositories/offers_repository.dart';
 import 'data/repositories/requests_repository.dart';
+import 'data/repositories/service_classifier_repository.dart';
 
 /// كل الـ repositories بمكان واحد. `fake` للتصميم/الاختبارات، `amplify` للخلفية الحقيقية.
 class AppDependencies {
@@ -23,7 +24,10 @@ class AppDependencies {
     required this.notifications,
     required this.myOffers,
     required this.craftsmanSignup,
+    this.classifier = const FakeServiceClassifier(),
   });
+
+  final ServiceClassifier classifier;
 
   final AuthRepository auth;
   final OffersRepository offers;
@@ -63,6 +67,7 @@ class AppDependencies {
       notifications: RemoteNotificationsRepository(gateway, auth),
       myOffers: const RemoteMyOffersRepository(gateway),
       craftsmanSignup: const RemoteCraftsmanSignupRepository(gateway),
+      classifier: const RemoteServiceClassifier(gateway),
     );
   }
 
