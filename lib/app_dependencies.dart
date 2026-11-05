@@ -2,6 +2,7 @@ import 'core/backend/app_config.dart';
 import 'core/backend/graphql_gateway.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/conversations_repository.dart';
+import 'data/repositories/craftsman_signup_repository.dart';
 import 'data/repositories/profile_repository.dart';
 import 'data/repositories/wallet_repository.dart';
 import 'data/repositories/notifications_repository.dart';
@@ -21,6 +22,7 @@ class AppDependencies {
     required this.wallet,
     required this.notifications,
     required this.myOffers,
+    required this.craftsmanSignup,
   });
 
   final AuthRepository auth;
@@ -32,6 +34,7 @@ class AppDependencies {
   final WalletRepository wallet;
   final NotificationsRepository notifications;
   final MyOffersRepository myOffers;
+  final CraftsmanSignupRepository craftsmanSignup;
 
   factory AppDependencies.fake() => AppDependencies(
     auth: FakeAuthRepository(),
@@ -43,6 +46,7 @@ class AppDependencies {
     wallet: const FakeWalletRepository(),
     notifications: const FakeNotificationsRepository(),
     myOffers: const FakeMyOffersRepository(),
+    craftsmanSignup: const FakeCraftsmanSignupRepository(),
   );
 
   factory AppDependencies.amplify() {
@@ -58,6 +62,7 @@ class AppDependencies {
       wallet: const RemoteWalletRepository(gateway),
       notifications: RemoteNotificationsRepository(gateway, auth),
       myOffers: const RemoteMyOffersRepository(gateway),
+      craftsmanSignup: const RemoteCraftsmanSignupRepository(gateway),
     );
   }
 

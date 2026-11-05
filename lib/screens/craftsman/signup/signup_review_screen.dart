@@ -1,10 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_chip.dart';
+import '../../../cubits/craftsman_signup_cubit.dart';
+import '../../../cubits/feature_cubits.dart';
 import '../../../data/craftsman_signup.dart';
 import '../craftsman_home_screen.dart';
 import '../widgets/signup_scaffold.dart';
@@ -51,16 +54,46 @@ class SignupReviewScreen extends StatelessWidget {
       for (final s in draft.services) ...?draft.specialties[s],
     };
 
+    final submitting =
+        context.watch<CraftsmanSignupCubit>().state.status ==
+        SignupStatus.submitting;
+
+    return BlocListener<CraftsmanSignupCubit, CraftsmanSignupState>(
+      listener: (context, state) {
+        if (state.status == SignupStatus.failure) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(content: Text(state.error ?? 'تعذّر إنشاء الحساب')),
+            );
+        } else if (state.status == SignupStatus.success) {
+          context.read<ProfileCubit>().load(force: true);
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const CraftsmanHomeScreen()),
+            (_) => false,
+          );
+        }
+      },
+      child: _scaffold(context, colors, link, infoBox, specialties, submitting),
+    );
+  }
+
+  Widget _scaffold(
+    BuildContext context,
+    AppColors colors,
+    TextStyle link,
+    Widget Function(String, String) infoBox,
+    Set<String> specialties,
+    bool submitting,
+  ) {
     return SignupScaffold(
       step: 5,
       title: 'مراجعة معلومات الحساب',
       stepSubtitle: 'مراجعة المعلومات',
-      nextLabel: 'تأكيد إنشاء الحساب',
-      // TODO: إنشاء الحساب الحقيقي (API)
-      onNext: () => Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const CraftsmanHomeScreen()),
-        (_) => false,
-      ),
+      nextLabel: submitting ? 'جارٍ إنشاء الحساب...' : 'تأكيد إنشاء الحساب',
+      onNext: submitting
+          ? null
+          : () => context.read<CraftsmanSignupCubit>().submit(draft),
       bottomNote: Text.rich(
         TextSpan(
           style: AppTextStyles.body12.copyWith(color: colors.textSecondary),

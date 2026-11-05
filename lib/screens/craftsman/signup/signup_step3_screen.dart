@@ -23,6 +23,7 @@ class SignupStep3Screen extends StatefulWidget {
 
 class _SignupStep3ScreenState extends State<SignupStep3Screen> {
   final _years = TextEditingController();
+  final _team = TextEditingController();
 
   CraftsmanSignupDraft get _d => widget.draft;
 
@@ -31,11 +32,14 @@ class _SignupStep3ScreenState extends State<SignupStep3Screen> {
     super.initState();
     _years.text = _d.years;
     _years.addListener(() => setState(() => _d.years = _years.text));
+    _team.text = _d.teamSize;
+    _team.addListener(() => setState(() => _d.teamSize = _team.text));
   }
 
   @override
   void dispose() {
     _years.dispose();
+    _team.dispose();
     super.dispose();
   }
 
@@ -46,6 +50,25 @@ class _SignupStep3ScreenState extends State<SignupStep3Screen> {
   ) async {
     final v = await showOptionsSheet(context, title: title, options: options);
     if (v != null) setState(() => onPicked(v));
+  }
+
+  Widget _toggleRow(String label, bool value, ValueChanged<bool> set) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: AppTextStyles.body16Medium.copyWith(
+                color: context.colors.textPrimary,
+              ),
+            ),
+          ),
+          AppToggle(value: value, onChanged: (v) => setState(() => set(v))),
+        ],
+      ),
+    );
   }
 
   @override
@@ -113,6 +136,41 @@ class _SignupStep3ScreenState extends State<SignupStep3Screen> {
             ],
           ),
         ),
+        const SizedBox(height: 24),
+        _toggleRow(
+          'عندي شهادة هندسية',
+          _d.hasEngineeringDegree,
+          (v) => _d.hasEngineeringDegree = v,
+        ),
+        const SizedBox(height: 16),
+        _toggleRow(
+          'عندي رخصة مهنية',
+          _d.hasProfessionalLicense,
+          (v) => _d.hasProfessionalLicense = v,
+        ),
+        ...signupField(
+          const FormLabel('حجم المشاريع اللي اشتغلت عليها', isRequired: true),
+          AppSelectField(
+            hint: 'اختر حجم المشاريع',
+            value: _d.projectScales,
+            onTap: () => _pick(
+              'حجم المشاريع',
+              [for (final o in craftsmanProjectScaleOptions) o.$1],
+              (v) => _d.projectScales = v,
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        _toggleRow('عندي فريق عمل', _d.hasTeam, (v) => _d.hasTeam = v),
+        if (_d.hasTeam)
+          ...signupField(
+            const FormLabel('عدد أعضاء الفريق', isRequired: true),
+            AppTextField(
+              hint: 'أدخل عدد أعضاء الفريق',
+              controller: _team,
+              keyboardType: TextInputType.number,
+            ),
+          ),
       ],
     );
   }

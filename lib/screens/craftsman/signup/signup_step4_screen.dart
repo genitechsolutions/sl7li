@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -42,6 +43,39 @@ class _SignupStep4ScreenState extends State<SignupStep4Screen> {
     super.dispose();
   }
 
+  Future<void> _locate() async {
+    final messenger = ScaffoldMessenger.of(context);
+    void say(String m) => messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(m)));
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        say('فعّل خدمة الموقع بالجهاز');
+        return;
+      }
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        say('ما قدرنا نوصل للموقع، اسمح بالإذن من الإعدادات');
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+      );
+      if (!mounted) return;
+      setState(() {
+        _d.latitude = pos.latitude;
+        _d.longitude = pos.longitude;
+        _d.locationSet = true;
+      });
+    } catch (_) {
+      say('تعذّر تحديد موقعك');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -82,7 +116,7 @@ class _SignupStep4ScreenState extends State<SignupStep4Screen> {
               ),
               const SizedBox(height: 12),
               GestureDetector(
-                onTap: () => setState(() => _d.locationSet = true),
+                onTap: _locate,
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 12),

@@ -26,12 +26,18 @@ class _SignupStep1ScreenState extends State<SignupStep1Screen> {
   final _draft = CraftsmanSignupDraft();
   final _name = TextEditingController();
   final _district = TextEditingController();
+  final _age = TextEditingController();
+  final _org = TextEditingController();
   final _districtFocus = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _name.addListener(() => setState(() => _draft.businessName = _name.text));
+    _age.addListener(() => setState(() => _draft.age = _age.text));
+    _org.addListener(
+      () => setState(() => _draft.registrationOrganizationName = _org.text),
+    );
     _district.addListener(() => setState(() {}));
     _districtFocus.addListener(() => setState(() {}));
   }
@@ -40,6 +46,8 @@ class _SignupStep1ScreenState extends State<SignupStep1Screen> {
   void dispose() {
     _name.dispose();
     _district.dispose();
+    _age.dispose();
+    _org.dispose();
     _districtFocus.dispose();
     super.dispose();
   }
@@ -63,6 +71,19 @@ class _SignupStep1ScreenState extends State<SignupStep1Screen> {
       options: loginCities,
     );
     if (city != null) setState(() => _draft.city = city);
+  }
+
+  Future<void> _pickLabel(
+    String title,
+    List<(String, String)> options,
+    ValueChanged<String> onPicked,
+  ) async {
+    final v = await showOptionsSheet(
+      context,
+      title: title,
+      options: [for (final o in options) o.$1],
+    );
+    if (v != null) setState(() => onPicked(v));
   }
 
   @override
@@ -232,6 +253,43 @@ class _SignupStep1ScreenState extends State<SignupStep1Screen> {
             ],
           ),
         ],
+        ...signupField(
+          const FormLabel('نوع النشاط', isRequired: true),
+          AppSelectField(
+            hint: 'فرد أو شركة',
+            value: _draft.businessType,
+            onTap: () => _pickLabel(
+              'نوع النشاط',
+              craftsmanBusinessTypes,
+              (v) => _draft.businessType = v,
+            ),
+          ),
+        ),
+        ...signupField(
+          const FormLabel('العمر', isRequired: true),
+          AppTextField(
+            hint: 'أدخل عمرك (20 سنة على الأقل)',
+            controller: _age,
+            keyboardType: TextInputType.number,
+          ),
+        ),
+        ...signupField(
+          const FormLabel('كيف عرفت عن صلّحلي؟', isRequired: true),
+          AppSelectField(
+            hint: 'اختر المصدر',
+            value: _draft.registrationSource,
+            onTap: () => _pickLabel(
+              'كيف عرفت عن صلّحلي؟',
+              craftsmanRegistrationSources,
+              (v) => _draft.registrationSource = v,
+            ),
+          ),
+        ),
+        if (_draft.registrationSource == craftsmanOrganizationSource)
+          ...signupField(
+            const FormLabel('اسم المنظمة أو الجمعية', isRequired: true),
+            AppTextField(hint: 'أدخل اسم المنظمة أو الجمعية', controller: _org),
+          ),
       ],
     );
   }
