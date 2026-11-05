@@ -175,7 +175,7 @@ final _screens = <(String, Widget Function())>[
   ),
   (
     '04_offer_details',
-    () => const OfferDetailsScreen(details: sampleOfferDetails),
+    () => const OfferDetailsScreen(),
   ),
   (
     '06_craftsman_profile_works',

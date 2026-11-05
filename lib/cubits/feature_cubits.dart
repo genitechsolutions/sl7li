@@ -17,8 +17,30 @@ class OffersCubit extends LoadCubit<List<Offer>> {
 
   final OffersRepository _repo;
 
+  String? cityCode;
+  String? serviceCategory;
+
   @override
-  Future<List<Offer>> fetch() => _repo.listPublicOffers();
+  Future<List<Offer>> fetch() =>
+      _repo.listPublicOffers(cityCode: cityCode, serviceCategory: serviceCategory);
+
+  /// null = بدون فلتر؛ بيعيد التحميل.
+  Future<void> applyFilters({String? cityCode, String? serviceCategory}) {
+    this.cityCode = cityCode;
+    this.serviceCategory = serviceCategory;
+    return load(force: true);
+  }
+
+  Future<OfferDetails> details(String? offerId) =>
+      offerId == null ? Future.value(sampleOfferDetails) : _repo.offerDetails(offerId);
+
+  Future<void> trackDetailView(String? id) async => id == null ? null : _repo.trackDetailView(id);
+
+  Future<void> trackWhatsAppClick(String? id) async =>
+      id == null ? null : _repo.trackWhatsAppClick(id);
+
+  Future<void> trackRelatedQuoteRequest(String? id) async =>
+      id == null ? null : _repo.trackRelatedQuoteRequest(id);
 }
 
 /// عروض الرئيسية (عدد قليل).

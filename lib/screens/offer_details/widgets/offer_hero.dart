@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
+import '../../../core/widgets/app_image.dart';
 
 /// معرض صور العرض أعلى الصفحة (تحت شريط الحالة) مع زر الرجوع، المدينة، وعدّاد الصور.
 class OfferHero extends StatefulWidget {
@@ -32,7 +33,7 @@ class _OfferHeroState extends State<OfferHero> {
               itemCount: widget.images.length,
               onPageChanged: (page) => setState(() => _page = page),
               itemBuilder: (_, index) =>
-                  Image.asset(widget.images[index], width: double.infinity, fit: BoxFit.cover),
+                  AppImage(widget.images[index], width: double.infinity, height: double.infinity),
             ),
             PositionedDirectional(
               top: top,

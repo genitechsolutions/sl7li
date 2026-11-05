@@ -108,7 +108,7 @@ class HomeScreen extends StatelessWidget {
                       separatorBuilder: (_, _) => const SizedBox(width: 13),
                       itemBuilder: (_, index) => OfferCard(
                         offer: offers[index],
-                        onTap: () => _openOfferDetails(context),
+                        onTap: () => _openOfferDetails(context, offers[index].id),
                       ),
                     ),
                   ),
@@ -146,10 +146,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _openOfferDetails(BuildContext context) {
+  void _openOfferDetails(BuildContext context, String? offerId) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const OfferDetailsScreen(details: sampleOfferDetails)),
+      MaterialPageRoute(builder: (_) => OfferDetailsScreen(offerId: offerId)),
     );
   }
 

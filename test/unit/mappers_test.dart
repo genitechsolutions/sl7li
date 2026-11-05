@@ -101,6 +101,45 @@ void main() {
     });
   });
 
+  group('تفاصيل العرض', () {
+    test('عرض بسعر ثابت', () {
+      final d = offerDetailsFromJson({
+        'id': 'o1',
+        'title': 'فحص',
+        'price': 120000,
+        'currency': 'SYP',
+        'cityCode': 'damascus',
+        'expiresAt': '2026-12-05T09:06:41.000Z',
+        'photos': ['offers/a.jpg', 'offers/b.jpg'],
+        'serviceCategory': 'electrical_repair',
+        'professionalName': 'سارة',
+        'professionalIsVip': true,
+        'professionalRating': 4,
+      });
+      expect(d.id, 'o1');
+      expect(d.discount, '120,000 ل.س');
+      expect(d.city, 'دمشق');
+      expect(d.images, hasLength(2));
+      expect(d.images.first, startsWith('https://'));
+      expect(d.tags, ['electrical_repair']);
+      expect(d.craftsman.name, 'سارة');
+      expect(d.craftsman.isPro, isTrue);
+      expect(d.craftsman.rating, 4.0);
+    });
+
+    test('نسبة خصم وبدون صور ولا مدينة', () {
+      final d = offerDetailsFromJson({'title': 't', 'discountPercentage': 20});
+      expect(d.discount, 'خصم 20%');
+      expect(d.city, 'جميع المدن');
+      expect(d.images, ['assets/images/offer_carpentry.jpg']);
+      expect(d.craftsman.image, isNull);
+    });
+
+    test('الـ id بيوصل لكرت العرض', () {
+      expect(offerFromJson({'id': 'x1', 'title': 't'}).id, 'x1');
+    });
+  });
+
   group('طلبات الزبون', () {
     Map<String, dynamic> job(
       String status, {

@@ -69,7 +69,7 @@ class OffersScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const OfferDetailsScreen(details: sampleOfferDetails),
+                          builder: (_) => OfferDetailsScreen(offerId: offers[index].id),
                         ),
                       ),
                     ),

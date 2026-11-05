@@ -24,6 +24,7 @@ class ServiceDetails {
 
 class Offer {
   const Offer({
+    this.id,
     required this.title,
     required this.location,
     required this.image,
@@ -32,6 +33,7 @@ class Offer {
     this.craftsman,
   });
 
+  final String? id;
   final String title;
   final String location;
   final String image;
@@ -66,6 +68,7 @@ class Craftsman {
 
 class OfferDetails {
   const OfferDetails({
+    this.id,
     required this.title,
     required this.discount,
     required this.validUntil,
@@ -76,6 +79,7 @@ class OfferDetails {
     required this.craftsman,
   });
 
+  final String? id;
   final String title;
   final String discount;
   final String validUntil;
