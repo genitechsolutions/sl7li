@@ -847,7 +847,7 @@ class _Bubble extends StatelessWidget {
                     message.image != null) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
+                    child: (message.image!.startsWith('http') ? Image.network : Image.asset)(
                       message.image!,
                       fit: BoxFit.cover,
                       width: 258,

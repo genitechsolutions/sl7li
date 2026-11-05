@@ -276,10 +276,8 @@ Conversation conversationFromJson(Map<String, dynamic> j) {
   Map<String, dynamic> j,
   String? myId,
 ) {
-  final hasImages =
-      asMapList(j['imageAttachments']).isNotEmpty ||
-      (j['imageAttachments'] is List &&
-          (j['imageAttachments'] as List).isNotEmpty);
+  final images = strList(j, 'imageAttachments');
+  final hasImages = images.isNotEmpty;
   final status = switch (str(j, 'status')) {
     'read' => MessageStatus.read,
     'delivered' => MessageStatus.delivered,
@@ -294,13 +292,14 @@ Conversation conversationFromJson(Map<String, dynamic> j) {
       id: str(j, 'id'),
       text: isVoice ? '' : (str(j, 'content') ?? ''),
       voiceKey: isVoice ? str(voice, 'voice') : null,
+      image: hasImages ? resourceUrl(images.first) : null,
       voiceSeconds: intOf(voice, 'seconds') ?? 0,
       time: arabicTime(created),
       sent: myId != null && str(j, 'senderId') == myId,
       status: status,
       content: isVoice
           ? ChatContent.voice
-          : hasImages && (str(j, 'content') ?? '').isEmpty
+          : hasImages
           ? ChatContent.image
           : ChatContent.text,
     ),
