@@ -50,7 +50,10 @@ class ChatMessage {
     this.voicePath,
     this.voiceKey,
     this.voiceSeconds = 0,
+    this.id,
   });
+
+  final String? id;
 
   /// تسجيل صوتي: مسار محلي (للمرسل) أو مفتاح S3 (للمستلم).
   final String? voicePath;

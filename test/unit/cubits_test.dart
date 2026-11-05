@@ -60,6 +60,16 @@ class _RecordingConversations implements ConversationsRepository {
 
   @override
   Future<String?> voiceUrl(String key) async => null;
+
+  @override
+  Future<ChatMessage> sendText(Conversation conversation, String text) async =>
+      const ChatMessage(text: '', time: '', sent: true);
+
+  @override
+  Future<void> markRead(String conversationId) async {}
+
+  @override
+  Stream<ChatMessage> liveMessages(Conversation conversation) => const Stream.empty();
 }
 
 class _FlakyAuth extends FakeAuthRepository {

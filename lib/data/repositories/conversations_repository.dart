@@ -25,6 +25,13 @@ abstract class ConversationsRepository {
 
   /// رابط تشغيل تسجيل مستلم (null = غير متاح).
   Future<String?> voiceUrl(String key);
+
+  Future<ChatMessage> sendText(Conversation conversation, String text);
+
+  Future<void> markRead(String conversationId);
+
+  /// رسائل جديدة مباشرة (من الطرف التاني ومن أجهزتي).
+  Stream<ChatMessage> liveMessages(Conversation conversation);
 }
 
 class FakeConversationsRepository implements ConversationsRepository {
@@ -51,6 +58,20 @@ class FakeConversationsRepository implements ConversationsRepository {
 
   @override
   Future<String?> voiceUrl(String key) async => null;
+
+  @override
+  Future<ChatMessage> sendText(Conversation conversation, String text) async => ChatMessage(
+    text: text,
+    time: arabicTime(DateTime.now().toIso8601String()),
+    sent: true,
+    status: MessageStatus.sent,
+  );
+
+  @override
+  Future<void> markRead(String conversationId) async {}
+
+  @override
+  Stream<ChatMessage> liveMessages(Conversation conversation) => const Stream.empty();
 }
 
 class RemoteConversationsRepository implements ConversationsRepository {
@@ -61,13 +82,6 @@ class RemoteConversationsRepository implements ConversationsRepository {
 
   @override
   Future<ChatMessage> sendVoice(Conversation conversation, String path, int seconds) async {
-    final me = _auth.currentUserId;
-    final id = conversation.id;
-    final p1 = conversation.participant1Id;
-    final p2 = conversation.participant2Id;
-    if (me == null || id == null || p1 == null || p2 == null) {
-      throw BackendException.unauthenticated;
-    }
     final upload = await _gateway.run(
       Gql.generateUploadUrl,
       // نوع "image" لأن الخلفية ما بتقبل نوع صوت للدردشة؛ المسار بيكون قابل للقراءة من الطرفين.
@@ -83,22 +97,13 @@ class RemoteConversationsRepository implements ConversationsRepository {
     final key = str(up, 'uploadUrl') == null ? null : str(up, 's3Key');
     if (key == null) throw const BackendException('تعذّر رفع التسجيل');
     await _putFile(str(up, 'uploadUrl')!, path);
-    final res = await _gateway.run(
-      Gql.createMessage,
-      variables: {
-        'input': {
-          'conversationId': id,
-          'senderId': me,
-          'participant1Id': p1,
-          'participant2Id': p2,
-          'type': 'voice',
-          'content': jsonEncode({'voice': key, 'seconds': seconds}),
-        },
-      },
-      mutation: true,
+    final messageId = await _createMessage(
+      conversation,
+      'voice',
+      jsonEncode({'voice': key, 'seconds': seconds}),
     );
-    if (asMap(res['createMessage']).isEmpty) throw const BackendException('تعذّر إرسال التسجيل');
     return ChatMessage(
+      id: messageId,
       text: '',
       time: arabicTime(DateTime.now().toIso8601String()),
       sent: true,
@@ -108,6 +113,78 @@ class RemoteConversationsRepository implements ConversationsRepository {
       voiceKey: key,
       voiceSeconds: seconds,
     );
+  }
+
+  @override
+  Future<ChatMessage> sendText(Conversation conversation, String text) async {
+    final id = await _createMessage(conversation, 'text', text);
+    return ChatMessage(
+      id: id,
+      text: text,
+      time: arabicTime(DateTime.now().toIso8601String()),
+      sent: true,
+      status: MessageStatus.sent,
+    );
+  }
+
+  Future<String?> _createMessage(Conversation c, String type, String content) async {
+    final me = _auth.currentUserId;
+    final id = c.id;
+    final p1 = c.participant1Id;
+    final p2 = c.participant2Id;
+    if (me == null || id == null || p1 == null || p2 == null) {
+      throw BackendException.unauthenticated;
+    }
+    final res = await _gateway.run(
+      Gql.createMessage,
+      variables: {
+        'input': {
+          'conversationId': id,
+          'senderId': me,
+          'participant1Id': p1,
+          'participant2Id': p2,
+          'type': type,
+          'content': content,
+        },
+      },
+      mutation: true,
+    );
+    final created = asMap(res['createMessage']);
+    if (created.isEmpty) throw const BackendException('تعذّر إرسال الرسالة');
+    return str(created, 'id');
+  }
+
+  @override
+  Future<void> markRead(String conversationId) async {
+    await _gateway.run(
+      Gql.markMessagesRead,
+      variables: {'conversationId': conversationId},
+      mutation: true,
+    );
+  }
+
+  @override
+  Stream<ChatMessage> liveMessages(Conversation conversation) {
+    final id = conversation.id;
+    final p1 = conversation.participant1Id;
+    final p2 = conversation.participant2Id;
+    if (id == null || p1 == null || p2 == null) return const Stream.empty();
+    final me = _auth.currentUserId;
+    // قاعدة owner: بنمرّر بس الحقل اللي قيمته أنا.
+    return _gateway
+        .subscribe(
+          Gql.onCreateMessage,
+          variables: {
+            'filter': {
+              'conversationId': {'eq': id},
+            },
+            if (me == p1) 'participant1Id': p1,
+            if (me == p2) 'participant2Id': p2,
+          },
+        )
+        .map((data) => asMap(data['onCreateMessage']))
+        .where((j) => j.isNotEmpty)
+        .map((j) => chatMessageFromJson(j, me).message);
   }
 
   Future<void> _putFile(String url, String path) async {
@@ -214,6 +291,7 @@ Conversation conversationFromJson(Map<String, dynamic> j) {
   final voice = isVoice ? asMap(j['content']) : const <String, dynamic>{};
   return (
     message: ChatMessage(
+      id: str(j, 'id'),
       text: isVoice ? '' : (str(j, 'content') ?? ''),
       voiceKey: isVoice ? str(voice, 'voice') : null,
       voiceSeconds: intOf(voice, 'seconds') ?? 0,

@@ -13,10 +13,35 @@ abstract class GraphQlGateway {
     bool mutation = false,
     bool guest = false,
   });
+
+  /// اشتراك GraphQL (subscription): بيرجّع `data` لكل حدث.
+  Stream<Map<String, dynamic>> subscribe(
+    String document, {
+    Map<String, dynamic> variables = const {},
+  });
 }
 
 class AmplifyGraphQlGateway implements GraphQlGateway {
   const AmplifyGraphQlGateway();
+
+  @override
+  Stream<Map<String, dynamic>> subscribe(
+    String document, {
+    Map<String, dynamic> variables = const {},
+  }) {
+    final request = GraphQLRequest<String>(
+      document: document,
+      variables: variables,
+      authorizationMode: APIAuthorizationType.userPools,
+    );
+    return Amplify.API
+        .subscribe(request)
+        .where((e) => e.data != null)
+        .map((e) {
+          final decoded = jsonDecode(e.data!);
+          return decoded is Map ? Map<String, dynamic>.from(decoded) : <String, dynamic>{};
+        });
+  }
 
   @override
   Future<Map<String, dynamic>> run(

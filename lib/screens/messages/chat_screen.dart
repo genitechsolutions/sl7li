@@ -62,11 +62,48 @@ class _ChatScreenState extends State<ChatScreen> {
     final id = widget.conversation.id;
     if (id == null) return;
     try {
-      final loaded = await context.read<ConversationsCubit>().messages(id);
+      final cubit = context.read<ConversationsCubit>();
+      final loaded = await cubit.messages(id);
       if (!mounted) return;
       setState(() => _messages = [...loaded]);
+      unawaited(cubit.markRead(id).catchError((Object _) {}));
     } on Object {
       // نكمّل بالعينة.
+    }
+    if (mounted) _listen();
+  }
+
+  void _listen() {
+    _live?.cancel();
+    final cubit = context.read<ConversationsCubit>();
+    _live = cubit
+        .liveMessages(widget.conversation)
+        .listen(
+          _onLive,
+          onError: (Object _) => _reconnect(),
+          onDone: _reconnect,
+        );
+  }
+
+  void _reconnect() {
+    Future<void>.delayed(const Duration(seconds: 4), () {
+      if (mounted) _listen();
+    });
+  }
+
+  void _onLive(ChatMessage m) {
+    if (m.id != null && _messages.any((x) => x.id == m.id)) return;
+    final nearBottom =
+        !_scroll.hasClients || _scroll.position.maxScrollExtent - _scroll.position.pixels < 200;
+    setState(() => _messages.add(m));
+    final convId = widget.conversation.id;
+    if (!m.sent && convId != null) {
+      unawaited(context.read<ConversationsCubit>().markRead(convId).catchError((Object _) {}));
+    }
+    if (nearBottom || m.sent) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scroll.hasClients) _scrollTo(_scroll.position.maxScrollExtent);
+      });
     }
   }
 
@@ -94,11 +131,13 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.dispose();
     _scroll.dispose();
     _recTimer?.cancel();
+    _live?.cancel();
     _voice.dispose();
     super.dispose();
   }
 
   final _voice = VoiceRecorder();
+  StreamSubscription<ChatMessage>? _live;
   bool _recording = false;
   Timer? _recTimer;
   int _recSeconds = 0;
@@ -167,20 +206,39 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // TODO: إرسال حقيقي؛ هلق بس بيضيف الرسالة محلياً.
-  void _send() {
+  Future<void> _send() async {
     if (!_canSend) return;
+    final text = _controller.text.trim();
+    _controller.clear();
+    final index = _messages.length;
     setState(() {
       _messages.add(
-        ChatMessage(
-          text: _controller.text.trim(),
-          time: '2:10 م',
-          sent: true,
-          status: MessageStatus.sending,
-        ),
+        ChatMessage(text: text, time: '2:10 م', sent: true, status: MessageStatus.sending),
       );
-      _controller.clear();
     });
+    if (widget.conversation.id == null) return;
+    try {
+      final sent = await context.read<ConversationsCubit>().sendText(widget.conversation, text);
+      if (!mounted) return;
+      final live = sent.id != null && _messages.any((x) => x.id == sent.id);
+      setState(() {
+        if (live) {
+          _messages.removeAt(index);
+        } else if (index < _messages.length) {
+          _messages[index] = sent;
+        }
+      });
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (index < _messages.length) _messages.removeAt(index);
+      });
+      _controller.text = text;
+      final msg = e is BackendException ? e.message : 'تعذّر إرسال الرسالة';
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(msg)));
+    }
   }
 
   @override

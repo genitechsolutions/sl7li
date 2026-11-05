@@ -44,6 +44,20 @@ query GetSecureUserConversations($isProfessionalMode: Boolean) {
   }
 }''';
 
+  static const onCreateMessage = r'''
+subscription OnCreateMessage($filter: ModelSubscriptionMessageFilterInput, $participant1Id: String, $participant2Id: String) {
+  onCreateMessage(filter: $filter, participant1Id: $participant1Id, participant2Id: $participant2Id) {
+    id
+    conversationId
+    senderId
+    content
+    type
+    status
+    imageAttachments
+    createdAt
+  }
+}''';
+
   static const generateUploadUrl = r'''
 mutation GenerateUploadUrlSecure($fileType: String!, $fileName: String!, $contentType: String!) {
   generateUploadUrlSecure(fileType: $fileType, fileName: $fileName, contentType: $contentType) {
@@ -57,10 +71,16 @@ mutation GenerateUploadUrlSecure($fileType: String!, $fileName: String!, $conten
 mutation CreateMessage($input: CreateMessageInput!) {
   createMessage(input: $input) {
     id
+    conversationId
+    senderId
+    participant1Id
+    participant2Id
     content
     type
     status
+    imageAttachments
     createdAt
+    updatedAt
   }
 }''';
 

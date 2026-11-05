@@ -83,6 +83,12 @@ class ConversationsCubit extends LoadCubit<List<Conversation>> {
 
   Future<String?> voiceUrl(String key) => _repo.voiceUrl(key);
 
+  Future<ChatMessage> sendText(Conversation c, String text) => _repo.sendText(c, text);
+
+  Future<void> markRead(String conversationId) => _repo.markRead(conversationId);
+
+  Stream<ChatMessage> liveMessages(Conversation c) => _repo.liveMessages(c);
+
   /// بيحمّل للوضع المطلوب (إذا تغيّر الوضع بنعيد التحميل).
   Future<void> loadFor({required bool professionalMode}) {
     final changed = _professionalMode != professionalMode;
