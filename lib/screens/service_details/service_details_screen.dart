@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/share_app.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -41,7 +42,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                     const Spacer(),
                     AppIconButton(
                       icon: 'assets/icons/ic_share.svg',
-                      onTap: () {}, // TODO: share
+                      onTap: () => shareText('جرّب تطبيق صلّحلي لإيجاد أفضل الحرفيين لخدمتك'),
                     ),
                   ],
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -25,6 +26,36 @@ class _RequestLocationScreenState extends State<RequestLocationScreen> {
   static const _labelPadding = EdgeInsetsDirectional.symmetric(horizontal: 12);
 
   RequestDraft get _draft => widget.draft;
+
+  Future<void> _locate() async {
+    final messenger = ScaffoldMessenger.of(context);
+    void say(String m) => messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(m)));
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        say('فعّل خدمة الموقع بالجهاز');
+        return;
+      }
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
+      if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
+        say('ما قدرنا نوصل للموقع، اسمح بالإذن من الإعدادات');
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+      );
+      if (!mounted) return;
+      setState(() {
+        _draft.latitude = pos.latitude;
+        _draft.longitude = pos.longitude;
+        _draft.located = true;
+      });
+    } catch (_) {
+      say('تعذّر تحديد موقعك');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,8 +124,7 @@ class _RequestLocationScreenState extends State<RequestLocationScreen> {
               SizedBox(
                 height: 50,
                 child: FilledButton(
-                  // TODO: تحديد الموقع الحقيقي بيحتاج geolocator؛ هلق منعرض دبوس عالخريطة.
-                  onPressed: () => setState(() => _draft.located = true),
+                  onPressed: _locate,
                   style: FilledButton.styleFrom(
                     backgroundColor: context.colors.primary,
                     foregroundColor: context.colors.textOnPrimary,

@@ -217,6 +217,14 @@ mutation DeleteAccountSecure($reason: String, $feedback: String) {
   }
 }''';
 
+  static const submitIdVerification = r'''
+mutation SubmitGovernmentIdVerificationSecure($s3Key: String!) {
+  submitGovernmentIdVerificationSecure(s3Key: $s3Key) {
+    success
+    error
+  }
+}''';
+
   static const createJobProposal = r'''
 mutation CreateJobProposalSecure($input: AWSJSON!) {
   createJobProposalSecure(input: $input) {

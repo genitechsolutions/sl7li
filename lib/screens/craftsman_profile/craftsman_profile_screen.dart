@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/share_app.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -61,7 +62,9 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ProfileTopBar(onShareTap: () {}), // TODO: share
+              ProfileTopBar(
+                onShareTap: () => shareText('تعرّف على حرفيين موثوقين عبر تطبيق صلّحلي'),
+              ),
               Padding(
                 padding: _padding,
                 child: Column(

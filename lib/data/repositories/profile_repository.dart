@@ -1,6 +1,7 @@
 import '../../core/backend/backend_exception.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
+import '../../core/backend/media_upload.dart';
 import '../../core/backend/json_utils.dart';
 
 /// بيانات حساب الزبون المعروضة بالإعدادات والملف الشخصي.
@@ -47,6 +48,8 @@ abstract class ProfileRepository {
   Future<void> saveName(UserProfile current, String name);
 
   Future<void> deleteAccount();
+
+  Future<void> submitIdPhoto(String path);
 }
 
 class FakeProfileRepository implements ProfileRepository {
@@ -61,6 +64,9 @@ class FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<void> deleteAccount() async {}
+
+  @override
+  Future<void> submitIdPhoto(String path) async {}
 }
 
 class RemoteProfileRepository implements ProfileRepository {
@@ -117,6 +123,17 @@ class RemoteProfileRepository implements ProfileRepository {
   Future<void> deleteAccount() async {
     final data = await _gateway.run(Gql.deleteAccount, mutation: true);
     throwIfBackendError(asMap(data['deleteAccountSecure']));
+  }
+
+  @override
+  Future<void> submitIdPhoto(String path) async {
+    final key = await uploadMedia(_gateway, path, type: 'government-id');
+    final data = await _gateway.run(
+      Gql.submitIdVerification,
+      variables: {'s3Key': key},
+      mutation: true,
+    );
+    throwIfBackendError(asMap(data['submitGovernmentIdVerificationSecure']));
   }
 }
 

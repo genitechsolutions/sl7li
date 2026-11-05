@@ -21,6 +21,8 @@ class RequestDraft {
 
   // الخطوة 3
   bool located = false;
+  double? latitude;
+  double? longitude;
 
   static const urgencyLevels = ['عادي', 'عاجل', 'طارئ'];
 

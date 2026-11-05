@@ -1,5 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/backend/backend_exception.dart';
+import '../../../core/widgets/photo_source.dart';
+import '../../../cubits/feature_cubits.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -23,11 +27,32 @@ class _VerificationDialog extends StatefulWidget {
 class _VerificationDialogState extends State<_VerificationDialog> {
   _Phase _phase = _Phase.empty;
 
-  // TODO: اختيار صورة حقيقي (image_picker بموافقة)؛ رفع وهمي.
+  String? _path;
+
   Future<void> _pick() async {
+    final picked = await pickPhotos(max: 1);
+    if (picked.isEmpty || !mounted) return;
+    setState(() {
+      _path = picked.first;
+      _phase = _Phase.uploaded;
+    });
+  }
+
+  Future<void> _submit() async {
+    final nav = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     setState(() => _phase = _Phase.uploading);
-    await Future<void>.delayed(const Duration(milliseconds: 900));
-    if (mounted) setState(() => _phase = _Phase.uploaded);
+    try {
+      await context.read<ProfileCubit>().submitIdPhoto(_path!);
+      verificationNotifier.value = VerificationStatus.pending;
+      nav.pop(true);
+    } on BackendException catch (e) {
+      if (!mounted) return;
+      setState(() => _phase = _Phase.uploaded);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.message)));
+    }
   }
 
   @override
@@ -41,7 +66,7 @@ class _VerificationDialogState extends State<_VerificationDialog> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset('assets/images/request_photo_1.png', fit: BoxFit.cover),
+            photoImage(_path ?? 'assets/images/request_photo_1.png'),
             if (_phase == _Phase.uploading)
               ColoredBox(
                 color: const Color(0x99000000),
@@ -149,10 +174,7 @@ class _VerificationDialogState extends State<_VerificationDialog> {
               label: 'رفع الصورة',
               background: colors.primary,
               foreground: colors.textOnPrimary,
-              onTap: () {
-                verificationNotifier.value = VerificationStatus.pending;
-                Navigator.of(context).pop(true);
-              },
+              onTap: _submit,
             ),
             const SizedBox(height: 8),
             AppDialogButton(

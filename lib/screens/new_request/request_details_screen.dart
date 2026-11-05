@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/photo_source.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -35,9 +36,9 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   RequestDraft get _draft => widget.draft;
   bool _showMore = false;
 
-  // TODO: اختيار صور حقيقي من المعرض بيحتاج package (image_picker)؛ هلق منضيف صورة تجريبية.
-  void _addPhoto() {
-    if (_draft.photos.length < _maxPhotos) setState(() => _draft.photos.add(sampleRequestPhoto));
+  Future<void> _addPhoto() async {
+    final picked = await pickPhotos(max: _maxPhotos - _draft.photos.length);
+    if (picked.isNotEmpty && mounted) setState(() => _draft.photos.addAll(picked));
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import '../../core/backend/backend_exception.dart';
 import '../../core/backend/graphql_documents.dart';
+import '../../core/backend/media_upload.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
 import '../craftsman_data.dart';
@@ -104,9 +105,13 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
 
   @override
   Future<void> create(RequestDraft draft) async {
+    final keys = <String>[];
+    for (final p in draft.photos.where(isLocalPhoto)) {
+      keys.add(await uploadMedia(_gateway, p));
+    }
     final data = await _gateway.run(
       Gql.createJob,
-      variables: {'input': jsonEncode(createJobInput(draft))},
+      variables: {'input': jsonEncode(createJobInput(draft, images: keys))},
       mutation: true,
     );
     throwIfBackendError(asMap(data['createJobSecure']));
@@ -114,7 +119,7 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
 }
 
 /// حقول createJobSecure من مسودة الطلب. (service_id=general لأن التصنيف الدقيق بيصير بالخلفية.)
-Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId}) {
+Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId, List<String> images = const []}) {
   const cityCodes = {
     'دمشق': 'damascus',
     'حلب': 'aleppo',
@@ -136,7 +141,11 @@ Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId}) {
     'city_code': cityCodes[d.city] ?? 'damascus',
     'urgency': urgency[d.urgency.clamp(0, 2)],
     'specialties_requested': <String>[],
-    'images': <String>[],
+    'images': images,
+    if (d.latitude != null && d.longitude != null) ...{
+      'approximate_latitude': d.latitude,
+      'approximate_longitude': d.longitude,
+    },
     'share_whatsapp_with_professionals': d.allowWhatsapp,
     if (d.onBehalf && d.customerName.trim().isNotEmpty)
       'customer_name': d.customerName.trim(),

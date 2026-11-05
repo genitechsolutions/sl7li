@@ -45,6 +45,9 @@ dependencies:
   record: ^7.1.2
   just_audio: ^0.10.6
   amplify_storage_s3: ^2.16.0
+  image_picker: ^1.2.4
+  share_plus: ^13.3.1
+  geolocator: ^14.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

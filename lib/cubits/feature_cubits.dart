@@ -182,6 +182,8 @@ class ProfileCubit extends LoadCubit<UserProfile> {
   }
 
   Future<void> deleteAccount() => _repo.deleteAccount();
+
+  Future<void> submitIdPhoto(String path) => _repo.submitIdPhoto(path);
 }
 
 /// رصيد نقاط المهني.

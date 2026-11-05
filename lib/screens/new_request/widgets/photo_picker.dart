@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/dashed_border_box.dart';
+import '../../../core/widgets/photo_source.dart';
 
 /// رفع الصور: صندوق كبير لما ما في صور، وبعدها شبكة صور مع مربع إضافة.
 class PhotoPicker extends StatelessWidget {
@@ -59,7 +60,7 @@ class PhotoPicker extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(photos[i], fit: BoxFit.cover),
+                child: photoImage(photos[i]),
               ),
               PositionedDirectional(
                 top: 8,
