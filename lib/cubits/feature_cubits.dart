@@ -3,6 +3,7 @@ import '../data/dummy_data.dart';
 import '../data/my_request.dart';
 import '../data/repositories/conversations_repository.dart';
 import '../data/repositories/profile_repository.dart';
+import '../data/repositories/wallet_repository.dart';
 import '../data/request_draft.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/offers_repository.dart';
@@ -61,6 +62,8 @@ class CraftsmanJobsCubit extends LoadCubit<CraftsmanJobs> {
 
   @override
   Future<CraftsmanJobs> fetch() => _repo.load();
+
+  Future<RequestOffer?> myProposal(String jobId) => _repo.myProposal(jobId);
 
   Future<void> ignore(String jobId, {required String reason, String? other}) async {
     await _repo.ignore(jobId, reason: reason, other: other);
@@ -121,4 +124,14 @@ class ProfileCubit extends LoadCubit<UserProfile> {
 
   @override
   Future<UserProfile> fetch() => _repo.load();
+}
+
+/// رصيد نقاط المهني.
+class WalletCubit extends LoadCubit<int> {
+  WalletCubit(this._repo);
+
+  final WalletRepository _repo;
+
+  @override
+  Future<int> fetch() => _repo.pointsBalance();
 }

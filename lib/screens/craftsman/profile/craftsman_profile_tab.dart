@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../cubits/feature_cubits.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
 import '../../../core/widgets/dashed_border_box.dart';
@@ -118,7 +120,9 @@ class CraftsmanProfileTab extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    'رضا الكويفاتي',
+                                    context.select(
+                                      (ProfileCubit c) => c.state.data?.name ?? '',
+                                    ),
                                     style: AppTextStyles.title18Medium,
                                   ),
                                   if (status ==

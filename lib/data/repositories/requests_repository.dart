@@ -153,6 +153,9 @@ abstract class CraftsmanJobsRepository {
   Future<CraftsmanJobs> load();
 
   Future<void> ignore(String jobId, {required String reason, String? other});
+
+  /// العرض اللي قدّمه المهني على الطلب (null = ما قدّم).
+  Future<RequestOffer?> myProposal(String jobId);
 }
 
 class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
@@ -172,6 +175,9 @@ class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
     required String reason,
     String? other,
   }) async {}
+
+  @override
+  Future<RequestOffer?> myProposal(String jobId) async => null;
 }
 
 class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
@@ -219,6 +225,15 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
           )
           .toList(),
     );
+  }
+
+  @override
+  Future<RequestOffer?> myProposal(String jobId) async {
+    final data = await _gateway.run(Gql.getMyProposal, variables: {'jobId': jobId});
+    final res = asMap(data['getMyProposalForJobSecure']);
+    throwIfBackendError(res);
+    final j = asMap(res['proposal']);
+    return j.isEmpty ? null : requestOfferFromJson(j);
   }
 
   @override
@@ -335,6 +350,7 @@ CraftsmanRequest craftsmanRequestFromJson(
     contacts: open ? intOf(j, 'interactions_count') : null,
     stage: stage,
     photos: strList(j, 'images').length,
+    images: strList(j, 'images').map(resourceUrl).toList(),
     state: state,
     note: str(j, 'cancellation_reason'),
   );

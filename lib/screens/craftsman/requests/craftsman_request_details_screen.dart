@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../cubits/feature_cubits.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
 import '../../../data/craftsman_data.dart';
+import '../../../data/my_request.dart';
 import '../../messages/chat_screen.dart';
 import '../../../data/dummy_data.dart';
 import '../../my_requests/widgets/request_stepper.dart';
@@ -31,6 +34,26 @@ class CraftsmanRequestDetailsScreen extends StatefulWidget {
 class _CraftsmanRequestDetailsScreenState
     extends State<CraftsmanRequestDetailsScreen> {
   late bool _offerSent = widget.offerSent;
+  RequestOffer? _mine;
+
+  @override
+  void initState() {
+    super.initState();
+    final id = widget.request.id;
+    if (id != null) {
+      context
+          .read<CraftsmanJobsCubit>()
+          .myProposal(id)
+          .then((o) {
+            if (!mounted) return;
+            setState(() {
+              _mine = o;
+              if (o != null) _offerSent = true;
+            });
+          })
+          .catchError((Object _) {});
+    }
+  }
 
   Future<void> _sendOffer() async {
     final sent = await showSendOfferFlow(
@@ -47,10 +70,30 @@ class _CraftsmanRequestDetailsScreenState
       return;
     }
     if (!mounted) return;
-    Navigator.push(
+    var conversation = sampleConversations[0];
+    final jobId = widget.request.id;
+    if (jobId != null) {
+      final cubit = context.read<ConversationsCubit>();
+      await cubit.loadFor(professionalMode: true);
+      final match = (cubit.state.data ?? const []).where(
+        (c) => c.jobId == jobId,
+      );
+      if (!mounted) return;
+      if (match.isEmpty) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: Text('ما في محادثة لهالطلب بعد')),
+          );
+        return;
+      }
+      conversation = match.first;
+    }
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChatScreen(conversation: sampleConversations[0]),
+        builder: (_) =>
+            ChatScreen(conversation: conversation, craftsmanMode: true),
       ),
     );
   }
@@ -223,7 +266,7 @@ class _CraftsmanRequestDetailsScreenState
                       ),
                       child: Text('العرض المقدم:', style: label),
                     ),
-                    _MyOffer(),
+                    _MyOffer(offer: _mine),
                   ],
                   Padding(
                     padding: const EdgeInsetsDirectional.only(
@@ -235,16 +278,25 @@ class _CraftsmanRequestDetailsScreenState
                   Row(
                     spacing: 12,
                     children: [
-                      for (var i = 1; i <= 3; i++)
+                      for (
+                        var i = 1;
+                        i <= (r.id != null ? r.images.take(3).length : 3);
+                        i++
+                      )
                         Expanded(
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                'assets/images/request_photo_$i.png',
-                                fit: BoxFit.cover,
-                              ),
+                              child: r.id != null
+                                  ? Image.network(
+                                      r.images[i - 1],
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      'assets/images/request_photo_$i.png',
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
                           ),
                         ),
@@ -259,7 +311,9 @@ class _CraftsmanRequestDetailsScreenState
                     child: Text('وصف الطلب:', style: label),
                   ),
                   Text(
-                    '${r.description}, ${r.description}',
+                    r.id != null
+                        ? r.description
+                        : '${r.description}, ${r.description}',
                     style: AppTextStyles.body18.copyWith(height: 1.5),
                   ),
                   const SizedBox(height: 20),
@@ -279,23 +333,24 @@ class _CraftsmanRequestDetailsScreenState
                       ),
                     ),
                   ),
-                  box(
-                    Column(
-                      children: [
-                        Text(
-                          'التاريخ والوقت المفضل',
-                          style: AppTextStyles.body16.copyWith(
-                            color: colors.textSecondary,
+                  if (r.id == null)
+                    box(
+                      Column(
+                        children: [
+                          Text(
+                            'التاريخ والوقت المفضل',
+                            style: AppTextStyles.body16.copyWith(
+                              color: colors.textSecondary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'خلال الأسبوع القادم  |  بعد الظهر',
-                          style: AppTextStyles.body16,
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Text(
+                            'خلال الأسبوع القادم  |  بعد الظهر',
+                            style: AppTextStyles.body16,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 8),
                   // TODO: الواتساب بيشتغل بس بعد تقديم عرض.
                   wide(
@@ -351,6 +406,10 @@ class _CraftsmanRequestDetailsScreenState
 }
 
 class _MyOffer extends StatelessWidget {
+  const _MyOffer({this.offer});
+
+  final RequestOffer? offer;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -381,13 +440,13 @@ class _MyOffer extends StatelessWidget {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: '100 ',
+                      text: offer == null ? '100 ' : '${offer!.price} ',
                       style: AppTextStyles.title20.copyWith(
                         color: colors.success,
                       ),
                     ),
                     TextSpan(
-                      text: 'ليرة جديدة',
+                      text: offer == null ? 'ليرة جديدة' : offer!.priceUnit,
                       style: AppTextStyles.body16.copyWith(
                         color: colors.success,
                       ),
@@ -402,14 +461,14 @@ class _MyOffer extends StatelessWidget {
             children: [
               Text('أجور الكشف والمواصلات', style: small),
               const Spacer(),
-              Text('مجاني', style: green),
+              Text(offer?.inspectionFee ?? 'مجاني', style: green),
             ],
           ),
           Row(
             children: [
               Text('أجور المواد والأدوات', style: small),
               const Spacer(),
-              Text('20 ليرة جديدة', style: green),
+              Text(offer?.materialsFee ?? '20 ليرة جديدة', style: green),
             ],
           ),
         ],

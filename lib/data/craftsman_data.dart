@@ -13,7 +13,11 @@ class CraftsmanRequest {
     this.note,
     this.rated = false,
     this.id,
+    this.images = const [],
   });
+
+  /// صور الطلب (روابط)؛ فاضية بالبيانات الوهمية.
+  final List<String> images;
 
   /// معرّف الطلب بالخلفية (job_id).
   final String? id;

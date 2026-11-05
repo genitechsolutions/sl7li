@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../cubits/feature_cubits.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
 import '../../home/home_screen.dart';
@@ -37,7 +39,10 @@ class CraftsmanHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('رضا الكويفاتي', style: AppTextStyles.title18Medium),
+                      Text(
+                        context.select((ProfileCubit c) => c.state.data?.name ?? ''),
+                        style: AppTextStyles.title18Medium,
+                      ),
                       GestureDetector(
                         onTap: () => Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const HomeScreen()),

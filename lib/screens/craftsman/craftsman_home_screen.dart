@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/backend/app_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -31,6 +33,13 @@ class CraftsmanHomeScreen extends StatefulWidget {
 
 class _CraftsmanHomeScreenState extends State<CraftsmanHomeScreen> {
   late int _tab = widget.initialTab;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfileCubit>().load();
+    context.read<WalletCubit>().load();
+  }
 
   void _select(int i) => setState(() => _tab = i);
 
@@ -68,6 +77,9 @@ class _HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final label = AppTextStyles.body16.copyWith(color: colors.textSecondary);
+    final real = AppConfig.mode == BackendMode.amplify;
+    final jobs = context.select((CraftsmanJobsCubit c) => c.state.data);
+    final points = context.select((WalletCubit c) => c.state.data);
     final num = AppTextStyles.title24Medium.copyWith(
       fontWeight: FontWeight.w600,
       height: 1.1,
@@ -166,12 +178,12 @@ class _HomeTab extends StatelessWidget {
                   stat(
                     'assets/icons/cr_tasks.svg',
                     'المهام النشطة',
-                    Text('2', style: num),
+                    Text(real ? '${jobs?.tasks.length ?? 0}' : '2', style: num),
                   ),
                   stat(
                     'assets/icons/cr_tasks_done.svg',
                     'المهام المكتملة',
-                    Text('13', style: num),
+                    Text(real ? '${jobs?.done.length ?? 0}' : '13', style: num),
                   ),
                 ],
               ),
@@ -182,7 +194,7 @@ class _HomeTab extends StatelessWidget {
                     'assets/icons/cr_star_box.svg',
                     'التقييم',
                     Text(
-                      '5 / 4.3',
+                      real ? '—' : '5 / 4.3',
                       textDirection: TextDirection.ltr,
                       style: num,
                     ),
@@ -191,7 +203,7 @@ class _HomeTab extends StatelessWidget {
                     'assets/icons/cr_cash.svg',
                     'إجمالي الأرباح',
                     Text(
-                      r'$1000',
+                      real ? '—' : r'$1000',
                       textDirection: TextDirection.ltr,
                       style: num,
                     ),
@@ -229,7 +241,7 @@ class _HomeTab extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          money('100000'),
+                          money(real ? '—' : '100000'),
                         ],
                       ),
                     ),
@@ -277,9 +289,9 @@ class _HomeTab extends StatelessWidget {
                       TextSpan(
                         style: num.copyWith(color: colors.textOnPrimary),
                         children: [
-                          const TextSpan(text: '100000 '),
+                          TextSpan(text: real ? '${points ?? 0} ' : '100000 '),
                           TextSpan(
-                            text: 'ل.س',
+                            text: real ? 'نقطة' : 'ل.س',
                             style: AppTextStyles.body12.copyWith(
                               fontSize: 13,
                               color: colors.textOnPrimary,

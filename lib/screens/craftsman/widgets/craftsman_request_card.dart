@@ -32,10 +32,13 @@ class CraftsmanRequestCard extends StatelessWidget {
       _ => colors.warning,
     };
 
+    final real = request.id != null;
+    final urls = request.images;
+
     Widget photos() => Row(
       spacing: 12,
       children: [
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= (real ? urls.take(3).length : 3); i++)
           Expanded(
             child: AspectRatio(
               aspectRatio: 102 / 63,
@@ -44,16 +47,18 @@ class CraftsmanRequestCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
-                      'assets/images/request_photo_$i.png',
-                      fit: BoxFit.cover,
-                    ),
+                    real
+                        ? Image.network(urls[i - 1], fit: BoxFit.cover)
+                        : Image.asset(
+                            'assets/images/request_photo_$i.png',
+                            fit: BoxFit.cover,
+                          ),
                     if (i == 3 && request.photos > 3)
                       ColoredBox(
                         color: const Color(0x99000000),
                         child: Center(
                           child: Text(
-                            '+${request.photos - 3 + 2}',
+                            '+${request.photos - 3 + (real ? 0 : 2)}',
                             style: AppTextStyles.title20.copyWith(
                               color: colors.textOnPrimary,
                             ),
@@ -206,7 +211,7 @@ class CraftsmanRequestCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          photos(),
+          if (!real || urls.isNotEmpty) photos(),
           if (request.state == CraftsmanRequestState.task ||
               request.state == CraftsmanRequestState.done) ...[
             const SizedBox(height: 20),
