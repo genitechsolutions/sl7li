@@ -11,6 +11,7 @@ import 'package:khaled_flutter/data/repositories/requests_repository.dart';
 
 void main() {
   liveShapeTests();
+  voiceTests();
   group('json utils', () {
     test('asMapList يفك قائمة AWSJSON (نصوص JSON)', () {
       final list = asMapList(['{"a":1}', '{"b":2}']);
@@ -314,5 +315,23 @@ void liveShapeTests() {
       expect(chatMessageFromJson(j, 'other').message.sent, isFalse);
       expect(chatMessageFromJson(j, 'me').message.text, 'مرحباً');
     });
+  });
+}
+
+void voiceTests() {
+  test('رسالة صوتية من الخلفية: المفتاح والمدة', () {
+    final j = {
+      'id': 'v1',
+      'senderId': 'other',
+      'type': 'voice',
+      'content': '{"voice":"quote-images/u/1-a.m4a","seconds":12}',
+      'createdAt': '2026-11-05T10:00:00.000Z',
+    };
+    final m = chatMessageFromJson(j, 'me').message;
+    expect(m.content, ChatContent.voice);
+    expect(m.voiceKey, 'quote-images/u/1-a.m4a');
+    expect(m.voiceSeconds, 12);
+    expect(m.sent, isFalse);
+    expect(m.text, '');
   });
 }

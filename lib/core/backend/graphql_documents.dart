@@ -44,6 +44,26 @@ query GetSecureUserConversations($isProfessionalMode: Boolean) {
   }
 }''';
 
+  static const generateUploadUrl = r'''
+mutation GenerateUploadUrlSecure($fileType: String!, $fileName: String!, $contentType: String!) {
+  generateUploadUrlSecure(fileType: $fileType, fileName: $fileName, contentType: $contentType) {
+    uploadUrl
+    s3Key
+    error
+  }
+}''';
+
+  static const createMessage = r'''
+mutation CreateMessage($input: CreateMessageInput!) {
+  createMessage(input: $input) {
+    id
+    content
+    type
+    status
+    createdAt
+  }
+}''';
+
   static const getConversationMessages = r'''
 query GetSecureConversationMessages($conversationId: String!, $limit: Int, $beforeTimestamp: String) {
   getSecureConversationMessages(conversationId: $conversationId, limit: $limit, beforeTimestamp: $beforeTimestamp) {

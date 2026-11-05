@@ -13,7 +13,12 @@ class Conversation {
     this.sentStatus,
     this.id,
     this.jobId,
+    this.participant1Id,
+    this.participant2Id,
   });
+
+  final String? participant1Id;
+  final String? participant2Id;
 
   /// معرّف المحادثة ومعرّف الطلب المرتبط بالخلفية.
   final String? id;
@@ -32,7 +37,7 @@ class Conversation {
 }
 
 /// نوع محتوى رسالة الدردشة.
-enum ChatContent { text, requestCard, image }
+enum ChatContent { text, requestCard, image, voice }
 
 class ChatMessage {
   const ChatMessage({
@@ -42,7 +47,15 @@ class ChatMessage {
     this.status = MessageStatus.read,
     this.content = ChatContent.text,
     this.image,
+    this.voicePath,
+    this.voiceKey,
+    this.voiceSeconds = 0,
   });
+
+  /// تسجيل صوتي: مسار محلي (للمرسل) أو مفتاح S3 (للمستلم).
+  final String? voicePath;
+  final String? voiceKey;
+  final int voiceSeconds;
 
   final String text;
   final String time;

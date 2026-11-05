@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -11,7 +13,10 @@ import '../../data/chat_data.dart';
 import '../../data/dummy_data.dart';
 import '../my_requests/request_details_screen.dart';
 import '../my_requests/dialogs/request_dialogs.dart';
+import '../../core/backend/backend_exception.dart';
+import '../../core/voice/voice_recorder.dart';
 import 'widgets/message_status_icon.dart';
+import 'widgets/voice_bubble.dart';
 
 /// دردشة مع حرفي: رسائل، بطاقة الطلب، صور، وشريط كتابة.
 class ChatScreen extends StatefulWidget {
@@ -88,10 +93,79 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _controller.dispose();
     _scroll.dispose();
+    _recTimer?.cancel();
+    _voice.dispose();
     super.dispose();
   }
 
+  final _voice = VoiceRecorder();
+  bool _recording = false;
+  Timer? _recTimer;
+  int _recSeconds = 0;
+
   bool get _canSend => _controller.text.trim().isNotEmpty;
+
+  Future<void> _startRecording() async {
+    final ok = await _voice.start();
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('اسمح للتطبيق باستخدام المايكروفون')));
+      return;
+    }
+    setState(() {
+      _recording = true;
+      _recSeconds = 0;
+    });
+    _recTimer = Timer.periodic(const Duration(seconds: 1), (_) => setState(() => _recSeconds++));
+  }
+
+  Future<void> _cancelRecording() async {
+    _recTimer?.cancel();
+    await _voice.cancel();
+    if (mounted) setState(() => _recording = false);
+  }
+
+  Future<void> _sendRecording() async {
+    _recTimer?.cancel();
+    final rec = await _voice.stop();
+    if (!mounted) return;
+    setState(() => _recording = false);
+    if (rec == null) return;
+    final index = _messages.length;
+    setState(() {
+      _messages.add(
+        ChatMessage(
+          text: '',
+          time: '2:10 م',
+          sent: true,
+          status: MessageStatus.sending,
+          content: ChatContent.voice,
+          voicePath: rec.path,
+          voiceSeconds: rec.seconds,
+        ),
+      );
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) _scrollTo(_scroll.position.maxScrollExtent);
+    });
+    try {
+      final sent = await context.read<ConversationsCubit>().sendVoice(
+        widget.conversation,
+        rec.path,
+        rec.seconds,
+      );
+      if (mounted && index < _messages.length) setState(() => _messages[index] = sent);
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => _messages.removeAt(index));
+      final text = e is BackendException ? e.message : 'تعذّر إرسال التسجيل';
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(text)));
+    }
+  }
 
   // TODO: إرسال حقيقي؛ هلق بس بيضيف الرسالة محلياً.
   void _send() {
@@ -238,6 +312,11 @@ class _ChatScreenState extends State<ChatScreen> {
               controller: _controller,
               canSend: _canSend,
               onSend: _send,
+              recording: _recording,
+              recSeconds: _recSeconds,
+              onMic: _startRecording,
+              onCancelRecording: _cancelRecording,
+              onSendRecording: _sendRecording,
             ),
           ],
         ),
@@ -719,10 +798,13 @@ class _Bubble extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                 ],
-                Text(
-                  message.text,
-                  style: AppTextStyles.body18.copyWith(color: fg, height: 1.5),
-                ),
+                if (message.content == ChatContent.voice)
+                  VoiceBubbleBody(message: message, color: fg)
+                else
+                  Text(
+                    message.text,
+                    style: AppTextStyles.body18.copyWith(color: fg, height: 1.5),
+                  ),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -755,11 +837,21 @@ class _Composer extends StatelessWidget {
     required this.controller,
     required this.canSend,
     required this.onSend,
+    required this.recording,
+    required this.recSeconds,
+    required this.onMic,
+    required this.onCancelRecording,
+    required this.onSendRecording,
   });
 
   final TextEditingController controller;
   final bool canSend;
   final VoidCallback onSend;
+  final bool recording;
+  final int recSeconds;
+  final VoidCallback onMic;
+  final VoidCallback onCancelRecording;
+  final VoidCallback onSendRecording;
 
   @override
   Widget build(BuildContext context) {
@@ -774,35 +866,58 @@ class _Composer extends StatelessWidget {
           child: Row(
             children: [
               GestureDetector(
-                onTap: onSend,
+                onTap: recording ? onSendRecording : (canSend ? onSend : onMic),
                 child: Container(
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: canSend ? colors.primary : colors.disabled,
+                    color: colors.primary,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    'assets/icons/ic_send_plane.svg',
-                    width: 28,
-                    height: 28,
-                    colorFilter: ColorFilter.mode(
-                      colors.textOnPrimary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
+                  child: canSend || recording
+                      ? SvgPicture.asset(
+                          'assets/icons/ic_send_plane.svg',
+                          width: 28,
+                          height: 28,
+                          colorFilter: ColorFilter.mode(
+                            colors.textOnPrimary,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                      : Icon(Icons.mic_none, size: 28, color: colors.textOnPrimary),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Container(
+                  height: recording ? 52 : null,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     color: colors.fieldFill,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
+                  child: recording
+                      ? Row(
+                          children: [
+                            GestureDetector(
+                              onTap: onCancelRecording,
+                              child: Icon(Icons.delete_outline, color: colors.error, size: 26),
+                            ),
+                            const Spacer(),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Text(voiceDuration(recSeconds), style: AppTextStyles.body16),
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(color: colors.error, shape: BoxShape.circle),
+                            ),
+                          ],
+                        )
+                      : Row(
                     children: [
                       Expanded(
                         child: TextField(

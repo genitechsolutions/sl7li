@@ -53,6 +53,13 @@ class _RecordingConversations implements ConversationsRepository {
 
   @override
   Future<List<ChatMessage>> messages(String conversationId) async => const [];
+
+  @override
+  Future<ChatMessage> sendVoice(Conversation conversation, String path, int seconds) async =>
+      const ChatMessage(text: '', time: '', sent: true);
+
+  @override
+  Future<String?> voiceUrl(String key) async => null;
 }
 
 class _FlakyAuth extends FakeAuthRepository {
