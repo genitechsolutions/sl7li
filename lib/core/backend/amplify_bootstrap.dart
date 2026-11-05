@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:amplify_api/amplify_api.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 
 import 'app_config.dart';
 
@@ -29,13 +30,22 @@ String buildAmplifyOutputs(BackendEnv env, {String apiKey = ''}) {
       'authorization_types': ['API_KEY', 'AWS_IAM'],
       if (apiKey.isNotEmpty) 'api_key': apiKey,
     },
+    if (env.storageBucket != null)
+      'storage': {
+        'aws_region': env.region,
+        'bucket_name': env.storageBucket,
+      },
   });
 }
 
 /// بيهيّئ Amplify (Auth + API) مرة وحدة عند الإقلاع بوضع `amplify`.
 Future<void> configureAmplify() async {
   if (Amplify.isConfigured) return;
-  await Amplify.addPlugins([AmplifyAuthCognito(), AmplifyAPI()]);
+  await Amplify.addPlugins([
+    AmplifyAuthCognito(),
+    AmplifyAPI(),
+    if (AppConfig.env.storageBucket != null) AmplifyStorageS3(),
+  ]);
   await Amplify.configure(
     buildAmplifyOutputs(AppConfig.env, apiKey: AppConfig.apiKey),
   );

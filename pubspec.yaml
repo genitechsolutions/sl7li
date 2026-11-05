@@ -44,6 +44,7 @@ dependencies:
   amplify_api: ^2.16.0
   record: ^7.1.2
   just_audio: ^0.10.6
+  amplify_storage_s3: ^2.16.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

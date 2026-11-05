@@ -91,10 +91,13 @@ class _VoiceBubbleBodyState extends State<VoiceBubbleBody> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StreamBuilder<bool>(
-            stream: _player.playingStream,
+          StreamBuilder<PlayerState>(
+            stream: _player.playerStateStream,
             builder: (context, snap) {
-              final playing = snap.data ?? false;
+              final st = snap.data;
+              final playing =
+                  (st?.playing ?? false) &&
+                  st?.processingState != ProcessingState.completed;
               return GestureDetector(
                 onTap: _toggle,
                 child: Container(

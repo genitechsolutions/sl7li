@@ -26,6 +26,7 @@ class BackendEnv {
     required this.identityPoolId,
     required this.graphqlUrl,
     required this.resourcesHost,
+    this.storageBucket,
   });
 
   final String region;
@@ -37,6 +38,9 @@ class BackendEnv {
   /// مضيف الصور/الملفات (CloudFront).
   final String resourcesHost;
 
+  /// null = اسم الـ bucket غير معروف (التسجيلات المستلمة ما بتشتغل).
+  final String? storageBucket;
+
   static const devqa = BackendEnv(
     region: 'us-east-2',
     userPoolId: 'us-east-2_GzDE0xy0O',
@@ -45,6 +49,7 @@ class BackendEnv {
     graphqlUrl:
         'https://khlnguhv6jfa3l476zlirvz7ay.appsync-api.us-east-2.amazonaws.com/graphql',
     resourcesHost: 'devqa-resources.salehli.com',
+    storageBucket: 'amplify-d1rbzpk5f88ird-de-salehliuserfilesbucketa2-azqrkmwwggul',
   );
 
   static const production = BackendEnv(

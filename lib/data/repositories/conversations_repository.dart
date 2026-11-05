@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_storage_s3/amplify_storage_s3.dart';
+
+import '../../core/backend/app_config.dart';
 import '../../core/backend/backend_exception.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
@@ -124,7 +128,20 @@ class RemoteConversationsRepository implements ConversationsRepository {
   }
 
   @override
-  Future<String?> voiceUrl(String key) async => null; // يحتاج amplify_storage_s3 (بانتظار الموافقة)
+  Future<String?> voiceUrl(String key) async {
+    if (AppConfig.env.storageBucket == null) return null;
+    try {
+      final res = await Amplify.Storage.getUrl(
+        path: StoragePath.fromString(key),
+        options: const StorageGetUrlOptions(
+          pluginOptions: S3GetUrlPluginOptions(expiresIn: Duration(minutes: 30)),
+        ),
+      ).result;
+      return res.url.toString();
+    } on StorageException {
+      return null;
+    }
+  }
 
   @override
   Future<List<ChatMessage>> messages(String conversationId) async {
