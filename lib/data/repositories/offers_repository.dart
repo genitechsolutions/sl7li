@@ -1,3 +1,4 @@
+import '../../core/backend/backend_exception.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
@@ -35,15 +36,21 @@ class RemoteOffersRepository implements OffersRepository {
     String? serviceCategory,
     bool featured = false,
   }) async {
-    final data = await _gateway.run(
-      Gql.listPublicOffers,
-      variables: {
-        'cityCode': cityCode,
-        'serviceCategory': serviceCategory,
-        'limit': featured ? 10 : 50,
-      },
-      guest: true,
-    );
+    final Map<String, dynamic> data;
+    try {
+      data = await _gateway.run(
+        Gql.listPublicOffers,
+        variables: {
+          'cityCode': cityCode,
+          'serviceCategory': serviceCategory,
+          'limit': featured ? 10 : 50,
+        },
+        guest: true,
+      );
+    } on BackendException catch (e) {
+      if (e.code == 'NO_API_KEY') return const [];
+      rethrow;
+    }
     final res = asMap(data['listPublicOffers']);
     return asMapList(res['items']).map(offerFromJson).toList();
   }
@@ -60,14 +67,14 @@ Offer offerFromJson(Map<String, dynamic> j) {
   final discount = percent != null && percent > 0
       ? '$percent%'
       : price != null
-      ? '${price is num && price == price.roundToDouble() ? price.toInt() : price} ${str(j, 'currency') ?? ''}'.trim()
+      ? '${formatMoney(price)} ${(str(j, 'currency') ?? 'SYP') == 'SYP' ? 'ل.س' : str(j, 'currency')}'
       : '';
   final neighborhoods = strList(j, 'neighborhoods');
   return Offer(
     title: str(j, 'title') ?? '',
-    location: neighborhoods.isNotEmpty
-        ? neighborhoods.first
-        : (str(j, 'cityCode') ?? ''),
+    location: placeName(
+      neighborhoods.isNotEmpty ? neighborhoods.first : (str(j, 'cityCode') ?? ''),
+    ),
     image: image == null ? 'assets/images/offer_carpentry.jpg' : resourceUrl(image),
     discount: discount,
     tags: [if (str(j, 'serviceCategory') != null) str(j, 'serviceCategory')!],

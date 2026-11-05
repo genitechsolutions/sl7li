@@ -47,7 +47,11 @@ class NotificationsScreen extends StatelessWidget {
         for (final item in items)
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
-            child: _NotificationCard(item: item),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _open(context, item),
+              child: _NotificationCard(item: item),
+            ),
           ),
       ],
     );
@@ -162,6 +166,26 @@ class NotificationsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// نقر الإشعار: إذا مرتبط بطلب بنفتح تفاصيله (تاب العروض إذا إشعار عرض).
+Future<void> _open(BuildContext context, NotificationItem item) async {
+  final id = item.entityId;
+  if (item.entityType != 'job' || id == null) return;
+  final cubit = context.read<MyRequestsCubit>();
+  await cubit.load();
+  if (!context.mounted) return;
+  final match = (cubit.state.data ?? const []).where((r) => r.id == id);
+  if (match.isEmpty) return;
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => RequestDetailsScreen(
+        request: match.first,
+        initialTab: item.kind == NotificationKind.offer ? 1 : 0,
+      ),
+    ),
+  );
 }
 
 class _NotificationCard extends StatelessWidget {

@@ -1,10 +1,20 @@
+import '../../core/backend/backend_exception.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
 
 /// بيانات حساب الزبون المعروضة بالإعدادات والملف الشخصي.
 class UserProfile {
-  const UserProfile({required this.name, required this.phone, this.cityCode, this.neighborhoodCode});
+  const UserProfile({
+    required this.name,
+    required this.phone,
+    this.cityCode,
+    this.neighborhoodCode,
+    this.isProfessional = false,
+  });
+
+  /// عنده ملف مهني بالخلفية (مو بس الدور بالحساب).
+  final bool isProfessional;
 
   final String name;
 
@@ -46,13 +56,21 @@ class RemoteProfileRepository implements ProfileRepository {
     final data = await _gateway.run(Gql.getCurrentUser);
     final res = asMap(data['getCurrentUserSecure']);
     throwIfBackendError(res);
-    return userProfileFromJson(asMap(res['user']));
+    var professional = false;
+    try {
+      final pro = await _gateway.run(Gql.getCurrentProfessional);
+      professional = asMap(asMap(pro['getCurrentProfessionalSecure'])['professional']).isNotEmpty;
+    } on BackendException {
+      professional = false;
+    }
+    return userProfileFromJson(asMap(res['user']), professional: professional);
   }
 }
 
-UserProfile userProfileFromJson(Map<String, dynamic> j) => UserProfile(
+UserProfile userProfileFromJson(Map<String, dynamic> j, {bool professional = false}) => UserProfile(
   name: str(j, 'name') ?? '',
   phone: str(j, 'phone_number') ?? '',
   cityCode: str(j, 'city_code'),
   neighborhoodCode: str(j, 'neighborhood_code'),
+  isProfessional: professional,
 );

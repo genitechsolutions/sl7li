@@ -20,7 +20,13 @@ class MyRequest {
     this.craftsmanRating,
     this.craftsmanReviews,
     this.id,
+    this.images = const [],
+    this.location,
   });
+
+  /// صور الطلب (روابط) وموقعه؛ فاضيين بالبيانات الوهمية.
+  final List<String> images;
+  final String? location;
 
   /// معرّف الطلب بالخلفية (job_id)؛ null بالبيانات الوهمية.
   final String? id;

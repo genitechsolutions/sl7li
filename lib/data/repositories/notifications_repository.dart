@@ -113,5 +113,7 @@ NotificationItem notificationFromJson(Map<String, dynamic> j, {DateTime? now}) {
     time: arabicTime(str(j, 'createdAt'), now: now),
     unread: status != 'read' && str(j, 'read_at') == null,
     actionLabel: boolOf(j, 'action_required') ? str(j, 'action_text') : null,
+    entityType: str(j, 'entity_type'),
+    entityId: str(j, 'entity_id'),
   );
 }

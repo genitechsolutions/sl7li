@@ -19,6 +19,9 @@ abstract class MyRequestsRepository {
 
   /// بيرسل طلب خدمة جديد (من خطوات "طلب خدمة").
   Future<void> create(RequestDraft draft);
+
+  /// عروض الأسعار الواردة على طلب.
+  Future<List<RequestOffer>> offers(String jobId);
 }
 
 class FakeMyRequestsRepository implements MyRequestsRepository {
@@ -36,6 +39,9 @@ class FakeMyRequestsRepository implements MyRequestsRepository {
 
   @override
   Future<void> create(RequestDraft draft) async {}
+
+  @override
+  Future<List<RequestOffer>> offers(String jobId) async => [sampleBestOffer, ...sampleOtherOffers];
 }
 
 class RemoteMyRequestsRepository implements MyRequestsRepository {
@@ -69,6 +75,15 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
       mutation: true,
     );
     throwIfBackendError(asMap(data['cancelJobSecure']));
+  }
+
+  @override
+  Future<List<RequestOffer>> offers(String jobId) async {
+    final data = await _gateway.run(Gql.getJobProposals, variables: {'jobId': jobId});
+    final res = asMap(data['getSecureJobProposals']);
+    throwIfBackendError(res);
+    final list = asMapList(res['proposals']).map(requestOfferFromJson).toList();
+    return list;
   }
 
   @override
@@ -235,19 +250,11 @@ String _urgencyLabel(String? urgency) => switch (urgency) {
   _ => 'عادي',
 };
 
-const _placeNames = {
-  'damascus': 'دمشق',
-  'aleppo': 'حلب',
-  'homs': 'حمص',
-  'hama': 'حماة',
-  'damascus_center': 'مركز المدينة',
-};
-
 String _locationOf(Map<String, dynamic> j) {
   final parts = [
     str(j, 'city_code'),
     str(j, 'neighborhood_code'),
-  ].whereType<String>().map((c) => _placeNames[c] ?? c).toList();
+  ].whereType<String>().map(placeName).toList();
   return parts.join(', ');
 }
 
@@ -279,6 +286,8 @@ MyRequest myRequestFromJson(Map<String, dynamic> j) {
         : canceled
         ? RequestStatus.canceled
         : RequestStatus.active,
+    images: strList(j, 'images').map(resourceUrl).toList(),
+    location: _locationOf(j),
     cancelNote: canceled
         ? (status == 'expired' ? 'لقد انتهت مدة طلبك' : 'تم إلغاء الطلب')
         : null,
@@ -328,5 +337,33 @@ CraftsmanRequest craftsmanRequestFromJson(
     photos: strList(j, 'images').length,
     state: state,
     note: str(j, 'cancellation_reason'),
+  );
+}
+
+/// عرض سعر وارد (JSON مقترح الحرفي) ← كرت العرض.
+RequestOffer requestOfferFromJson(Map<String, dynamic> j) {
+  final type = str(j, 'pricing_type');
+  final max = j['quote_amount_max'];
+  final unit = (str(j, 'quote_currency') ?? 'SYP') == 'SYP' ? 'ليرة' : str(j, 'quote_currency')!;
+  final price = type == 'range' && max != null
+      ? '${formatMoney(j['quote_amount'])} - ${formatMoney(max)}'
+      : formatMoney(j['quote_amount']);
+  final inspection = str(j, 'inspection_fee_type') == 'free'
+      ? 'مجاني'
+      : '${formatMoney(j['inspection_fee_amount'])} $unit';
+  final materials = intOf(j, 'materials_cost') ?? 0;
+  return RequestOffer(
+    craftsmanName: str(j, 'professional_name') ?? 'مهني',
+    rating: str(j, 'professional_rating') ?? '–',
+    reviews: intOf(j, 'professional_review_count') ?? 0,
+    priceLabel: type == 'range' ? 'الكلفة الأولية تتراوح بين' : 'الكلفة الأولية التقديرية',
+    price: price,
+    priceUnit: unit,
+    inspectionFee: inspection,
+    materialsFee: boolOf(j, 'includes_materials')
+        ? 'مشمولة'
+        : materials > 0
+        ? '${formatMoney(materials)} $unit'
+        : 'غير محددة',
   );
 }

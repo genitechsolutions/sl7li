@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 
+import 'app_config.dart';
 import 'backend_exception.dart';
 
 /// أي طلب GraphQL بيمر من هون؛ الـ repositories ما بتعرف شي عن Amplify (بتسهّل الاختبار بدون شبكة).
@@ -50,18 +51,22 @@ class AmplifyGraphQlGateway implements GraphQlGateway {
     bool mutation = false,
     bool guest = false,
   }) async {
-    if (!guest) {
-      try {
-        final session = await Amplify.Auth.fetchAuthSession();
-        if (!session.isSignedIn) throw BackendException.unauthenticated;
-      } on AuthException {
-        throw BackendException.unauthenticated;
-      }
+    var useApiKey = guest;
+    var signedIn = false;
+    try {
+      signedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
+    } on AuthException {
+      signedIn = false;
+    }
+    if (!guest && !signedIn) throw BackendException.unauthenticated;
+    if (guest && signedIn) useApiKey = false;
+    if (useApiKey && AppConfig.apiKey.isEmpty) {
+      throw const BackendException('هالقسم بيحتاج تسجيل دخول', code: 'NO_API_KEY');
     }
     final request = GraphQLRequest<String>(
       document: document,
       variables: variables,
-      authorizationMode: guest
+      authorizationMode: useApiKey
           ? APIAuthorizationType.apiKey
           : APIAuthorizationType.userPools,
     );
@@ -81,7 +86,7 @@ class AmplifyGraphQlGateway implements GraphQlGateway {
       throw const BackendException('تعذّر الاتصال بالإنترنت', code: 'NetworkException');
     } on AuthException catch (e) {
       throw BackendException(e.message, code: e.runtimeType.toString());
-    } on ApiException catch (e) {
+    } on AmplifyException catch (e) {
       throw BackendException('تعذّر الاتصال بالخادم، حاول مرة ثانية', code: e.message);
     }
   }

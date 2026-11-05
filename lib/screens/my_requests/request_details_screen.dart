@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_icon_button.dart';
 import '../../core/widgets/app_segmented_control.dart';
 import '../../core/widgets/form/app_toggle.dart';
+import '../../cubits/feature_cubits.dart';
 import '../../data/dummy_data.dart';
 import '../../data/my_request.dart';
 import 'dialogs/request_dialogs.dart';
@@ -34,6 +36,34 @@ class RequestDetailsScreen extends StatefulWidget {
 class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   late int _tab = widget.initialTab;
   bool _whatsapp = true;
+  List<RequestOffer>? _proposals;
+  bool _offersFailed = false;
+
+  bool get _real => widget.request.id != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_real) _loadOffers();
+  }
+
+  Future<void> _loadOffers() async {
+    try {
+      final list = await context.read<MyRequestsCubit>().offers(
+        widget.request.id!,
+      );
+      if (mounted) setState(() => _proposals = list);
+    } on Object {
+      if (mounted) setState(() => _offersFailed = true);
+    }
+  }
+
+  List<RequestOffer> get _shownOffers => _real
+      ? (_proposals ?? const [])
+      : [sampleBestOffer, ...sampleOtherOffers];
+
+  int get _offersCount =>
+      _real ? (_proposals?.length ?? widget.request.offersCount ?? 0) : 3;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +92,7 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                       child: AppSegmentedControl(
-                        options: ['التفاصيل', 'العروض (3)'],
+                        options: ['التفاصيل', 'العروض ($_offersCount)'],
                         selected: _tab,
                         onChanged: (i) => setState(() => _tab = i),
                         height: 48,
@@ -114,7 +144,12 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
         // TODO: navigate to offer / craftsman profile
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: OfferTile(offer: sampleOtherOffers[0], onOpen: () {}),
+          child: OfferTile(
+            offer: _real && _proposals?.isNotEmpty == true
+                ? _proposals!.first
+                : sampleOtherOffers[0],
+            onOpen: () {},
+          ),
         ),
         if (widget.completionPending)
           Padding(
@@ -159,32 +194,43 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
             ),
           ),
       ],
-      Padding(
-        padding: const EdgeInsets.fromLTRB(32, 24, 32, 0),
-        child: Text('الصور المرفقة:', style: label),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-        child: Row(
-          children: [
-            for (var i = 1; i <= 3; i++) ...[
-              if (i > 1) const SizedBox(width: 12),
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/images/request_photo_$i.png',
-                      fit: BoxFit.cover,
+      if (!_real || widget.request.images.isNotEmpty) ...[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 24, 32, 0),
+          child: Text('الصور المرفقة:', style: label),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Row(
+            children: [
+              for (
+                var i = 0;
+                i < (_real ? widget.request.images.take(3).length : 3);
+                i++
+              ) ...[
+                if (i > 0) const SizedBox(width: 12),
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: _real
+                          ? Image.network(
+                              widget.request.images[i],
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'assets/images/request_photo_${i + 1}.png',
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
+      ],
       Padding(
         padding: const EdgeInsets.fromLTRB(32, 32, 32, 0),
         child: Text('وصف الطلب:', style: label),
@@ -192,7 +238,7 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
         child: Text(
-          'شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب',
+          _real ? widget.request.description : 'شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب, شرح تفاصيل المشكلة أو العمل المطلوب',
           style: AppTextStyles.body18.copyWith(height: 1.5),
         ),
       ),
@@ -210,35 +256,42 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
                   children: [
                     const TextSpan(text: 'مدى الإلحاح: '),
                     TextSpan(
-                      text: 'عاجل',
+                      text: _real
+                          ? switch (widget.request.priority) {
+                              RequestPriority.emergency => 'طارئ',
+                              RequestPriority.urgent => 'عاجل',
+                              RequestPriority.normal => 'عادي',
+                            }
+                          : 'عاجل',
                       style: TextStyle(color: colors.textPrimary),
                     ),
                   ],
                 ),
               ),
             ]),
-            infoBox([
-              Text(
-                'التاريخ والوقت المفضل',
-                style: AppTextStyles.body16.copyWith(
-                  color: colors.textSecondary,
+            if (!_real)
+              infoBox([
+                Text(
+                  'التاريخ والوقت المفضل',
+                  style: AppTextStyles.body16.copyWith(
+                    color: colors.textSecondary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text.rich(
-                TextSpan(
-                  style: AppTextStyles.body16,
-                  children: [
-                    const TextSpan(text: 'خلال الأسبوع القادم  '),
-                    TextSpan(
-                      text: '|',
-                      style: TextStyle(color: colors.textSecondary),
-                    ),
-                    const TextSpan(text: '  بعد الظهر'),
-                  ],
+                const SizedBox(height: 8),
+                Text.rich(
+                  TextSpan(
+                    style: AppTextStyles.body16,
+                    children: [
+                      const TextSpan(text: 'خلال الأسبوع القادم  '),
+                      TextSpan(
+                        text: '|',
+                        style: TextStyle(color: colors.textSecondary),
+                      ),
+                      const TextSpan(text: '  بعد الظهر'),
+                    ],
+                  ),
                 ),
-              ),
-            ]),
+              ]),
           ],
         ),
       ),
@@ -261,7 +314,10 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
       ),
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-        child: Text('دمشق, مركز المدينة', style: AppTextStyles.body18),
+        child: Text(
+          _real ? (widget.request.location ?? '') : 'دمشق, مركز المدينة',
+          style: AppTextStyles.body18,
+        ),
       ),
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
@@ -284,6 +340,22 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
     final label = AppTextStyles.body16Medium.copyWith(
       color: context.colors.textSecondary,
     );
+    final list = _shownOffers;
+    if (_real && list.isEmpty) {
+      return [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 48, 32, 0),
+          child: Center(
+            child: _proposals == null && !_offersFailed
+                ? const CircularProgressIndicator()
+                : Text(
+                    _offersFailed ? 'تعذّر تحميل العروض' : 'ما وصلتك عروض لسا',
+                    style: label,
+                  ),
+          ),
+        ),
+      ];
+    }
 
     return [
       Padding(
@@ -293,17 +365,19 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
       // TODO: navigate to offer / craftsman profile
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: OfferTile(offer: sampleBestOffer, onOpen: () {}),
+        child: OfferTile(offer: list.first, onOpen: () {}),
       ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(32, 20, 32, 8),
-        child: Text('باقي العروض:', style: label),
-      ),
-      for (final offer in sampleOtherOffers)
+      if (list.length > 1) ...[
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-          child: OfferTile(offer: offer, onOpen: () {}),
+          padding: const EdgeInsets.fromLTRB(32, 20, 32, 8),
+          child: Text('باقي العروض:', style: label),
         ),
+        for (final offer in list.skip(1))
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: OfferTile(offer: offer, onOpen: () {}),
+          ),
+      ],
     ];
   }
 }

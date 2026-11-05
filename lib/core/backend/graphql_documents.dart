@@ -84,6 +84,14 @@ mutation CreateMessage($input: CreateMessageInput!) {
   }
 }''';
 
+  static const getJobProposals = r'''
+query GetSecureJobProposals($jobId: String!) {
+  getSecureJobProposals(jobId: $jobId) {
+    proposals
+    error
+  }
+}''';
+
   static const getConversationMessages = r'''
 query GetSecureConversationMessages($conversationId: String!, $limit: Int, $beforeTimestamp: String) {
   getSecureConversationMessages(conversationId: $conversationId, limit: $limit, beforeTimestamp: $beforeTimestamp) {

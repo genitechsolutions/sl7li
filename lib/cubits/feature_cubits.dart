@@ -38,6 +38,8 @@ class MyRequestsCubit extends LoadCubit<List<MyRequest>> {
   @override
   Future<List<MyRequest>> fetch() => _repo.list();
 
+  Future<List<RequestOffer>> offers(String jobId) => _repo.offers(jobId);
+
   /// بيرسل طلب جديد وبيحدّث القائمة.
   Future<void> create(RequestDraft draft) async {
     await _repo.create(draft);

@@ -94,9 +94,9 @@ void main() {
         'currency': 'ل.س',
         'cityCode': 'damascus',
       });
-      expect(o.discount, '1000 ل.س');
+      expect(o.discount, '1,000 ل.س');
       expect(o.image, 'assets/images/offer_carpentry.jpg');
-      expect(o.location, 'damascus');
+      expect(o.location, 'دمشق');
     });
   });
 
@@ -299,6 +299,34 @@ void liveShapeTests() {
         'neighborhood_code': 'damascus_center',
       });
       expect(r.stage, 1);
+      expect(r.location, 'دمشق, مركز المدينة');
+    });
+
+    test('عرض سعر وارد من مقترح المهني', () {
+      final o = requestOfferFromJson({
+        'professional_name': 'مختص',
+        'pricing_type': 'fixed',
+        'quote_amount': 90000,
+        'quote_currency': 'SYP',
+        'inspection_fee_type': 'free',
+        'includes_materials': false,
+        'materials_cost': 0,
+      });
+      expect(o.price, '90,000');
+      expect(o.priceUnit, 'ليرة');
+      expect(o.inspectionFee, 'مجاني');
+      expect(o.materialsFee, 'غير محددة');
+    });
+
+    test('طلب الزبون: صور وموقع بالعربي', () {
+      final r = myRequestFromJson({
+        'job_id': 'j',
+        'status': 'open',
+        'city_code': 'damascus',
+        'neighborhood_code': 'damascus_center',
+        'images': ['quote-images/u/a.jpg'],
+      });
+      expect(r.images.single, contains('quote-images/u/a.jpg'));
       expect(r.location, 'دمشق, مركز المدينة');
     });
 

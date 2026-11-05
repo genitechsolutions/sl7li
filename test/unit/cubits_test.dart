@@ -40,6 +40,9 @@ class _CountingRequests implements MyRequestsRepository {
 
   @override
   Future<void> create(RequestDraft draft) async {}
+
+  @override
+  Future<List<RequestOffer>> offers(String jobId) async => const [];
 }
 
 class _RecordingConversations implements ConversationsRepository {

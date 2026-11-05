@@ -115,3 +115,26 @@ void throwIfBackendError(Map<String, dynamic> res) {
   final error = str(res, 'error');
   if (error != null) throw BackendException(error);
 }
+
+const _placeNames = {
+  'damascus': 'دمشق',
+  'aleppo': 'حلب',
+  'homs': 'حمص',
+  'hama': 'حماة',
+  'damascus_center': 'مركز المدينة',
+};
+
+/// اسم المدينة/الحي بالعربي إذا معروف، وإلا الرمز نفسه.
+String placeName(String code) => _placeNames[code] ?? code;
+
+/// رقم بفواصل آلاف: 120000 ← 120,000.
+String formatMoney(Object? v) {
+  final n = v is num ? v : num.tryParse('$v') ?? 0;
+  final digits = n.round().toString();
+  final buf = StringBuffer();
+  for (var i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 == 0) buf.write(',');
+    buf.write(digits[i]);
+  }
+  return buf.toString();
+}

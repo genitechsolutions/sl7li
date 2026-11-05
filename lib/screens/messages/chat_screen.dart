@@ -274,10 +274,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         const _Pill('2 رسائل غير مقروءة'),
                         const SizedBox(height: 16),
                       ],
-                      const _RequestCardBubble(),
-                      const SizedBox(height: 8),
+                      if (widget.conversation.id == null) ...[
+                        const _RequestCardBubble(),
+                        const SizedBox(height: 8),
+                      ],
                       for (var i = 0; i < _messages.length; i++) ...[
-                        if (i == 4)
+                        if (i == 4 && widget.conversation.id == null)
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 12),
                             child: Center(child: _Pill('اليوم')),

@@ -81,8 +81,13 @@ class NotificationItem {
     required this.time,
     this.unread = false,
     this.actionLabel,
+    this.entityType,
+    this.entityId,
   });
 
+  /// الكيان المرتبط بالإشعار (مثلاً job + معرّف الطلب) لفتحه بالنقر.
+  final String? entityType;
+  final String? entityId;
   final NotificationKind kind;
   final String title;
   final String body;
