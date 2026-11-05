@@ -204,6 +204,33 @@ class ProfileCubit extends LoadCubit<UserProfile> {
     await load(force: true);
   }
 
+  /// تسجيل الزبون الجديد: بنحفظ الاسم/المدينة/الحي إذا اسم الحساب فاضي.
+  Future<void> saveRegistration({required String name, String? city, String? neighborhood}) async {
+    var current = state.data;
+    if (current == null) {
+      await load(force: true);
+      current = state.data;
+    }
+    if (current == null) return;
+    if (current.name.isNotEmpty) return;
+    await _repo.saveDetails(current, name: name.trim(), city: city, neighborhood: neighborhood);
+    await load(force: true);
+  }
+
+  Future<void> saveDetails({required String name, String? city, String? neighborhood}) async {
+    final current = state.data;
+    if (current == null) return;
+    await _repo.saveDetails(current, name: name.trim(), city: city, neighborhood: neighborhood);
+    await load(force: true);
+  }
+
+  Future<void> saveNotificationPrefs(NotificationPrefs prefs) async {
+    final current = state.data;
+    if (current == null) return;
+    await _repo.saveNotificationPrefs(current, prefs);
+    await load(force: true);
+  }
+
   Future<void> saveAvatar(String path) async {
     final current = state.data;
     if (current == null) return;

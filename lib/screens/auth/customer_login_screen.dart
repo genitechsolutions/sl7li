@@ -1,7 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/backend/app_config.dart';
+import '../../core/backend/backend_exception.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -10,6 +13,7 @@ import '../../core/widgets/form/app_text_field.dart';
 import '../../core/widgets/form/field_icons.dart';
 import '../../core/widgets/form/field_popup.dart';
 import '../../core/widgets/form/form_label.dart';
+import '../../cubits/feature_cubits.dart';
 import '../../data/dummy_data.dart';
 import '../home/home_screen.dart';
 import 'widgets/auth_bottom_bar.dart';
@@ -73,11 +77,29 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
     _districtFocus.unfocus();
   }
 
-  // TODO: إنشاء الحساب الحقيقي (API)؛ هلق تأخير وهمي وبعدين الرئيسية.
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+    final cubit = context.read<ProfileCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (AppConfig.mode == BackendMode.amplify) {
+        await cubit.saveRegistration(
+          name: _name.text,
+          city: _city,
+          neighborhood: _district.text.trim(),
+        );
+      } else {
+        await Future.delayed(const Duration(seconds: 2));
+      }
+    } on BackendException catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.message)));
+      return;
+    }
     if (!mounted) return;
     setState(() => _isLoading = false);
     Navigator.of(context)
