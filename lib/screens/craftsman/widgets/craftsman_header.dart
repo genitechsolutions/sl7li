@@ -40,7 +40,9 @@ class CraftsmanHeader extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.select((ProfileCubit c) => c.state.data?.name ?? ''),
+                        context.select(
+                          (ProfileCubit c) => c.state.data?.name ?? '',
+                        ),
                         style: AppTextStyles.title18Medium,
                       ),
                       GestureDetector(

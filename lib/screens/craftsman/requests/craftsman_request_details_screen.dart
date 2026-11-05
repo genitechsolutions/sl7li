@@ -108,7 +108,7 @@ class _CraftsmanRequestDetailsScreenState
   }
 
   Future<void> _ignore() async {
-    final ok = await showIgnoreRequestDialog(context);
+    final ok = await showIgnoreRequestDialog(context, jobId: widget.request.id);
     if (ok == true && mounted) Navigator.of(context).pop();
   }
 

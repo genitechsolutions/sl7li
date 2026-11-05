@@ -121,7 +121,8 @@ class CraftsmanProfileTab extends StatelessWidget {
                                 children: [
                                   Text(
                                     context.select(
-                                      (ProfileCubit c) => c.state.data?.name ?? '',
+                                      (ProfileCubit c) =>
+                                          c.state.data?.name ?? '',
                                     ),
                                     style: AppTextStyles.title18Medium,
                                   ),

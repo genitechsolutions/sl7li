@@ -212,7 +212,7 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                               jobId: r.id,
                             ),
                           },
-                          onMore: showRequestMoreMenu,
+                          onMore: (c) => showRequestMoreMenu(c, jobId: r.id),
                         ),
                       ),
                   ],

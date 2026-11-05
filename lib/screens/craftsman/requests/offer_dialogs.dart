@@ -156,8 +156,31 @@ const _ignoreReasons = [
 ];
 
 /// "تأكيد تجاهل الطلب" — بيرجع true إذا أكّد.
-Future<bool?> showIgnoreRequestDialog(BuildContext context) =>
-    showAppModal<bool>(context, (context) => const _IgnoreDialog());
+Future<bool?> showIgnoreRequestDialog(
+  BuildContext context, {
+  String? jobId,
+}) async {
+  final reason = await showAppModal<String>(
+    context,
+    (context) => const _IgnoreDialog(),
+  );
+  if (reason == null || !context.mounted) return false;
+  if (jobId == null) return true;
+  try {
+    await context.read<CraftsmanJobsCubit>().ignore(
+      jobId,
+      reason: 'other',
+      other: reason,
+    );
+    return true;
+  } on BackendException catch (e) {
+    if (!context.mounted) return false;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(e.message)));
+    return false;
+  }
+}
 
 class _IgnoreDialog extends StatefulWidget {
   const _IgnoreDialog();
@@ -217,7 +240,7 @@ class _IgnoreDialogState extends State<_IgnoreDialog> {
                     foreground: colors.textOnPrimary,
                     onTap: _reason == null
                         ? null
-                        : () => Navigator.of(context).pop(true),
+                        : () => Navigator.of(context).pop(_reason),
                   ),
                 ),
               ),
@@ -228,7 +251,7 @@ class _IgnoreDialogState extends State<_IgnoreDialog> {
                   background: colors.background,
                   foreground: colors.primaryContent,
                   border: colors.border,
-                  onTap: () => Navigator.of(context).pop(false),
+                  onTap: () => Navigator.of(context).pop(),
                 ),
               ),
             ],
@@ -713,7 +736,7 @@ class _OfferSent extends StatelessWidget {
 }
 
 /// قائمة "المزيد" (ثلاث نقاط) بكرت الطلب: "تجاهل العرض" بس (متل التصميم)، لاصقة بالزر.
-Future<void> showRequestMoreMenu(BuildContext anchor) async {
+Future<void> showRequestMoreMenu(BuildContext anchor, {String? jobId}) async {
   final colors = anchor.colors;
   final box = anchor.findRenderObject() as RenderBox;
   final overlay = Overlay.of(anchor).context.findRenderObject() as RenderBox;
@@ -750,6 +773,6 @@ Future<void> showRequestMoreMenu(BuildContext anchor) async {
     ],
   );
   if (choice == 'ignore' && anchor.mounted) {
-    await showIgnoreRequestDialog(anchor);
+    await showIgnoreRequestDialog(anchor, jobId: jobId);
   }
 }
