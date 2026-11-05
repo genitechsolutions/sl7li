@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/app_image.dart';
+import '../../core/widgets/photo_source.dart';
 import '../../core/backend/backend_exception.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,12 +42,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  String? _avatar;
+
+  Future<void> _pickAvatar() async {
+    final picked = await pickPhotos(max: 1);
+    if (picked.isNotEmpty && mounted) setState(() => _avatar = picked.first);
+  }
+
   Future<void> _save() async {
     if (_name.text.trim().isEmpty) return;
     final nav = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await context.read<ProfileCubit>().saveName(_name.text);
+      final cubit = context.read<ProfileCubit>();
+      if (_avatar != null) await cubit.saveAvatar(_avatar!);
+      await cubit.saveName(_name.text);
       nav.pop();
     } on BackendException catch (e) {
       messenger
@@ -120,8 +131,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           clipBehavior: Clip.none,
                           children: [
                             ClipOval(
-                              child: Image.asset(
-                                'assets/images/profile_avatar.png',
+                              child: AppImage(
+                                _avatar ??
+                                    context.select((ProfileCubit c) => c.state.data?.imageUrl) ??
+                                    'assets/images/profile_avatar.png',
                                 width: 96,
                                 height: 96,
                               ),
@@ -129,8 +142,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             PositionedDirectional(
                               start: 0,
                               bottom: 0,
-                              // TODO: اختيار صورة حقيقي (image_picker)
-                              child: Container(
+                              child: GestureDetector(
+                                onTap: _pickAvatar,
+                                child: Container(
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
@@ -143,6 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   width: 16,
                                   height: 16,
                                 ),
+                              ),
                               ),
                             ),
                           ],

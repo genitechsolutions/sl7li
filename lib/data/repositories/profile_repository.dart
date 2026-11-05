@@ -14,7 +14,11 @@ class UserProfile {
     this.isProfessional = false,
     this.idStatus,
     this.userId = '',
+    this.imageUrl,
   });
+
+  /// رابط صورة الحساب (null = ما في).
+  final String? imageUrl;
 
   final String userId;
 
@@ -47,6 +51,8 @@ abstract class ProfileRepository {
 
   Future<void> saveName(UserProfile current, String name);
 
+  Future<void> saveAvatar(UserProfile current, String path);
+
   Future<void> deleteAccount();
 
   Future<void> submitIdPhoto(String path);
@@ -61,6 +67,9 @@ class FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<void> saveName(UserProfile current, String name) async {}
+
+  @override
+  Future<void> saveAvatar(UserProfile current, String path) async {}
 
   @override
   Future<void> deleteAccount() async {}
@@ -105,6 +114,7 @@ class RemoteProfileRepository implements ProfileRepository {
       isProfessional: professional,
       idStatus: idStatus,
       userId: base.userId,
+      imageUrl: base.imageUrl,
     );
   }
 
@@ -114,6 +124,18 @@ class RemoteProfileRepository implements ProfileRepository {
       Gql.updateUser,
       variables: {
         'input': {'user_id': current.userId, 'name': name},
+      },
+      mutation: true,
+    );
+  }
+
+  @override
+  Future<void> saveAvatar(UserProfile current, String path) async {
+    final key = await uploadMedia(_gateway, path, type: 'profile');
+    await _gateway.run(
+      Gql.updateUser,
+      variables: {
+        'input': {'user_id': current.userId, 'profile_image_url': key},
       },
       mutation: true,
     );
@@ -144,4 +166,7 @@ UserProfile userProfileFromJson(Map<String, dynamic> j, {bool professional = fal
   neighborhoodCode: str(j, 'neighborhood_code'),
   isProfessional: professional,
   userId: str(j, 'user_id') ?? '',
+  imageUrl: str(j, 'profile_image_url') == null
+      ? null
+      : resourceUrl(str(j, 'profile_image_url')!),
 );

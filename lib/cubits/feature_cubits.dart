@@ -182,6 +182,13 @@ class ProfileCubit extends LoadCubit<UserProfile> {
     await load(force: true);
   }
 
+  Future<void> saveAvatar(String path) async {
+    final current = state.data;
+    if (current == null) return;
+    await _repo.saveAvatar(current, path);
+    await load(force: true);
+  }
+
   Future<void> deleteAccount() => _repo.deleteAccount();
 
   Future<void> submitIdPhoto(String path) => _repo.submitIdPhoto(path);
