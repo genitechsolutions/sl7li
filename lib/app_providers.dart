@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'app_dependencies.dart';
 import 'cubits/auth/auth_cubit.dart';
 import 'cubits/feature_cubits.dart';
+import 'cubits/professional_profile_cubit.dart';
 import 'cubits/load_cubit.dart';
 import 'data/repositories/public_profile_repository.dart';
 
@@ -31,6 +32,7 @@ class AppProviders extends StatelessWidget {
         BlocProvider(create: (_) => MyOffersCubit(d.myOffers)),
         BlocProvider(create: (_) => WalletTxCubit(d.wallet)),
         RepositoryProvider<PublicProfileRepository>.value(value: d.publicProfile),
+        BlocProvider(create: (_) => ProfessionalProfileCubit(d.professionalProfile)),
       ],
       child: child,
     );
@@ -49,6 +51,7 @@ Future<void> signOutAndReset(BuildContext context) async {
     context.read<WalletCubit>(),
     context.read<MyOffersCubit>(),
     context.read<WalletTxCubit>(),
+    context.read<ProfessionalProfileCubit>(),
   ];
   await auth.signOut();
   for (final c in cubits) {
