@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_view.dart';
+import '../../cubits/offer_details_cubit.dart';
+import '../../core/widgets/app_image.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
@@ -11,7 +17,27 @@ import '../../data/dummy_data.dart';
 import 'widgets/offer_hero.dart';
 
 class OfferDetailsScreen extends StatelessWidget {
-  const OfferDetailsScreen({super.key, required this.details});
+  const OfferDetailsScreen({super.key, this.offerId});
+
+  /// null = بيانات وهمية (عروض ما إلها id حقيقي).
+  final String? offerId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => OfferDetailsCubit(context.read<OffersCubit>(), offerId),
+      child: Scaffold(
+        backgroundColor: context.colors.background,
+        body: LoadView<OfferDetailsCubit, OfferDetails>(
+          builder: (context, details) => _OfferDetailsView(details: details),
+        ),
+      ),
+    );
+  }
+}
+
+class _OfferDetailsView extends StatelessWidget {
+  const _OfferDetailsView({required this.details});
 
   final OfferDetails details;
 
@@ -103,7 +129,7 @@ class OfferDetailsScreen extends StatelessWidget {
                   separatorBuilder: (_, _) => const SizedBox(width: 12),
                   itemBuilder: (_, index) => ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
+                    child: AppImage(
                       details.images[index],
                       width: 116,
                       height: 150,

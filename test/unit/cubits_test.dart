@@ -3,6 +3,7 @@ import 'package:khaled_flutter/core/backend/backend_exception.dart';
 import 'package:khaled_flutter/cubits/auth/auth_cubit.dart';
 import 'package:khaled_flutter/cubits/feature_cubits.dart';
 import 'package:khaled_flutter/cubits/load_cubit.dart';
+import 'package:khaled_flutter/cubits/offer_details_cubit.dart';
 import 'package:khaled_flutter/data/chat_data.dart';
 import 'package:khaled_flutter/data/dummy_data.dart';
 import 'package:khaled_flutter/data/my_request.dart';
@@ -23,6 +24,40 @@ class _FailingOffers implements OffersRepository {
     String? serviceCategory,
     bool featured = false,
   }) async => throw error;
+
+  @override
+  Future<OfferDetails> offerDetails(String offerId) async => throw error;
+
+  @override
+  Future<void> trackDetailView(String offerId) async {}
+
+  @override
+  Future<void> trackWhatsAppClick(String offerId) async {}
+
+  @override
+  Future<void> trackRelatedQuoteRequest(String offerId) async {}
+}
+
+class _RecordingOffers extends FakeOffersRepository {
+  _RecordingOffers();
+
+  String? lastCity;
+  String? lastCategory;
+  final viewed = <String>[];
+
+  @override
+  Future<List<Offer>> listPublicOffers({
+    String? cityCode,
+    String? serviceCategory,
+    bool featured = false,
+  }) async {
+    lastCity = cityCode;
+    lastCategory = serviceCategory;
+    return const [];
+  }
+
+  @override
+  Future<void> trackDetailView(String offerId) async => viewed.add(offerId);
 }
 
 class _CountingRequests implements MyRequestsRepository {
@@ -155,6 +190,30 @@ void main() {
       await cubit.loadFor(professionalMode: true);
       expect(repo.modes, [false, true]);
       await cubit.close();
+    });
+  });
+
+  group('OffersCubit فلاتر وتفاصيل', () {
+    test('applyFilters بتمرّر المدينة والتصنيف للمستودع', () async {
+      final repo = _RecordingOffers();
+      final cubit = OffersCubit(repo);
+      await cubit.applyFilters(cityCode: 'aleppo', serviceCategory: 'painting_molding');
+      expect(repo.lastCity, 'aleppo');
+      expect(repo.lastCategory, 'painting_molding');
+      expect(cubit.state.status, LoadStatus.success);
+    });
+
+    test('تفاصيل بدون id ← عينة، ومع id ← من المستودع + تتبّع المشاهدة', () async {
+      final repo = _RecordingOffers();
+      final offers = OffersCubit(repo);
+      final sample = OfferDetailsCubit(offers, null);
+      await sample.load();
+      expect(sample.state.data, sampleOfferDetails);
+      expect(repo.viewed, isEmpty);
+
+      final real = OfferDetailsCubit(offers, 'o1');
+      await real.load();
+      expect(repo.viewed, ['o1']);
     });
   });
 

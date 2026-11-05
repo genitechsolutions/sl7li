@@ -22,7 +22,11 @@ class CraftsmanAvatar extends StatelessWidget {
           CircleAvatar(
             radius: size / 2,
             backgroundColor: context.colors.tag,
-            backgroundImage: image != null ? AssetImage(image!) : null,
+            backgroundImage: image == null
+                ? null
+                : image!.startsWith('http')
+                ? NetworkImage(image!)
+                : AssetImage(image!) as ImageProvider,
             child: image == null
                 ? Icon(Icons.person, size: 36, color: context.colors.textOnPrimary)
                 : null,

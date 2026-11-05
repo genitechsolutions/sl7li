@@ -141,9 +141,7 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const OfferDetailsScreen(
-                          details: sampleOfferDetails,
-                        ),
+                        builder: (_) => OfferDetailsScreen(offerId: profile.offers[index].id),
                       ),
                     ),
                   ),
