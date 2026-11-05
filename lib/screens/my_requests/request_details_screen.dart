@@ -577,7 +577,11 @@ class _BottomBar extends StatelessWidget {
                         'تقييم الخدمة',
                         bg: colors.accentButton,
                         fg: colors.textOnAccent,
-                        onTap: () => showRatingDialog(context),
+                        onTap: () => rateProfessional(
+                          context,
+                          jobId: request.id,
+                          name: request.craftsmanName,
+                        ),
                       )
                     else if (request.status == RequestStatus.active)
                       button(

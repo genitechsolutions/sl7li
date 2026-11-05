@@ -195,7 +195,16 @@ class _CraftsmanRequestDetailsScreenState
                     wide(
                       'تحديث حالة الطلب',
                       colors.primary,
-                      onTap: () => showTaskStatusDialog(context),
+                      onTap: () async {
+                        final res = await showTaskStatusDialog(
+                          context,
+                          jobId: r.id,
+                          proposalId: _mine?.proposalId,
+                        );
+                        if (res == 'cancel' && r.id != null && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
                     ),
                   wide(
                     'مراسلة الزبون',

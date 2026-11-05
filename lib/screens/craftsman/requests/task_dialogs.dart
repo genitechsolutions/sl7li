@@ -6,9 +6,14 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/form/app_select_field.dart';
 import '../../../core/widgets/form/options_sheet.dart';
+import 'withdraw_offer.dart';
 
 /// "تحديث حالة الطلب" عند المهني: بترجع 'agreed' | 'working' | 'done' | 'cancel' أو null.
-Future<String?> showTaskStatusDialog(BuildContext context) async {
+Future<String?> showTaskStatusDialog(
+  BuildContext context, {
+  String? jobId,
+  String? proposalId,
+}) async {
   final result = await showAppModal<String>(context, (context) {
     final colors = context.colors;
     Widget action(String label, String value, Color bg, Color fg) => Padding(
@@ -69,7 +74,15 @@ Future<String?> showTaskStatusDialog(BuildContext context) async {
     );
   });
   if (result == 'cancel' && context.mounted) {
-    await showCancelOfferDialog(context);
+    if (jobId == null) {
+      await showCancelOfferDialog(context);
+    } else if (!await withdrawMyOffer(
+      context,
+      jobId: jobId,
+      proposalId: proposalId,
+    )) {
+      return null;
+    }
   }
   return result;
 }

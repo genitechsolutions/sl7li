@@ -391,6 +391,11 @@ class _Header extends StatelessWidget {
   final Conversation conversation;
   final bool craftsmanMode;
 
+  Set<String> get _participants => {
+    ?conversation.participant1Id,
+    ?conversation.participant2Id,
+  };
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -458,9 +463,23 @@ class _Header extends StatelessWidget {
                 onSelected: (value) {
                   switch (value) {
                     case 'agree':
-                      showAgreementDialog(context);
+                      final jobId = conversation.jobId;
+                      if (jobId == null) {
+                        showAgreementDialog(context);
+                      } else {
+                        agreeWithOffer(
+                          context,
+                          jobId,
+                          preferProfessionalIds: _participants,
+                        );
+                      }
                     case 'rate':
-                      showRatingDialog(context);
+                      rateProfessional(
+                        context,
+                        jobId: conversation.jobId,
+                        professionalIds: _participants,
+                        name: conversation.name,
+                      );
                     // TODO: إبلاغ (ما في تصميم لنافذة الإبلاغ)
                   }
                 },

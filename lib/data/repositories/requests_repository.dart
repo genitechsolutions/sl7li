@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import '../../core/backend/backend_exception.dart';
+import '../../core/backend/gql_proposal_actions.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/media_upload.dart';
 import '../../core/backend/graphql_gateway.dart';
@@ -26,6 +27,15 @@ abstract class MyRequestsRepository {
 
   /// قبول أو رفض عرض سعر.
   Future<void> respondToOffer(String proposalId, {required bool approve});
+
+  /// تقييم المهني بعد اكتمال الطلب.
+  Future<void> rate(
+    String jobId, {
+    String? proposalId,
+    String? professionalId,
+    required int stars,
+    String? comment,
+  });
 }
 
 class FakeMyRequestsRepository implements MyRequestsRepository {
@@ -49,6 +59,15 @@ class FakeMyRequestsRepository implements MyRequestsRepository {
 
   @override
   Future<void> respondToOffer(String proposalId, {required bool approve}) async {}
+
+  @override
+  Future<void> rate(
+    String jobId, {
+    String? proposalId,
+    String? professionalId,
+    required int stars,
+    String? comment,
+  }) async {}
 }
 
 class RemoteMyRequestsRepository implements MyRequestsRepository {
@@ -104,6 +123,29 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
   }
 
   @override
+  Future<void> rate(
+    String jobId, {
+    String? proposalId,
+    String? professionalId,
+    required int stars,
+    String? comment,
+  }) async {
+    final data = await _gateway.run(
+      GqlProposalActions.recordFeedback,
+      variables: customerFeedbackVariables(
+        jobId,
+        proposalId: proposalId,
+        professionalId: professionalId,
+        stars: stars,
+        comment: comment,
+        now: DateTime.now().toUtc(),
+      ),
+      mutation: true,
+    );
+    throwIfBackendError(asMap(data['recordCustomerFeedback']));
+  }
+
+  @override
   Future<void> create(RequestDraft draft) async {
     final keys = <String>[];
     for (final p in draft.photos.where(isLocalPhoto)) {
@@ -152,6 +194,36 @@ Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId, List<String>
   };
 }
 
+/// متغيرات recordCustomerFeedback (متل الموقع: كل التقييمات = عدد النجوم).
+Map<String, dynamic> customerFeedbackVariables(
+  String jobId, {
+  String? proposalId,
+  String? professionalId,
+  required int stars,
+  String? comment,
+  required DateTime now,
+}) {
+  final text = comment?.trim() ?? '';
+  return {
+    'jobId': jobId,
+    'proposalId': proposalId,
+    'professionalId': professionalId,
+    'overallRating': stars,
+    'priceRating': stars,
+    'qualityRating': stars,
+    'ontimeRating': stars,
+    'responsivenessRating': stars,
+    'platformRating': stars,
+    'actualPrice': 0,
+    'priceCurrency': 'SYP',
+    'actualPriceIncludesMaterial': false,
+    'writtenFeedback': text.isEmpty ? null : text,
+    'recommendProfessional': stars >= 4,
+    'jobAccuracyCustomer': 'met_expectations',
+    'submittedAt': now.toIso8601String(),
+  };
+}
+
 String _uuid() {
   final r = Random.secure();
   String h(int n) =>
@@ -184,6 +256,9 @@ abstract class CraftsmanJobsRepository {
 
   /// بيرسل عرض سعر على طلب (بيخصم نقطة من المحفظة).
   Future<void> sendProposal(Map<String, Object?> input);
+
+  /// سحب العرض المرسل.
+  Future<void> withdrawProposal(String proposalId);
 }
 
 class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
@@ -209,6 +284,9 @@ class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
 
   @override
   Future<void> sendProposal(Map<String, Object?> input) async {}
+
+  @override
+  Future<void> withdrawProposal(String proposalId) async {}
 }
 
 class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
@@ -275,6 +353,20 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
       mutation: true,
     );
     throwIfBackendError(asMap(data['createJobProposalSecure']));
+  }
+
+  @override
+  Future<void> withdrawProposal(String proposalId) async {
+    final data = await _gateway.run(
+      GqlProposalActions.withdrawProposal,
+      variables: {
+        'proposalId': proposalId,
+        'status': 'withdrawn',
+        'isWithdrawal': true,
+      },
+      mutation: true,
+    );
+    throwIfBackendError(asMap(data['updateProposalStatusSecure']));
   }
 
   @override
