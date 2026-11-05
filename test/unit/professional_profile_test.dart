@@ -136,7 +136,7 @@ void main() {
               )['professional_services']
               as List;
       expect(add.length, 3);
-      expect((add.last as Map)['serviceId'], 'electricity');
+      expect((add.last as Map)['serviceId'], 'electrical_repair');
       expect((add.last as Map)['approvalStatus'], 'PENDING');
 
       final remove =
@@ -147,7 +147,7 @@ void main() {
               as List;
       expect(remove.map((e) => (e as Map)['serviceId']), [
         'plumbing',
-        'electricity',
+        'electrical_repair',
       ]);
     });
   });

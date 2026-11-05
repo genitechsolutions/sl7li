@@ -6,6 +6,7 @@ import '../../../core/backend/backend_exception.dart';
 import '../../../core/backend/json_utils.dart';
 import '../../../core/widgets/photo_source.dart';
 import '../../../cubits/feature_cubits.dart';
+import '../../../data/repositories/craftsman_signup_repository.dart';
 import '../../../data/repositories/my_offers_repository.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -91,12 +92,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     if (picked.isNotEmpty && mounted) setState(() => _photos.addAll(picked));
   }
 
-  static const _categories = {
-    'الدهانات': 'painting',
-    'التكييف': 'ac_repair',
-    'الكهرباء': 'electricity',
-    'السباكة': 'plumbing_repair',
-  };
+  static const _categories = craftsmanServiceIds;
 
   Future<void> _submit() async {
     final messenger = ScaffoldMessenger.of(context);

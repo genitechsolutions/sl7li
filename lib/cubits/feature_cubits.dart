@@ -1,3 +1,4 @@
+import '../core/backend/backend_exception.dart';
 import '../data/chat_data.dart';
 import '../data/dummy_data.dart';
 import '../data/my_request.dart';
@@ -231,7 +232,7 @@ class ProfileCubit extends LoadCubit<UserProfile> {
       await load(force: true);
       current = state.data;
     }
-    if (current == null) return;
+    if (current == null) throw const BackendException('تعذّر تحميل حسابك، حاول مرة ثانية');
     if (current.name.isNotEmpty) return;
     await _repo.saveDetails(current, name: name.trim(), city: city, neighborhood: neighborhood);
     await load(force: true);

@@ -6,16 +6,12 @@ import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
 import '../../core/backend/media_upload.dart';
+import 'craftsman_signup_repository.dart';
 
 const professionalMaxPortfolio = 20;
 
 /// خدمات الواجهة (عربي) ← أكواد الخدمات بالخلفية.
-const professionalServiceCodes = {
-  'الدهانات': 'painting',
-  'التكييف': 'ac_repair',
-  'الكهرباء': 'electricity',
-  'السباكة': 'plumbing_repair',
-};
+const professionalServiceCodes = craftsmanServiceIds;
 
 /// الملف المهني الحقيقي (الحقول اللي بتعرضها/بتعدّلها الواجهة).
 class ProfessionalProfile {

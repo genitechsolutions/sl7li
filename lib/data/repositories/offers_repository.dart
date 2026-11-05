@@ -148,6 +148,7 @@ OfferDetails offerDetailsFromJson(Map<String, dynamic> j) {
       rating: rating is num ? rating.toDouble() : null,
       reviewsCount: intOf(j, 'professionalReviewCount') ?? 0,
       isPro: boolOf(j, 'professionalIsVip'),
+      professionalId: str(j, 'professionalId'),
     ),
   );
 }

@@ -184,6 +184,11 @@ class _EditState extends State<_EditForm> {
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(e.message)));
       if (mounted) setState(() => _saving = false);
+    } on Object {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('تعذّر الحفظ، حاول مرة ثانية')));
+      if (mounted) setState(() => _saving = false);
     }
   }
 
