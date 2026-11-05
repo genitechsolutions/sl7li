@@ -225,6 +225,22 @@ mutation SubmitGovernmentIdVerificationSecure($s3Key: String!) {
   }
 }''';
 
+  static const listMyOffers = r'''
+query ListMyOffers($limit: Int) {
+  listMyOffers(limit: $limit) {
+    offers
+    error
+  }
+}''';
+
+  static const createOffer = r'''
+mutation CreateOfferSecure($input: AWSJSON!) {
+  createOfferSecure(input: $input) {
+    offer
+    error
+  }
+}''';
+
   static const createJobProposal = r'''
 mutation CreateJobProposalSecure($input: AWSJSON!) {
   createJobProposalSecure(input: $input) {

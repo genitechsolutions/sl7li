@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'photo_source.dart';
+
 /// صورة من asset محلي أو رابط شبكة (الخلفية بترجع روابط CloudFront).
 class AppImage extends StatelessWidget {
-  const AppImage(this.src, {super.key, this.width, this.height, this.fit = BoxFit.cover});
+  const AppImage(
+    this.src, {
+    super.key,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+  });
 
   final String src;
   final double? width;
@@ -13,7 +21,13 @@ class AppImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isNetwork) return Image.asset(src, width: width, height: height, fit: fit);
+    if (!_isNetwork) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: photoImage(src, fit: fit),
+      );
+    }
     return Image.network(
       src,
       width: width,

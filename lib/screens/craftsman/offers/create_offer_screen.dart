@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../core/backend/backend_exception.dart';
+import '../../../core/backend/json_utils.dart';
+import '../../../core/widgets/photo_source.dart';
+import '../../../cubits/feature_cubits.dart';
+import '../../../data/repositories/my_offers_repository.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -47,6 +54,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     'منطقة',
   ];
   bool _confirmed = false;
+  bool _sending = false;
 
   @override
   void initState() {
@@ -77,6 +85,53 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     3 => _districts.isNotEmpty && _confirmed,
     _ => true,
   };
+
+  Future<void> _addPhotos() async {
+    final picked = await pickPhotos(max: 10 - _photos.length);
+    if (picked.isNotEmpty && mounted) setState(() => _photos.addAll(picked));
+  }
+
+  static const _categories = {
+    'الدهانات': 'painting',
+    'التكييف': 'ac_repair',
+    'الكهرباء': 'electricity',
+    'السباكة': 'plumbing_repair',
+  };
+
+  Future<void> _submit() async {
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _sending = true);
+    try {
+      final percent = _offerType != 'سعر خاص';
+      await context.read<MyOffersCubit>().create(
+        NewOffer(
+          title: _title.text.trim(),
+          description: _desc.text.trim(),
+          serviceCategory: _categories[_service] ?? 'general',
+          percentage: percent,
+          amount:
+              num.tryParse(
+                (percent ? _percent : _price).text.replaceAll(
+                  RegExp(r'[^0-9.]'),
+                  '',
+                ),
+              ) ??
+              0,
+          expiresAt: _expiry ?? DateTime.now().add(const Duration(days: 30)),
+          photos: _photos,
+          cityCode: placeCode(_city),
+          neighborhoods: [for (final d in _districts) placeCode(d)],
+        ),
+      );
+      if (mounted) setState(() => _step = 5);
+    } on BackendException catch (e) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.message)));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
 
   void _next() => setState(() => _step++);
 
@@ -295,10 +350,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
             PhotoPicker(
               photos: _photos,
               maxPhotos: 10,
-              // TODO: اختيار صور حقيقي (image_picker بموافقة)؛ صورة تجريبية.
-              onAdd: () => setState(
-                () => _photos.add('assets/images/offer_carpentry.jpg'),
-              ),
+              onAdd: _addPhotos,
               onRemove: (i) => setState(() => _photos.removeAt(i)),
             ),
           ],
@@ -454,7 +506,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(photos.first, fit: BoxFit.cover),
+                    photoImage(photos.first),
                     PositionedDirectional(
                       top: 12,
                       end: 12,
@@ -544,10 +596,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                       aspectRatio: 1,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          photos[i % photos.length],
-                          fit: BoxFit.cover,
-                        ),
+                        child: photoImage(photos[i % photos.length]),
                       ),
                     ),
                   ),
@@ -697,7 +746,9 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                       else ...[
                         btn(
                           _step == 4 ? 'إنشاء العرض' : 'المتابعة',
-                          _valid ? _next : null,
+                          _valid && !_sending
+                              ? (_step == 4 ? _submit : _next)
+                              : null,
                         ),
                         if (_step > 1)
                           btn('الخطوة السابقة', _back, primary: false),

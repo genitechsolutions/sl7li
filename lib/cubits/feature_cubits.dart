@@ -5,6 +5,7 @@ import '../data/repositories/conversations_repository.dart';
 import '../data/repositories/profile_repository.dart';
 import '../data/repositories/wallet_repository.dart';
 import '../data/request_draft.dart';
+import '../data/repositories/my_offers_repository.dart';
 import '../data/repositories/notifications_repository.dart';
 import '../data/repositories/offers_repository.dart';
 import '../data/repositories/requests_repository.dart';
@@ -194,4 +195,19 @@ class WalletCubit extends LoadCubit<int> {
 
   @override
   Future<int> fetch() => _repo.pointsBalance();
+}
+
+/// عروض المهني الترويجية.
+class MyOffersCubit extends LoadCubit<List<MyOffer>> {
+  MyOffersCubit(this._repo);
+
+  final MyOffersRepository _repo;
+
+  @override
+  Future<List<MyOffer>> fetch() => _repo.list();
+
+  Future<void> create(NewOffer offer) async {
+    await _repo.create(offer);
+    await load(force: true);
+  }
 }

@@ -24,7 +24,7 @@ Map<String, dynamic> asMap(Object? value) {
 List<Map<String, dynamic>> asMapList(Object? value) {
   if (value == null) return const [];
   Object? v = value;
-  if (v is String) {
+  for (var i = 0; i < 3 && v is String; i++) {
     try {
       v = jsonDecode(v);
     } on FormatException {
@@ -137,4 +137,12 @@ String formatMoney(Object? v) {
     buf.write(digits[i]);
   }
   return buf.toString();
+}
+
+/// اسم المدينة/الحي العربي ← كود الخلفية (الأحياء غير المعروفة بتنرسل نصها).
+String placeCode(String name) {
+  for (final e in _placeNames.entries) {
+    if (e.value == name) return e.key;
+  }
+  return name;
 }

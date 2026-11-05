@@ -5,6 +5,7 @@ import 'data/repositories/conversations_repository.dart';
 import 'data/repositories/profile_repository.dart';
 import 'data/repositories/wallet_repository.dart';
 import 'data/repositories/notifications_repository.dart';
+import 'data/repositories/my_offers_repository.dart';
 import 'data/repositories/offers_repository.dart';
 import 'data/repositories/requests_repository.dart';
 
@@ -19,6 +20,7 @@ class AppDependencies {
     required this.profile,
     required this.wallet,
     required this.notifications,
+    required this.myOffers,
   });
 
   final AuthRepository auth;
@@ -29,6 +31,7 @@ class AppDependencies {
   final ProfileRepository profile;
   final WalletRepository wallet;
   final NotificationsRepository notifications;
+  final MyOffersRepository myOffers;
 
   factory AppDependencies.fake() => AppDependencies(
     auth: FakeAuthRepository(),
@@ -39,6 +42,7 @@ class AppDependencies {
     profile: const FakeProfileRepository(),
     wallet: const FakeWalletRepository(),
     notifications: const FakeNotificationsRepository(),
+    myOffers: const FakeMyOffersRepository(),
   );
 
   factory AppDependencies.amplify() {
@@ -53,6 +57,7 @@ class AppDependencies {
       profile: const RemoteProfileRepository(gateway),
       wallet: const RemoteWalletRepository(gateway),
       notifications: RemoteNotificationsRepository(gateway, auth),
+      myOffers: const RemoteMyOffersRepository(gateway),
     );
   }
 

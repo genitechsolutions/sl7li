@@ -14,6 +14,10 @@ Widget photoImage(String path, {BoxFit fit = BoxFit.cover}) {
 /// اختيار صور من المعرض (بيرجع المسارات).
 Future<List<String>> pickPhotos({required int max}) async {
   if (max <= 0) return const [];
-  final files = await ImagePicker().pickMultiImage(limit: max > 1 ? max : null, imageQuality: 85, maxWidth: 1600);
+  final files = await ImagePicker().pickMultiImage(
+    limit: max > 1 ? max : null,
+    imageQuality: 85,
+    maxWidth: 1600,
+  );
   return files.take(max).map((f) => f.path).toList();
 }
