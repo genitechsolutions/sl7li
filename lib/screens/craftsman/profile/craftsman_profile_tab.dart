@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../data/repositories/wallet_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -374,17 +375,14 @@ class CraftsmanProfileTab extends StatelessWidget {
                     ],
                   ),
                 ),
-                CraftsmanTxRow(
-                  title: 'أرباح خدمة - تنظيف مكيفات',
-                  value: '+1000',
-                  color: colors.success,
-                ),
-                CraftsmanTxRow(
-                  title: 'سحب رصيد',
-                  value: '-1000',
-                  color: colors.error,
-                  income: false,
-                ),
+                for (final t
+                    in (context.select((WalletTxCubit c) => c.state.data) ?? const <WalletTx>[]).take(2))
+                  CraftsmanTxRow(
+                    title: t.title,
+                    value: t.value,
+                    color: t.income ? colors.success : colors.error,
+                    income: t.income,
+                  ),
               ],
             ),
           ),

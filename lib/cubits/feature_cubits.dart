@@ -211,3 +211,13 @@ class MyOffersCubit extends LoadCubit<List<MyOffer>> {
     await load(force: true);
   }
 }
+
+/// آخر حركات المحفظة.
+class WalletTxCubit extends LoadCubit<List<WalletTx>> {
+  WalletTxCubit(this._repo);
+
+  final WalletRepository _repo;
+
+  @override
+  Future<List<WalletTx>> fetch() => _repo.transactions();
+}

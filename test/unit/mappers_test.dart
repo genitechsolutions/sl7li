@@ -1,3 +1,4 @@
+import 'package:khaled_flutter/data/repositories/wallet_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:khaled_flutter/core/backend/json_utils.dart';
 import 'package:khaled_flutter/data/chat_data.dart';
@@ -366,5 +367,25 @@ void voiceTests() {
     expect(m.voiceSeconds, 12);
     expect(m.sent, isFalse);
     expect(m.text, '');
+  });
+
+  test('walletTxFromJson: خصم عرض وإضافة نقاط', () {
+    final debit = walletTxFromJson({
+      'transaction_type': 'debit',
+      'amount': 1,
+      'job_title': 'تسريب',
+    });
+    expect(debit.value, '-1');
+    expect(debit.income, isFalse);
+    expect(debit.title, 'عرض على: تسريب');
+    final credit = walletTxFromJson({'transaction_type': 'credit', 'amount': 30});
+    expect(credit.value, '+30');
+    expect(credit.income, isTrue);
+  });
+
+  test('asMapList بيفك JSON المزدوج', () {
+    expect(asMapList('"[{\\"a\\":1}]"'), [
+      {'a': 1},
+    ]);
   });
 }

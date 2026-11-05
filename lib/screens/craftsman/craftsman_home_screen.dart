@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/repositories/wallet_repository.dart';
 
 import '../../data/craftsman_verification.dart';
 
@@ -51,6 +52,7 @@ class _CraftsmanHomeScreenState extends State<CraftsmanHomeScreen> {
       };
     });
     context.read<WalletCubit>().load();
+    context.read<WalletTxCubit>().load(force: true);
   }
 
   void _select(int i) => setState(() => _tab = i);
@@ -335,17 +337,14 @@ class _HomeTab extends StatelessWidget {
                   ],
                 ),
               ),
-              CraftsmanTxRow(
-                title: 'أرباح خدمة - تنظيف مكيفات',
-                value: '+1000',
-                color: colors.success,
-              ),
-              CraftsmanTxRow(
-                title: 'سحب رصيد',
-                value: '-1000',
-                color: colors.error,
-                income: false,
-              ),
+              for (final t
+                  in (context.select((WalletTxCubit c) => c.state.data) ?? const <WalletTx>[]).take(2))
+                CraftsmanTxRow(
+                  title: t.title,
+                  value: t.value,
+                  color: t.income ? colors.success : colors.error,
+                  income: t.income,
+                ),
               GestureDetector(
                 onTap: () {}, // TODO: سجل المحفظة الكامل (ما في تصميم)
                 child: Container(
