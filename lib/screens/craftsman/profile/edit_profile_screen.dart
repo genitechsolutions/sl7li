@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/backend/backend_exception.dart';
+import '../../../core/backend/json_utils.dart';
+import '../../../core/device_location.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_bottom_action_bar.dart';
+import '../../../core/widgets/app_image.dart';
+import '../../../core/widgets/photo_source.dart';
 import '../../../core/widgets/form/app_checkbox.dart';
 import '../../../core/widgets/form/app_select_field.dart';
 import '../../../core/widgets/form/app_text_field.dart';
@@ -15,49 +21,91 @@ import '../../../core/widgets/form/form_label.dart';
 import '../../../core/widgets/form/options_sheet.dart';
 import '../../../core/widgets/form/phone_field.dart';
 import '../../../data/craftsman_signup.dart';
+import '../../../cubits/feature_cubits.dart';
+import '../../../cubits/load_view.dart';
+import '../../../cubits/professional_profile_cubit.dart';
 import '../../../data/dummy_data.dart';
+import '../../../data/repositories/professional_profile_repository.dart';
 import '../signup/signup_step2_screen.dart';
 import '../widgets/signup_scaffold.dart';
 
-/// "الملف الشخصي" عند المهني (Edit profile): بيانات وهمية مبدئية، زر الحفظ بيتفعّل بأول تعديل.
-class EditCraftsmanProfileScreen extends StatefulWidget {
+/// "الملف الشخصي" عند المهني: بيحمّل الملف الحقيقي، وزر الحفظ بيتفعّل بأول تعديل.
+class EditCraftsmanProfileScreen extends StatelessWidget {
   const EditCraftsmanProfileScreen({super.key});
 
   @override
-  State<EditCraftsmanProfileScreen> createState() => _EditState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      body: LoadView<ProfessionalProfileCubit, ProfessionalProfile>(
+        onInit: (c) => c.load(force: true),
+        builder: (_, p) => _EditForm(profile: p),
+      ),
+    );
+  }
 }
 
-class _EditState extends State<EditCraftsmanProfileScreen> {
-  final _d = CraftsmanSignupDraft()
-    ..businessName = 'رضا الكويفاتي'
-    ..city = 'دمشق'
-    ..districts.addAll([
-      'مركز المدينة',
-      'المزة',
-      'المنطقة الصناعية',
-      'البرامكة',
-    ])
-    ..services.addAll(['التكييف', 'الكهرباء', 'السباكة'])
-    ..specialties['التكييف'] = {'تبديل وصيانة الضواغط', 'نقل وحدات المكيف'}
-    ..years = '4 سنوات'
-    ..transport = 'نعم, سيارة خاصة';
+class _EditForm extends StatefulWidget {
+  const _EditForm({required this.profile});
+
+  final ProfessionalProfile profile;
+
+  @override
+  State<_EditForm> createState() => _EditState();
+}
+
+class _EditState extends State<_EditForm> {
+  ProfessionalProfile get _p => widget.profile;
+
+  late final _d = _seedDraft();
+
+  CraftsmanSignupDraft _seedDraft() {
+    final d = CraftsmanSignupDraft()
+      ..businessName = _p.businessName
+      ..city = _p.cityCode == null ? null : placeName(_p.cityCode!)
+      ..transport = _p.hasTransport == null
+          ? null
+          : _p.hasTransport!
+          ? craftsmanTransportOptions.first
+          : craftsmanTransportOptions.last
+      ..workTimes = _p.workingHoursType
+      ..hasTools = _p.hasTools ?? false
+      ..districts.addAll([for (final c in _p.areaCodes) placeName(c)])
+      ..services.addAll(_p.serviceNames.take(craftsmanMaxServices));
+    // الخلفية ما بتخزّن التخصصات الدقيقة بهالشكل: نعتبر كل تخصصات الخدمة مختارة.
+    for (final s in d.services) {
+      d.specialties[s] = {...?craftsmanSpecialtiesByService[s]};
+    }
+    return d;
+  }
 
   late final _name = TextEditingController(text: _d.businessName);
-  final _phone = TextEditingController(text: '939 316 463');
-  final _bio = TextEditingController();
-  late final _years = TextEditingController(text: _d.years);
-  final _address = TextEditingController();
+  late final _phone = TextEditingController(
+    text: context.read<ProfileCubit>().state.data?.localPhone ?? '',
+  );
+  late final _bio = TextEditingController(text: _p.description);
+  late final _years = TextEditingController(
+    text: _p.experienceYears?.toString() ?? '',
+  );
+  late final _address = TextEditingController(text: _p.workshopAddress);
   final _district = TextEditingController();
 
-  String _active = 'التكييف';
-  bool _dirty = false;
+  late String _active = _d.services.isEmpty ? '' : _d.services.first;
+  final _touched = <String>{};
+  double? _lat;
+  double? _lng;
+  String? _avatar;
+  bool _saving = false;
+
+  bool get _dirty => _touched.isNotEmpty || _avatar != null;
 
   @override
   void initState() {
     super.initState();
-    for (final c in [_name, _phone, _bio, _years, _address]) {
-      c.addListener(() => _dirty = true);
-    }
+    _name.addListener(() => _touched.add('name'));
+    _bio.addListener(() => _touched.add('bio'));
+    _years.addListener(() => _touched.add('years'));
+    _address.addListener(() => _touched.add('address'));
     _district.addListener(() => setState(() {}));
   }
 
@@ -69,18 +117,84 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
     super.dispose();
   }
 
-  void _change(VoidCallback fn) => setState(() {
+  void _change(VoidCallback fn, [String key = 'other']) => setState(() {
     fn();
-    _dirty = true;
+    _touched.add(key);
   });
+
+  Future<void> _pickAvatar() async {
+    final picked = await pickPhotos(max: 1);
+    if (picked.isNotEmpty && mounted) setState(() => _avatar = picked.first);
+  }
+
+  Future<void> _locate() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final pos = await currentDeviceLocation(
+      (m) => messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(m))),
+    );
+    if (pos != null && mounted) {
+      _change(() {
+        _lat = pos.lat;
+        _lng = pos.lng;
+      }, 'location');
+    }
+  }
+
+  ProfessionalEdits _edits() => ProfessionalEdits(
+    businessName: _touched.contains('name') ? _name.text.trim() : null,
+    description: _touched.contains('bio') ? _bio.text.trim() : null,
+    experienceYears: _touched.contains('years')
+        ? int.tryParse(
+            _years.text.replaceAllMapped(
+              RegExp('[٠-٩]'),
+              (m) => '${m[0]!.codeUnitAt(0) - 0x0660}',
+            ),
+          )
+        : null,
+    hasTools: _touched.contains('tools') ? _d.hasTools : null,
+    hasTransport: _touched.contains('transport')
+        ? _d.transport != craftsmanTransportOptions.last
+        : null,
+    workingHoursType: _touched.contains('workTimes') ? _d.workTimes : null,
+    cityCode: _touched.contains('city') && _d.city != null
+        ? placeCode(_d.city!)
+        : null,
+    areaCodes: _touched.contains('districts')
+        ? [for (final x in _d.districts) placeCode(x)]
+        : null,
+    workshopAddress: _touched.contains('address') ? _address.text.trim() : null,
+    latitude: _lat,
+    longitude: _lng,
+    serviceNames: _touched.contains('services') ? [..._d.services] : null,
+  );
+
+  Future<void> _save() async {
+    final nav = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final cubit = context.read<ProfessionalProfileCubit>();
+    setState(() => _saving = true);
+    try {
+      if (_avatar != null) await cubit.saveAvatar(_avatar!);
+      await cubit.save(_edits());
+      nav.pop();
+    } on BackendException catch (e) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) setState(() => _saving = false);
+    }
+  }
 
   Future<void> _pick(
     String title,
     List<String> options,
     ValueChanged<String> onPicked,
+    String key,
   ) async {
     final v = await showOptionsSheet(context, title: title, options: options);
-    if (v != null) _change(() => onPicked(v));
+    if (v != null) _change(() => onPicked(v), key);
   }
 
   @override
@@ -102,7 +216,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
         backgroundColor: colors.background,
         bottomNavigationBar: AppBottomActionBar(
           label: 'حفظ التغييرات',
-          onPressed: _dirty ? () => Navigator.pop(context) : null,
+          onPressed: _dirty && !_saving ? _save : null,
           secondaryLabel: 'إلغاء',
           sideBySide: true,
           onSecondaryPressed: () => Navigator.pop(context),
@@ -152,29 +266,32 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                         clipBehavior: Clip.none,
                         children: [
                           ClipOval(
-                            child: Image.asset(
-                              'assets/images/craftsman_avatar_self.jpg',
+                            child: AppImage(
+                              _avatar ??
+                                  _p.imageUrl ??
+                                  'assets/images/profile_avatar.png',
                               width: 96,
                               height: 96,
-                              fit: BoxFit.cover,
                             ),
                           ),
                           PositionedDirectional(
                             start: 0,
                             bottom: 0,
-                            // TODO: اختيار صورة حقيقي (image_picker)
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: colors.primary,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              alignment: Alignment.center,
-                              child: SvgPicture.asset(
-                                'assets/icons/ic_edit_badge.svg',
-                                width: 16,
-                                height: 16,
+                            child: GestureDetector(
+                              onTap: _pickAvatar,
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: colors.primary,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                alignment: Alignment.center,
+                                child: SvgPicture.asset(
+                                  'assets/icons/ic_edit_badge.svg',
+                                  width: 16,
+                                  height: 16,
+                                ),
                               ),
                             ),
                           ),
@@ -189,11 +306,14 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                   ),
                   ...signupField(
                     const FormLabel('الرقم'),
-                    PhoneField(
-                      controller: _phone,
-                      inline: true,
-                      restrictInput: true,
-                      onCountryTap: () {}, // TODO: pick country code
+                    // TODO: تغيير الرقم بيحتاج رمز تأكيد (Cognito)؛ هلق للعرض بس.
+                    IgnorePointer(
+                      child: PhoneField(
+                        controller: _phone,
+                        inline: true,
+                        restrictInput: true,
+                        onCountryTap: () {},
+                      ),
                     ),
                   ),
                   Padding(
@@ -237,6 +357,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                               ),
                             );
                             setState(() {
+                              _touched.add('services');
                               if (!_d.services.contains(_active) &&
                                   _d.services.isNotEmpty) {
                                 _active = _d.services.first;
@@ -307,7 +428,8 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                     if (chosen.contains(o))
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => _change(() => chosen.remove(o)),
+                        onTap: () =>
+                            _change(() => chosen.remove(o), 'specialties'),
                         child: Padding(
                           padding: const EdgeInsetsDirectional.symmetric(
                             horizontal: 12,
@@ -340,6 +462,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                         'وسيلة المواصلات',
                         craftsmanTransportOptions,
                         (v) => _d.transport = v,
+                        'transport',
                       ),
                     ),
                   ),
@@ -352,6 +475,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                         'أوقات العمل',
                         craftsmanWorkTimeOptions,
                         (v) => _d.workTimes = v,
+                        'workTimes',
                       ),
                     ),
                   ),
@@ -370,7 +494,8 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                         ),
                         AppToggle(
                           value: _d.hasTools,
-                          onChanged: (v) => _change(() => _d.hasTools = v),
+                          onChanged: (v) =>
+                              _change(() => _d.hasTools = v, 'tools'),
                         ),
                       ],
                     ),
@@ -384,6 +509,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                         'المدينة المخدمة',
                         loginCities,
                         (v) => _d.city = v,
+                        'city',
                       ),
                     ),
                   ),
@@ -401,7 +527,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                       onTap: () => _change(() {
                         _d.districts.add(m);
                         _district.clear();
-                      }),
+                      }, 'districts'),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: 12,
@@ -437,7 +563,10 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                     children: [
                       for (final d in _d.districts)
                         GestureDetector(
-                          onTap: () => _change(() => _d.districts.remove(d)),
+                          onTap: () => _change(
+                            () => _d.districts.remove(d),
+                            'districts',
+                          ),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -491,7 +620,7 @@ class _EditState extends State<EditCraftsmanProfileScreen> {
                         ),
                         const SizedBox(height: 12),
                         GestureDetector(
-                          onTap: () => _change(() {}),
+                          onTap: _locate,
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 12),

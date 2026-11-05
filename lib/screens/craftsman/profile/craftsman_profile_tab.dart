@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+
 import '../../../data/repositories/wallet_repository.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_image.dart';
 import '../../../cubits/feature_cubits.dart';
+import '../../../cubits/professional_profile_cubit.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_icon_button.dart';
-import '../../../core/widgets/dashed_border_box.dart';
 import '../../../data/craftsman_verification.dart';
 import '../../../data/dummy_data.dart';
 import '../../craftsman_profile/craftsman_profile_screen.dart';
@@ -16,11 +19,23 @@ import '../../notifications/notifications_screen.dart';
 import '../../settings/settings_screen.dart';
 import '../widgets/craftsman_cards.dart';
 import 'edit_profile_screen.dart';
+import 'portfolio_section.dart';
 import 'verification_dialog.dart';
 
 /// تاب "الملف الشخصي" للمهني: بطاقة التعريف، التوثيق، المسار، معرض الأعمال، المحفظة، إدارة الحساب.
-class CraftsmanProfileTab extends StatelessWidget {
+class CraftsmanProfileTab extends StatefulWidget {
   const CraftsmanProfileTab({super.key});
+
+  @override
+  State<CraftsmanProfileTab> createState() => _CraftsmanProfileTabState();
+}
+
+class _CraftsmanProfileTabState extends State<CraftsmanProfileTab> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfessionalProfileCubit>().load();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +50,8 @@ class CraftsmanProfileTab extends StatelessWidget {
       ),
       child: child,
     );
+
+    final pro = context.select((ProfessionalProfileCubit c) => c.state.data);
 
     return ValueListenableBuilder<VerificationStatus>(
       valueListenable: verificationNotifier,
@@ -100,20 +117,29 @@ class CraftsmanProfileTab extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: colors.tag,
-                              shape: BoxShape.circle,
+                          if (pro?.imageUrl != null)
+                            ClipOval(
+                              child: AppImage(
+                                pro!.imageUrl!,
+                                width: 64,
+                                height: 64,
+                              ),
+                            )
+                          else
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: colors.tag,
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.person_outline,
+                                size: 32,
+                                color: colors.primary,
+                              ),
                             ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.person_outline,
-                              size: 32,
-                              color: colors.primary,
-                            ),
-                          ),
                           const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,10 +147,12 @@ class CraftsmanProfileTab extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    context.select(
-                                      (ProfileCubit c) =>
-                                          c.state.data?.name ?? '',
-                                    ),
+                                    (pro?.businessName.isNotEmpty ?? false)
+                                        ? pro!.businessName
+                                        : context.select(
+                                            (ProfileCubit c) =>
+                                                c.state.data?.name ?? '',
+                                          ),
                                     style: AppTextStyles.title18Medium,
                                   ),
                                   if (status ==
@@ -139,7 +167,9 @@ class CraftsmanProfileTab extends StatelessWidget {
                                 ],
                               ),
                               Text(
-                                'تكييف وتبريد',
+                                (pro?.headline.isNotEmpty ?? false)
+                                    ? pro!.headline
+                                    : 'تكييف وتبريد',
                                 style: AppTextStyles.body16.copyWith(
                                   color: colors.textSecondary,
                                 ),
@@ -181,7 +211,9 @@ class CraftsmanProfileTab extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            '(128) 4.9',
+                            pro == null
+                                ? '(0) 0.0'
+                                : '(${pro.reviewCount}) ${(pro.rating ?? 0).toStringAsFixed(1)}',
                             textDirection: TextDirection.ltr,
                             style: AppTextStyles.body14.copyWith(
                               color: colors.textSecondary,
@@ -273,49 +305,7 @@ class CraftsmanProfileTab extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(32, 28, 32, 8),
-            child: Row(
-              children: [
-                Text('معرض الأعمال', style: AppTextStyles.title18Medium),
-                const Spacer(),
-                Text(
-                  '(0/20)',
-                  textDirection: TextDirection.ltr,
-                  style: AppTextStyles.body12.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: DashedBorderBox(
-              height: 146,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.file_upload_outlined,
-                      size: 40,
-                      color: colors.textSecondary,
-                    ),
-                    const SizedBox(height: 12),
-                    Text('إضغط لإضافة صور', style: AppTextStyles.body14Medium),
-                    const SizedBox(height: 4),
-                    Text(
-                      'لا توجد صور في معرض أعمالك بعد',
-                      style: AppTextStyles.body12.copyWith(
-                        color: colors.textHint,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          const CraftsmanPortfolioSection(),
           Padding(
             padding: const EdgeInsets.fromLTRB(32, 28, 32, 8),
             child: Align(
@@ -376,7 +366,9 @@ class CraftsmanProfileTab extends StatelessWidget {
                   ),
                 ),
                 for (final t
-                    in (context.select((WalletTxCubit c) => c.state.data) ?? const <WalletTx>[]).take(2))
+                    in (context.select((WalletTxCubit c) => c.state.data) ??
+                            const <WalletTx>[])
+                        .take(2))
                   CraftsmanTxRow(
                     title: t.title,
                     value: t.value,
