@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/backend/backend_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/craftsman_avatar.dart';
 import '../../../core/widgets/form/app_select_field.dart';
 import '../../../core/widgets/form/options_sheet.dart';
+import '../../../cubits/feature_cubits.dart';
+import '../../../data/my_request.dart';
 import '../../new_request/new_request_screen.dart';
 
 // ───────────────────────── تحديث حالة الطلب ─────────────────────────
@@ -78,24 +82,29 @@ Future<String?> showUpdateStatusDialog(BuildContext context) {
 // ───────────────────────── تم الاتفاق مع مهني ─────────────────────────
 
 /// اختيار المهني اللي تم الاتفاق معه من العروض. بترجع فهرس المختار (أو null).
-Future<int?> showAgreementDialog(BuildContext context, {int count = 4}) {
+Future<int?> showAgreementDialog(
+  BuildContext context, {
+  int count = 4,
+  List<RequestOffer>? offers,
+}) {
   return showAppModal<int>(
     context,
-    (context) => _AgreementDialog(count: count),
+    (context) => _AgreementDialog(count: offers?.length ?? count, offers: offers),
   );
 }
 
 class _AgreementDialog extends StatefulWidget {
-  const _AgreementDialog({required this.count});
+  const _AgreementDialog({required this.count, this.offers});
 
   final int count;
+  final List<RequestOffer>? offers;
 
   @override
   State<_AgreementDialog> createState() => _AgreementDialogState();
 }
 
 class _AgreementDialogState extends State<_AgreementDialog> {
-  int _selected = 1;
+  late int _selected = widget.offers == null ? 1 : 0;
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +141,10 @@ class _AgreementDialogState extends State<_AgreementDialog> {
               itemBuilder: (_, i) => _AgreementTile(
                 selected: i == _selected,
                 onTap: () => setState(() => _selected = i),
+                name: widget.offers?[i].craftsmanName,
+                price: widget.offers == null
+                    ? null
+                    : '${widget.offers![i].price} ${widget.offers![i].priceUnit}',
               ),
             ),
           ),
@@ -168,10 +181,17 @@ class _AgreementDialogState extends State<_AgreementDialog> {
 }
 
 class _AgreementTile extends StatelessWidget {
-  const _AgreementTile({required this.selected, required this.onTap});
+  const _AgreementTile({
+    required this.selected,
+    required this.onTap,
+    this.name,
+    this.price,
+  });
 
   final bool selected;
   final VoidCallback onTap;
+  final String? name;
+  final String? price;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +224,7 @@ class _AgreementTile extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          'مركز قزاز للتكيف والتبريد',
+                          name ?? 'مركز قزاز للتكيف والتبريد',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.body16,
@@ -219,7 +239,7 @@ class _AgreementTile extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    '100 ليرة سورية',
+                    price ?? '100 ليرة سورية',
                     style: AppTextStyles.body14.copyWith(color: colors.success),
                   ),
                 ],
@@ -258,9 +278,9 @@ class _AgreementTile extends StatelessWidget {
 
 const _cancelReasons = ['لم أتلق أي عروض أو رسائل', 'أتلقى الكثير من الرسائل'];
 
-/// تأكيد إلغاء الطلب مع سبب إجباري. بترجع true إذا أكّد.
-Future<bool?> showCancelRequestDialog(BuildContext context) {
-  return showAppModal<bool>(context, (context) => const _CancelDialog());
+/// تأكيد إلغاء الطلب مع سبب إجباري. بترجع السبب إذا أكّد.
+Future<String?> showCancelRequestDialog(BuildContext context) {
+  return showAppModal<String>(context, (context) => const _CancelDialog());
 }
 
 class _CancelDialog extends StatefulWidget {
@@ -411,7 +431,7 @@ class _CancelDialogState extends State<_CancelDialog> {
                     foreground: colors.textOnPrimary,
                     onTap: _reason == null
                         ? null
-                        : () => Navigator.of(context).pop(true),
+                        : () => Navigator.of(context).pop(_reason),
                   ),
                 ),
               ),
@@ -602,17 +622,73 @@ class _RatingDialogState extends State<_RatingDialog> {
   }
 }
 
-/// TODO: "تم إنجاز المهمة" بدها تحديث الحالة فعلياً.
-Future<void> runUpdateStatusFlow(BuildContext context) async {
+void _toast(BuildContext context, String text) => ScaffoldMessenger.of(context)
+  ..hideCurrentSnackBar()
+  ..showSnackBar(SnackBar(content: Text(text)));
+
+/// بينفّذ عملية بالخلفية وبيعرض نتيجتها؛ بيرجّع true إذا نجحت.
+Future<bool> _backend(BuildContext context, Future<void> Function() run, String ok) async {
+  try {
+    await run();
+  } on BackendException catch (e) {
+    if (context.mounted) _toast(context, e.message);
+    return false;
+  } on Object {
+    if (context.mounted) _toast(context, 'تعذّر تنفيذ العملية، حاول مرة ثانية');
+    return false;
+  }
+  if (context.mounted) _toast(context, ok);
+  return true;
+}
+
+/// "تم الاتفاق مع مهني": بيعرض العروض الحقيقية وبيقبل المختار.
+Future<bool> agreeWithOffer(BuildContext context, String jobId) async {
+  final cubit = context.read<MyRequestsCubit>();
+  List<RequestOffer> offers;
+  try {
+    offers = await cubit.offers(jobId);
+  } on Object {
+    if (context.mounted) _toast(context, 'تعذّر تحميل العروض');
+    return false;
+  }
+  if (!context.mounted) return false;
+  if (offers.isEmpty) {
+    _toast(context, 'ما وصلتك عروض لسا');
+    return false;
+  }
+  final index = await showAgreementDialog(context, offers: offers);
+  final proposalId = index == null ? null : offers[index].proposalId;
+  if (proposalId == null || !context.mounted) return false;
+  return _backend(
+    context,
+    () => cubit.respondToOffer(proposalId, approve: true),
+    'تم الاتفاق مع المهني',
+  );
+}
+
+/// نافذة "تحديث الحالة" ومتابعتها. بترجع true إذا تغيّر شي بالخلفية.
+Future<bool> runUpdateStatusFlow(BuildContext context, MyRequest request) async {
   final result = await showUpdateStatusDialog(context);
-  if (!context.mounted) return;
+  if (!context.mounted) return false;
+  final id = request.id;
   switch (result) {
     case 'agree':
-      await showAgreementDialog(context);
+      if (id == null) {
+        await showAgreementDialog(context);
+        return false;
+      }
+      return agreeWithOffer(context, id);
     case 'edit':
       // TODO: تعبئة الطلب الحالي مسبقاً (ما في frames مخصصة)؛ هلق بيفتح خطوات الطلب.
       await Navigator.push(context, NewRequestScreen.route());
     case 'cancel':
-      await showCancelRequestDialog(context);
+      final reason = await showCancelRequestDialog(context);
+      if (reason == null || id == null || !context.mounted) return false;
+      return _backend(
+        context,
+        () => context.read<MyRequestsCubit>().cancel(id, reason: reason),
+        'تم إلغاء الطلب',
+      );
   }
+  return false;
 }

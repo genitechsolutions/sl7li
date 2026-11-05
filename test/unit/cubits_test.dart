@@ -43,6 +43,9 @@ class _CountingRequests implements MyRequestsRepository {
 
   @override
   Future<List<RequestOffer>> offers(String jobId) async => const [];
+
+  @override
+  Future<void> respondToOffer(String proposalId, {required bool approve}) async {}
 }
 
 class _RecordingConversations implements ConversationsRepository {
@@ -72,7 +75,7 @@ class _RecordingConversations implements ConversationsRepository {
   Future<void> markRead(String conversationId) async {}
 
   @override
-  Future<void> ensureJobConversation(String jobId, String customerId) async {}
+  Future<void> ensureJobConversation(String jobId, String otherId, {bool asCustomer = false}) async {}
 
   @override
   Stream<ChatMessage> liveMessages(Conversation conversation) => const Stream.empty();

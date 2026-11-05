@@ -22,6 +22,9 @@ abstract class MyRequestsRepository {
 
   /// عروض الأسعار الواردة على طلب.
   Future<List<RequestOffer>> offers(String jobId);
+
+  /// قبول أو رفض عرض سعر.
+  Future<void> respondToOffer(String proposalId, {required bool approve});
 }
 
 class FakeMyRequestsRepository implements MyRequestsRepository {
@@ -42,6 +45,9 @@ class FakeMyRequestsRepository implements MyRequestsRepository {
 
   @override
   Future<List<RequestOffer>> offers(String jobId) async => [sampleBestOffer, ...sampleOtherOffers];
+
+  @override
+  Future<void> respondToOffer(String proposalId, {required bool approve}) async {}
 }
 
 class RemoteMyRequestsRepository implements MyRequestsRepository {
@@ -84,6 +90,16 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
     throwIfBackendError(res);
     final list = asMapList(res['proposals']).map(requestOfferFromJson).toList();
     return list;
+  }
+
+  @override
+  Future<void> respondToOffer(String proposalId, {required bool approve}) async {
+    final data = await _gateway.run(
+      Gql.updateProposalStatus,
+      variables: {'proposalId': proposalId, 'status': approve ? 'approved' : 'rejected'},
+      mutation: true,
+    );
+    throwIfBackendError(asMap(data['updateProposalStatusSecure']));
   }
 
   @override
@@ -370,6 +386,8 @@ RequestOffer requestOfferFromJson(Map<String, dynamic> j) {
       : '${formatMoney(j['inspection_fee_amount'])} $unit';
   final materials = intOf(j, 'materials_cost') ?? 0;
   return RequestOffer(
+    proposalId: str(j, 'proposal_id'),
+    professionalId: str(j, 'professional_id'),
     craftsmanName: str(j, 'professional_name') ?? 'مهني',
     rating: str(j, 'professional_rating') ?? '–',
     reviews: intOf(j, 'professional_review_count') ?? 0,

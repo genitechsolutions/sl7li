@@ -41,6 +41,12 @@ class MyRequestsCubit extends LoadCubit<List<MyRequest>> {
 
   Future<List<RequestOffer>> offers(String jobId) => _repo.offers(jobId);
 
+  /// قبول/رفض عرض وتحديث القائمة.
+  Future<void> respondToOffer(String proposalId, {required bool approve}) async {
+    await _repo.respondToOffer(proposalId, approve: approve);
+    await load(force: true);
+  }
+
   /// بيرسل طلب جديد وبيحدّث القائمة.
   Future<void> create(RequestDraft draft) async {
     await _repo.create(draft);
@@ -91,6 +97,25 @@ class ConversationsCubit extends LoadCubit<List<Conversation>> {
   Future<ChatMessage> sendText(Conversation c, String text) => _repo.sendText(c, text);
 
   Future<void> markRead(String conversationId) => _repo.markRead(conversationId);
+
+  /// محادثة الزبون مع مهني معيّن على طلب (بتنعمل إذا ما كانت موجودة).
+  Future<Conversation?> openWithProfessional(String jobId, String professionalId) async {
+    Conversation? find() {
+      for (final c in state.data ?? const <Conversation>[]) {
+        if (c.jobId == jobId && c.participant2Id == professionalId) return c;
+      }
+      return null;
+    }
+
+    await loadFor(professionalMode: false);
+    var found = find();
+    if (found == null) {
+      await _repo.ensureJobConversation(jobId, professionalId, asCustomer: true);
+      await load(force: true);
+      found = find();
+    }
+    return found;
+  }
 
   /// محادثة طلب (بتنعمل إذا ما كانت موجودة) بوضع المهني.
   Future<Conversation?> openForJob(String jobId, String? customerId) async {

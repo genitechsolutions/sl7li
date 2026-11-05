@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/backend/backend_exception.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_icon_button.dart';
@@ -9,7 +10,9 @@ import '../../core/widgets/app_segmented_control.dart';
 import '../../core/widgets/form/app_toggle.dart';
 import '../../cubits/feature_cubits.dart';
 import '../../data/dummy_data.dart';
+import '../../data/chat_data.dart';
 import '../../data/my_request.dart';
+import '../messages/chat_screen.dart';
 import 'dialogs/request_dialogs.dart';
 import 'widgets/offer_tile.dart';
 import 'widgets/request_stepper.dart';
@@ -37,6 +40,7 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   late int _tab = widget.initialTab;
   bool _whatsapp = true;
   List<RequestOffer>? _proposals;
+  RequestOffer? _selected;
   bool _offersFailed = false;
 
   bool get _real => widget.request.id != null;
@@ -56,6 +60,33 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
     } on Object {
       if (mounted) setState(() => _offersFailed = true);
     }
+  }
+
+  Future<void> _update() async {
+    if (await runUpdateStatusFlow(context, widget.request) && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _accept() async {
+    final offer = _selected;
+    final id = offer?.proposalId;
+    if (offer == null || id == null) return;
+    final ok = await _acceptOffer(context, id);
+    if (ok && mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _message() async {
+    final offer = _selected;
+    final jobId = widget.request.id;
+    final proId = offer?.professionalId;
+    if (jobId == null || proId == null) return;
+    final conversation = await _openChat(context, jobId, proId);
+    if (conversation == null || !mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ChatScreen(conversation: conversation)),
+    );
   }
 
   List<RequestOffer> get _shownOffers => _real
@@ -79,6 +110,10 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           request: widget.request,
           completionPending: widget.completionPending,
           offersTab: _tab == 1,
+          selected: _real ? _selected : null,
+          onAccept: _accept,
+          onMessage: _message,
+          onUpdate: _update,
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -336,6 +371,24 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
     ];
   }
 
+  Widget _selectable(RequestOffer offer) {
+    final selected = _real && identical(_selected, offer);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _real ? () => setState(() => _selected = selected ? null : offer) : null,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? context.colors.successLight : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: OfferTile(offer: offer, onOpen: () {}),
+      ),
+    );
+  }
+
   List<Widget> _offers(BuildContext context) {
     final label = AppTextStyles.body16Medium.copyWith(
       color: context.colors.textSecondary,
@@ -365,7 +418,7 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
       // TODO: navigate to offer / craftsman profile
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: OfferTile(offer: list.first, onOpen: () {}),
+        child: _selectable(list.first),
       ),
       if (list.length > 1) ...[
         Padding(
@@ -375,7 +428,7 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
         for (final offer in list.skip(1))
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: OfferTile(offer: offer, onOpen: () {}),
+            child: _selectable(offer),
           ),
       ],
     ];
@@ -439,10 +492,18 @@ class _BottomBar extends StatelessWidget {
     required this.request,
     required this.offersTab,
     required this.completionPending,
+    this.selected,
+    this.onAccept,
+    this.onMessage,
+    this.onUpdate,
   });
 
   final MyRequest request;
   final bool offersTab;
+  final RequestOffer? selected;
+  final VoidCallback? onAccept;
+  final VoidCallback? onMessage;
+  final VoidCallback? onUpdate;
   final bool completionPending;
 
   @override
@@ -502,7 +563,7 @@ class _BottomBar extends StatelessWidget {
                         'تحديث حالة الطلب',
                         bg: colors.primary,
                         fg: colors.textOnPrimary,
-                        onTap: () => runUpdateStatusFlow(context),
+                        onTap: onUpdate,
                       ),
                       // TODO: الاعتراض على الإنجاز (ما في نافذة بالتصميم)
                       button(
@@ -523,20 +584,24 @@ class _BottomBar extends StatelessWidget {
                         'تحديث حالة الطلب',
                         bg: colors.primary,
                         fg: colors.textOnPrimary,
-                        onTap: () => runUpdateStatusFlow(context),
+                        onTap: onUpdate,
                       ),
                   ]
                 : offersTab
                 ? [
                     button(
                       'قبول العرض',
-                      bg: colors.successDisabled,
+                      bg: selected == null
+                          ? colors.successDisabled
+                          : colors.success,
                       fg: colors.textOnPrimary,
+                      onTap: selected == null ? null : onAccept,
                     ),
                     button(
                       'مراسلة المختص',
                       bg: colors.primary,
                       fg: colors.textOnPrimary,
+                      onTap: selected == null ? null : onMessage,
                     ),
                   ]
                 : [
@@ -544,7 +609,7 @@ class _BottomBar extends StatelessWidget {
                       'تحديث حالة الطلب',
                       bg: colors.primary,
                       fg: colors.textOnPrimary,
-                      onTap: () => runUpdateStatusFlow(context),
+                      onTap: onUpdate,
                     ),
                     button(
                       'تعديل الطلب',
@@ -557,5 +622,39 @@ class _BottomBar extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<bool> _acceptOffer(BuildContext context, String proposalId) async {
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    await context.read<MyRequestsCubit>().respondToOffer(proposalId, approve: true);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('تم الاتفاق مع المهني')));
+    return true;
+  } on Object catch (e) {
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(e is BackendException ? e.message : 'تعذّر قبول العرض')));
+    return false;
+  }
+}
+
+Future<Conversation?> _openChat(BuildContext context, String jobId, String professionalId) async {
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final c = await context.read<ConversationsCubit>().openWithProfessional(jobId, professionalId);
+    if (c == null) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('تعذّر فتح المحادثة')));
+    }
+    return c;
+  } on Object {
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('تعذّر فتح المحادثة')));
+    return null;
   }
 }

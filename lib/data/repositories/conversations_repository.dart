@@ -31,7 +31,7 @@ abstract class ConversationsRepository {
   Future<void> markRead(String conversationId);
 
   /// بيفتح (أو بيعمل) محادثة الطلب بين الزبون والمهني الحالي.
-  Future<void> ensureJobConversation(String jobId, String customerId);
+  Future<void> ensureJobConversation(String jobId, String otherId, {bool asCustomer = false});
 
   /// رسائل جديدة مباشرة (من الطرف التاني ومن أجهزتي).
   Stream<ChatMessage> liveMessages(Conversation conversation);
@@ -74,7 +74,7 @@ class FakeConversationsRepository implements ConversationsRepository {
   Future<void> markRead(String conversationId) async {}
 
   @override
-  Future<void> ensureJobConversation(String jobId, String customerId) async {}
+  Future<void> ensureJobConversation(String jobId, String otherId, {bool asCustomer = false}) async {}
 
   @override
   Stream<ChatMessage> liveMessages(Conversation conversation) => const Stream.empty();
@@ -161,12 +161,12 @@ class RemoteConversationsRepository implements ConversationsRepository {
   }
 
   @override
-  Future<void> ensureJobConversation(String jobId, String customerId) async {
+  Future<void> ensureJobConversation(String jobId, String otherId, {bool asCustomer = false}) async {
     final me = _auth.currentUserId;
     if (me == null) throw BackendException.unauthenticated;
     await _gateway.run(
       Gql.findOrCreateJobConversation,
-      variables: {'a': customerId, 'b': me, 'j': jobId},
+      variables: {'a': asCustomer ? me : otherId, 'b': asCustomer ? otherId : me, 'j': jobId},
       mutation: true,
     );
   }

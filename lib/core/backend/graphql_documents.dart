@@ -92,6 +92,14 @@ mutation FindOrCreateJobConversation($a: String!, $b: String!, $j: String!) {
   }
 }''';
 
+  static const updateProposalStatus = r'''
+mutation UpdateProposalStatusSecure($proposalId: String!, $status: String!) {
+  updateProposalStatusSecure(proposalId: $proposalId, status: $status) {
+    proposal
+    error
+  }
+}''';
+
   static const getMyProposal = r'''
 query GetMyProposalForJobSecure($jobId: String!) {
   getMyProposalForJobSecure(jobId: $jobId) {

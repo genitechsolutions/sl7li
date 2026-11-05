@@ -63,7 +63,13 @@ class RequestOffer {
     required this.priceUnit,
     required this.inspectionFee,
     required this.materialsFee,
+    this.proposalId,
+    this.professionalId,
   });
+
+  /// معرّفات الباك (بالبيانات الحقيقية فقط).
+  final String? proposalId;
+  final String? professionalId;
 
   final String craftsmanName;
   final String rating;
