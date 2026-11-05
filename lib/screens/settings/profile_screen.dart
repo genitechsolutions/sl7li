@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/backend/backend_exception.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubits/feature_cubits.dart';
@@ -39,6 +40,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _save() async {
+    if (_name.text.trim().isEmpty) return;
+    final nav = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await context.read<ProfileCubit>().saveName(_name.text);
+      nav.pop();
+    } on BackendException catch (e) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   @override
   void dispose() {
     _name.dispose();
@@ -55,10 +70,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       value: AppTheme.overlayStyle(context),
       child: Scaffold(
         backgroundColor: colors.background,
-        // TODO: حفظ التغييرات الحقيقي (API)
         bottomNavigationBar: AppBottomActionBar(
           label: 'حفظ التغييرات',
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _save,
         ),
         body: Column(
           children: [

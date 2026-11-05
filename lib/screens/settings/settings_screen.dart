@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/backend/backend_exception.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubits/feature_cubits.dart';
@@ -50,12 +51,7 @@ class SettingsScreen extends StatelessWidget {
       context,
       (context) => const _DeleteDialog(),
     );
-    if (ok == true && context.mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
-        (_) => false,
-      );
-    }
+    if (ok == true && context.mounted) await _finishDelete(context);
   }
 
   @override
@@ -586,12 +582,26 @@ Future<void> confirmDeleteAccount(BuildContext context) async {
     context,
     (context) => const _DeleteDialog(),
   );
-  if (ok == true && context.mounted) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
-      (_) => false,
-    );
+  if (ok == true && context.mounted) await _finishDelete(context);
+}
+
+Future<void> _finishDelete(BuildContext context) async {
+  try {
+    await context.read<ProfileCubit>().deleteAccount();
+  } on BackendException catch (e) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(e.message)));
+    return;
   }
+  if (!context.mounted) return;
+  await signOutAndReset(context);
+  if (!context.mounted) return;
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
+    (_) => false,
+  );
 }
 
 /// الاسم + الرقم من بيانات الحساب (حقيقية بالوضع الحقيقي).

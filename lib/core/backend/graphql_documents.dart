@@ -201,6 +201,22 @@ query GetGovernmentIdVerificationStatusSecure {
   }
 }''';
 
+  static const updateUser = r'''
+mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    user_id
+    name
+  }
+}''';
+
+  static const deleteAccount = r'''
+mutation DeleteAccountSecure($reason: String, $feedback: String) {
+  deleteAccountSecure(reason: $reason, feedback: $feedback) {
+    success
+    error
+  }
+}''';
+
   static const createJobProposal = r'''
 mutation CreateJobProposalSecure($input: AWSJSON!) {
   createJobProposalSecure(input: $input) {

@@ -12,7 +12,10 @@ class UserProfile {
     this.neighborhoodCode,
     this.isProfessional = false,
     this.idStatus,
+    this.userId = '',
   });
+
+  final String userId;
 
   /// حالة توثيق الهوية بالخلفية (approved/pending/rejected)، null = ما في طلب.
   final String? idStatus;
@@ -40,6 +43,10 @@ class UserProfile {
 
 abstract class ProfileRepository {
   Future<UserProfile> load();
+
+  Future<void> saveName(UserProfile current, String name);
+
+  Future<void> deleteAccount();
 }
 
 class FakeProfileRepository implements ProfileRepository {
@@ -48,6 +55,12 @@ class FakeProfileRepository implements ProfileRepository {
   @override
   Future<UserProfile> load() async =>
       const UserProfile(name: 'رضا الكويفاتي', phone: '+963939316463');
+
+  @override
+  Future<void> saveName(UserProfile current, String name) async {}
+
+  @override
+  Future<void> deleteAccount() async {}
 }
 
 class RemoteProfileRepository implements ProfileRepository {
@@ -85,7 +98,25 @@ class RemoteProfileRepository implements ProfileRepository {
       neighborhoodCode: base.neighborhoodCode,
       isProfessional: professional,
       idStatus: idStatus,
+      userId: base.userId,
     );
+  }
+
+  @override
+  Future<void> saveName(UserProfile current, String name) async {
+    await _gateway.run(
+      Gql.updateUser,
+      variables: {
+        'input': {'user_id': current.userId, 'name': name},
+      },
+      mutation: true,
+    );
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final data = await _gateway.run(Gql.deleteAccount, mutation: true);
+    throwIfBackendError(asMap(data['deleteAccountSecure']));
   }
 }
 
@@ -95,4 +126,5 @@ UserProfile userProfileFromJson(Map<String, dynamic> j, {bool professional = fal
   cityCode: str(j, 'city_code'),
   neighborhoodCode: str(j, 'neighborhood_code'),
   isProfessional: professional,
+  userId: str(j, 'user_id') ?? '',
 );

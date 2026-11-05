@@ -173,6 +173,15 @@ class ProfileCubit extends LoadCubit<UserProfile> {
 
   @override
   Future<UserProfile> fetch() => _repo.load();
+
+  Future<void> saveName(String name) async {
+    final current = state.data;
+    if (current == null || name.trim() == current.name) return;
+    await _repo.saveName(current, name.trim());
+    await load(force: true);
+  }
+
+  Future<void> deleteAccount() => _repo.deleteAccount();
 }
 
 /// رصيد نقاط المهني.
