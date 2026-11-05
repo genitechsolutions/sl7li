@@ -81,6 +81,15 @@ class _CountingRequests implements MyRequestsRepository {
 
   @override
   Future<void> respondToOffer(String proposalId, {required bool approve}) async {}
+
+  @override
+  Future<void> rate(
+    String jobId, {
+    String? proposalId,
+    String? professionalId,
+    required int stars,
+    String? comment,
+  }) async {}
 }
 
 class _RecordingConversations implements ConversationsRepository {

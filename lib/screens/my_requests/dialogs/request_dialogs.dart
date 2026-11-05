@@ -86,16 +86,22 @@ Future<int?> showAgreementDialog(
   BuildContext context, {
   int count = 4,
   List<RequestOffer>? offers,
+  int initial = 0,
 }) {
   return showAppModal<int>(
     context,
-    (context) => _AgreementDialog(count: offers?.length ?? count, offers: offers),
+    (context) => _AgreementDialog(
+      count: offers?.length ?? count,
+      offers: offers,
+      initial: initial,
+    ),
   );
 }
 
 class _AgreementDialog extends StatefulWidget {
-  const _AgreementDialog({required this.count, this.offers});
+  const _AgreementDialog({required this.count, this.offers, this.initial = 0});
 
+  final int initial;
   final int count;
   final List<RequestOffer>? offers;
 
@@ -104,7 +110,7 @@ class _AgreementDialog extends StatefulWidget {
 }
 
 class _AgreementDialogState extends State<_AgreementDialog> {
-  late int _selected = widget.offers == null ? 1 : 0;
+  late int _selected = widget.offers == null ? 1 : widget.initial;
 
   @override
   Widget build(BuildContext context) {
@@ -456,12 +462,16 @@ class _CancelDialogState extends State<_CancelDialog> {
 // ───────────────────────── تقييم الخدمة ─────────────────────────
 
 /// تقييم الخدمة (5 نجوم + تعليق اختياري). بترجع عدد النجوم (أو null إذا إلغاء).
-Future<int?> showRatingDialog(BuildContext context) {
-  return showAppModal<int>(context, (context) => const _RatingDialog());
+typedef RatingResult = ({int stars, String comment});
+
+Future<RatingResult?> showRatingDialog(BuildContext context, {String? name}) {
+  return showAppModal<RatingResult>(context, (context) => _RatingDialog(name: name));
 }
 
 class _RatingDialog extends StatefulWidget {
-  const _RatingDialog();
+  const _RatingDialog({this.name});
+
+  final String? name;
 
   @override
   State<_RatingDialog> createState() => _RatingDialogState();
@@ -469,6 +479,13 @@ class _RatingDialog extends StatefulWidget {
 
 class _RatingDialogState extends State<_RatingDialog> {
   int _stars = 3;
+  final _comment = TextEditingController();
+
+  @override
+  void dispose() {
+    _comment.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -510,7 +527,7 @@ class _RatingDialogState extends State<_RatingDialog> {
                       children: [
                         Flexible(
                           child: Text(
-                            'مركز قزاز للتكيف والتبريد',
+                            widget.name ?? 'مركز قزاز للتكيف والتبريد',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.body16,
@@ -582,6 +599,7 @@ class _RatingDialogState extends State<_RatingDialog> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: TextField(
+              controller: _comment,
               maxLines: null,
               expands: true,
               style: AppTextStyles.body16,
@@ -601,7 +619,7 @@ class _RatingDialogState extends State<_RatingDialog> {
                   label: 'إرسال التقييم',
                   background: colors.accentButton,
                   foreground: colors.textOnAccent,
-                  onTap: () => Navigator.of(context).pop(_stars),
+                  onTap: () => Navigator.of(context).pop((stars: _stars, comment: _comment.text)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -641,8 +659,46 @@ Future<bool> _backend(BuildContext context, Future<void> Function() run, String 
   return true;
 }
 
+/// تقييم المهني: بيعرض النافذة وبيرسل التقييم لطلب مكتمل.
+Future<bool> rateProfessional(
+  BuildContext context, {
+  required String? jobId,
+  Set<String> professionalIds = const {},
+  String? name,
+}) async {
+  final cubit = context.read<MyRequestsCubit>();
+  final result = await showRatingDialog(context, name: name);
+  if (result == null || jobId == null || !context.mounted) return false;
+  RequestOffer? offer;
+  if (professionalIds.isNotEmpty) {
+    try {
+      offer = (await cubit.offers(jobId))
+          .where((o) => professionalIds.contains(o.professionalId))
+          .firstOrNull;
+    } on Object {
+      offer = null;
+    }
+  }
+  if (!context.mounted) return false;
+  return _backend(
+    context,
+    () => cubit.rate(
+      jobId,
+      proposalId: offer?.proposalId,
+      professionalId: offer?.professionalId,
+      stars: result.stars,
+      comment: result.comment,
+    ),
+    'تم إرسال تقييمك، شكراً لك',
+  );
+}
+
 /// "تم الاتفاق مع مهني": بيعرض العروض الحقيقية وبيقبل المختار.
-Future<bool> agreeWithOffer(BuildContext context, String jobId) async {
+Future<bool> agreeWithOffer(
+  BuildContext context,
+  String jobId, {
+  Set<String> preferProfessionalIds = const {},
+}) async {
   final cubit = context.read<MyRequestsCubit>();
   List<RequestOffer> offers;
   try {
@@ -656,7 +712,14 @@ Future<bool> agreeWithOffer(BuildContext context, String jobId) async {
     _toast(context, 'ما وصلتك عروض لسا');
     return false;
   }
-  final index = await showAgreementDialog(context, offers: offers);
+  final preferred = offers.indexWhere(
+    (o) => preferProfessionalIds.contains(o.professionalId),
+  );
+  final index = await showAgreementDialog(
+    context,
+    offers: offers,
+    initial: preferred < 0 ? 0 : preferred,
+  );
   final proposalId = index == null ? null : offers[index].proposalId;
   if (proposalId == null || !context.mounted) return false;
   return _backend(

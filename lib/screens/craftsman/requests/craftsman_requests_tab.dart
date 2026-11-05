@@ -205,6 +205,7 @@ class _CraftsmanRequestsTabState extends State<CraftsmanRequestsTab> {
                           onPrimary: () => switch (r.state) {
                             CraftsmanRequestState.task => showTaskStatusDialog(
                               context,
+                              jobId: r.id,
                             ),
                             _ => showSendOfferFlow(
                               context,

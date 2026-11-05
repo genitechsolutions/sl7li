@@ -70,6 +70,20 @@ class MyRequestsCubit extends LoadCubit<List<MyRequest>> {
     await load(force: true);
   }
 
+  Future<void> rate(
+    String jobId, {
+    String? proposalId,
+    String? professionalId,
+    required int stars,
+    String? comment,
+  }) => _repo.rate(
+    jobId,
+    proposalId: proposalId,
+    professionalId: professionalId,
+    stars: stars,
+    comment: comment,
+  );
+
   /// بيرسل طلب جديد وبيحدّث القائمة.
   Future<void> create(RequestDraft draft) async {
     await _repo.create(draft);
@@ -96,6 +110,12 @@ class CraftsmanJobsCubit extends LoadCubit<CraftsmanJobs> {
 
   Future<void> sendProposal(Map<String, Object?> input) async {
     await _repo.sendProposal(input);
+    await load(force: true);
+  }
+
+  /// بيسحب العرض وبيحدّث القائمة.
+  Future<void> withdrawProposal(String proposalId) async {
+    await _repo.withdrawProposal(proposalId);
     await load(force: true);
   }
 

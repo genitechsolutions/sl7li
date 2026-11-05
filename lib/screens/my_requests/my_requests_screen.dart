@@ -165,7 +165,11 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                           ),
                           onUpdate: () => runUpdateStatusFlow(context, request),
                           onMore: () => runUpdateStatusFlow(context, request),
-                          onRate: () => showRatingDialog(context),
+                          onRate: () => rateProfessional(
+                            context,
+                            jobId: request.id,
+                            name: request.craftsmanName,
+                          ),
                           onReorder: () {},
                         ),
                       ),
