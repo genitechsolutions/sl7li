@@ -9,6 +9,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/form/form_label.dart';
 import '../../core/widgets/form/phone_field.dart';
+import '../../debug/test_login.dart'; // TEST-LOGIN
 import '../home/home_screen.dart';
 import 'otp_screen.dart';
 import 'widgets/auth_bottom_bar.dart';
@@ -171,6 +172,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                   ],
                 ),
               ),
+              if (TestLogin.enabled) const TestLoginButton(), // TEST-LOGIN
             ],
           ),
         ),
