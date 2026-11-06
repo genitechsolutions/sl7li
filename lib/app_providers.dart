@@ -48,10 +48,60 @@ class AppProviders extends StatelessWidget {
         RepositoryProvider<ServiceReportsRepository>.value(value: d.reports),
         BlocProvider(create: (_) => RatingsCubit(d.ratings)),
       ],
-      child: child,
+      child: _ResumeRefresh(child: child),
       ),
     );
   }
+}
+
+/// لما التطبيق يرجع من الخلفية بنعيد تحميل القوائم اللي انفتحت قبل (الاتصال المباشر بيقطع بالخلفية).
+class _ResumeRefresh extends StatefulWidget {
+  const _ResumeRefresh({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_ResumeRefresh> createState() => _ResumeRefreshState();
+}
+
+class _ResumeRefreshState extends State<_ResumeRefresh> with WidgetsBindingObserver {
+  DateTime? _last;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final now = DateTime.now();
+    if (_last != null && now.difference(_last!) < const Duration(seconds: 5)) return;
+    _last = now;
+    final cubits = <LoadCubit<dynamic>>[
+      context.read<ConversationsCubit>(),
+      context.read<NotificationsCubit>(),
+      context.read<UnreadCountCubit>(),
+      context.read<MyRequestsCubit>(),
+      context.read<CraftsmanJobsCubit>(),
+      context.read<WalletCubit>(),
+      context.read<EarningsCubit>(),
+      context.read<MyOffersCubit>(),
+    ];
+    for (final c in cubits) {
+      if (c.state.data != null) c.load(force: true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// تسجيل الخروج: بينهي الجلسة وبيفضّي كل البيانات الخاصة بالمستخدم (عشان ما تظهر لحساب تاني).

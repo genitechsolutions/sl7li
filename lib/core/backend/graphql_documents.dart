@@ -58,6 +58,23 @@ subscription OnCreateMessage($filter: ModelSubscriptionMessageFilterInput, $part
   }
 }''';
 
+  static const onUpdateMessage = r'''
+subscription OnUpdateMessage($filter: ModelSubscriptionMessageFilterInput, $participant1Id: String, $participant2Id: String) {
+  onUpdateMessage(filter: $filter, participant1Id: $participant1Id, participant2Id: $participant2Id) {
+    id
+    conversationId
+    status
+  }
+}''';
+
+  static const onDeleteMessage = r'''
+subscription OnDeleteMessage($filter: ModelSubscriptionMessageFilterInput, $participant1Id: String, $participant2Id: String) {
+  onDeleteMessage(filter: $filter, participant1Id: $participant1Id, participant2Id: $participant2Id) {
+    id
+    conversationId
+  }
+}''';
+
   static const generateUploadUrl = r'''
 mutation GenerateUploadUrlSecure($fileType: String!, $fileName: String!, $contentType: String!) {
   generateUploadUrlSecure(fileType: $fileType, fileName: $fileName, contentType: $contentType) {

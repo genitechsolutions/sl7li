@@ -129,6 +129,9 @@ class _RecordingConversations implements ConversationsRepository {
       const ChatMessage(text: '', time: '', sent: true);
 
   @override
+  Stream<MessageEvent> liveUpdates(Conversation conversation) => const Stream.empty();
+
+  @override
   Future<void> markRead(String conversationId) async {}
 
   @override

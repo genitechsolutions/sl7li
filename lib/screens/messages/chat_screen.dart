@@ -43,7 +43,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   final _controller = TextEditingController();
   final _scroll = ScrollController();
   late List<ChatMessage> _messages = [...sampleChat];
@@ -51,10 +51,13 @@ class _ChatScreenState extends State<ChatScreen> {
   // بعد ما نبعد عن بطاقة الطلب (فوق) بنبيّن "العودة للعرض"، وبعد ما نبعد عن الآخر بنبيّن زر النزول.
   bool _showBackToRequest = false;
   bool _showToBottom = false;
+  bool _active = true;
+  Timer? _poll;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller.addListener(() => setState(() {}));
     _scroll.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
@@ -76,11 +79,85 @@ class _ChatScreenState extends State<ChatScreen> {
       // نكمّل بالعينة.
     }
     if (mounted) _listen();
+    _poll ??= Timer.periodic(const Duration(seconds: 8), (_) => _refresh());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _active = state == AppLifecycleState.resumed;
+    if (_active) _resync();
+  }
+
+  /// الخلفية ما بتبعت تحديث لحالة القراءة/الحذف مباشرة، فبنجيب الرسائل كل كم ثانية والمحادثة مفتوحة.
+  Future<void> _refresh() async {
+    final id = widget.conversation.id;
+    if (id == null || !mounted || !_active) return;
+    try {
+      final loaded = await context.read<ConversationsCubit>().messages(id);
+      if (!mounted) return;
+      final pending = _messages.where((m) => m.status == MessageStatus.sending && m.id == null).toList();
+      final same =
+          loaded.length + pending.length == _messages.length &&
+          [for (final m in loaded) '${m.id}:${m.status.name}'].join(',') ==
+              [for (final m in _messages.where((m) => !pending.contains(m))) '${m.id}:${m.status.name}'].join(',');
+      if (same) return;
+      final nearBottom =
+          !_scroll.hasClients || _scroll.position.maxScrollExtent - _scroll.position.pixels < 200;
+      setState(() => _messages = [...loaded, ...pending]);
+      if (nearBottom) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+        });
+      }
+    } on Object {
+      // المحاولة الجاية.
+    }
+  }
+
+  /// بعد الرجوع من الخلفية أو انقطاع الاتصال: بنجيب الرسائل اللي فاتت وبنعيد الاشتراك.
+  Future<void> _resync() async {
+    final id = widget.conversation.id;
+    if (id == null || !mounted) return;
+    try {
+      final cubit = context.read<ConversationsCubit>();
+      final loaded = await cubit.messages(id);
+      if (!mounted) return;
+      final nearBottom =
+          !_scroll.hasClients || _scroll.position.maxScrollExtent - _scroll.position.pixels < 200;
+      final pending = _messages.where((m) => m.status == MessageStatus.sending && m.id == null);
+      setState(() => _messages = [...loaded, ...pending]);
+      unawaited(cubit.markRead(id).catchError((Object _) {}));
+      if (nearBottom) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+        });
+      }
+    } on Object {
+      // نكمّل بالموجود.
+    }
+    if (mounted) _listen();
+  }
+
+  void _onUpdate(MessageEvent e) {
+    final i = _messages.indexWhere((m) => m.id == e.id);
+    if (i < 0) return;
+    setState(() {
+      if (e.deleted) {
+        _messages.removeAt(i);
+      } else if (e.status != null) {
+        _messages[i] = _messages[i].withStatus(e.status!);
+      }
+    });
   }
 
   void _listen() {
     _live?.cancel();
+    _updates?.cancel();
     final cubit = context.read<ConversationsCubit>();
+    _updates = cubit.liveUpdates(widget.conversation).listen(_onUpdate, onError: (Object _) {});
     _live = cubit
         .liveMessages(widget.conversation)
         .listen(
@@ -92,7 +169,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _reconnect() {
     Future<void>.delayed(const Duration(seconds: 4), () {
-      if (mounted) _listen();
+      if (mounted) _resync();
     });
   }
 
@@ -133,6 +210,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _poll?.cancel();
+    _updates?.cancel();
     _controller.dispose();
     _scroll.dispose();
     _recTimer?.cancel();
@@ -143,6 +223,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final _voice = VoiceRecorder();
   StreamSubscription<ChatMessage>? _live;
+  StreamSubscription<MessageEvent>? _updates;
   bool _recording = false;
   Timer? _recTimer;
   int _recSeconds = 0;

@@ -68,6 +68,28 @@ class ChatMessage {
   final MessageStatus status;
   final ChatContent content;
   final String? image;
+
+  ChatMessage withStatus(MessageStatus status) => ChatMessage(
+    id: id,
+    text: text,
+    time: time,
+    sent: sent,
+    status: status,
+    content: content,
+    image: image,
+    voicePath: voicePath,
+    voiceKey: voiceKey,
+    voiceSeconds: voiceSeconds,
+  );
+}
+
+/// تغيير مباشر على رسالة موجودة: تحديث حالتها (مقروءة...) أو حذفها.
+class MessageEvent {
+  const MessageEvent({required this.id, this.status, this.deleted = false});
+
+  final String id;
+  final MessageStatus? status;
+  final bool deleted;
 }
 
 /// نوع الإشعار (بيحدد الأيقونة واللون).

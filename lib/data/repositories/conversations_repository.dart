@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -48,6 +49,9 @@ abstract class ConversationsRepository {
 
   /// رسائل جديدة مباشرة (من الطرف التاني ومن أجهزتي).
   Stream<ChatMessage> liveMessages(Conversation conversation);
+
+  /// تحديثات مباشرة على رسائل موجودة (مقروءة/محذوفة).
+  Stream<MessageEvent> liveUpdates(Conversation conversation);
 }
 
 class FakeConversationsRepository implements ConversationsRepository {
@@ -110,6 +114,9 @@ class FakeConversationsRepository implements ConversationsRepository {
 
   @override
   Stream<ChatMessage> liveMessages(Conversation conversation) => const Stream.empty();
+
+  @override
+  Stream<MessageEvent> liveUpdates(Conversation conversation) => const Stream.empty();
 }
 
 class RemoteConversationsRepository implements ConversationsRepository {
@@ -281,6 +288,50 @@ class RemoteConversationsRepository implements ConversationsRepository {
   }
 
   @override
+  Stream<MessageEvent> liveUpdates(Conversation conversation) {
+    final id = conversation.id;
+    final p1 = conversation.participant1Id;
+    final p2 = conversation.participant2Id;
+    if (id == null || p1 == null || p2 == null) return const Stream.empty();
+    final me = _auth.currentUserId;
+    final vars = {
+      'filter': {
+        'conversationId': {'eq': id},
+      },
+      if (me == p1) 'participant1Id': p1,
+      if (me == p2) 'participant2Id': p2,
+    };
+    late final StreamController<MessageEvent> out;
+    final subs = <StreamSubscription<MessageEvent>>[];
+    out = StreamController<MessageEvent>(
+      onListen: () {
+        subs.add(
+          _gateway
+              .subscribe(Gql.onUpdateMessage, variables: vars)
+              .map((d) => asMap(d['onUpdateMessage']))
+              .where((j) => str(j, 'id') != null)
+              .map((j) => MessageEvent(id: str(j, 'id')!, status: messageStatusFrom(str(j, 'status'))))
+              .listen(out.add, onError: out.addError),
+        );
+        subs.add(
+          _gateway
+              .subscribe(Gql.onDeleteMessage, variables: vars)
+              .map((d) => asMap(d['onDeleteMessage']))
+              .where((j) => str(j, 'id') != null)
+              .map((j) => MessageEvent(id: str(j, 'id')!, deleted: true))
+              .listen(out.add, onError: out.addError),
+        );
+      },
+      onCancel: () async {
+        for (final s in subs) {
+          await s.cancel();
+        }
+      },
+    );
+    return out.stream;
+  }
+
+  @override
   Future<String?> voiceUrl(String key) async {
     if (AppConfig.env.storageBucket == null) return null;
     try {
@@ -368,12 +419,7 @@ Conversation conversationFromJson(Map<String, dynamic> j) {
 ) {
   final images = strList(j, 'imageAttachments');
   final hasImages = images.isNotEmpty;
-  final status = switch (str(j, 'status')) {
-    'read' => MessageStatus.read,
-    'delivered' => MessageStatus.delivered,
-    'sending' => MessageStatus.sending,
-    _ => MessageStatus.sent,
-  };
+  final status = messageStatusFrom(str(j, 'status')) ?? MessageStatus.sent;
   final created = str(j, 'createdAt') ?? '';
   final isVoice = str(j, 'type') == 'voice';
   final voice = isVoice ? asMap(j['content']) : const <String, dynamic>{};
@@ -396,3 +442,12 @@ Conversation conversationFromJson(Map<String, dynamic> j) {
     sortKey: created,
   );
 }
+
+/// حالة الرسالة بالخلفية ← حالة الواجهة (null إذا القيمة مش معروفة).
+MessageStatus? messageStatusFrom(String? v) => switch (v) {
+  'read' => MessageStatus.read,
+  'delivered' => MessageStatus.delivered,
+  'sending' => MessageStatus.sending,
+  'sent' => MessageStatus.sent,
+  _ => null,
+};

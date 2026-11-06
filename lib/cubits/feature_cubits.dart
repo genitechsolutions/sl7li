@@ -200,6 +200,8 @@ class ConversationsCubit extends LoadCubit<List<Conversation>> {
 
   Stream<ChatMessage> liveMessages(Conversation c) => _repo.liveMessages(c);
 
+  Stream<MessageEvent> liveUpdates(Conversation c) => _repo.liveUpdates(c);
+
   /// بيحمّل للوضع المطلوب (إذا تغيّر الوضع بنعيد التحميل).
   Future<void> loadFor({required bool professionalMode}) {
     final changed = _professionalMode != professionalMode;
