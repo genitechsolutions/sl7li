@@ -18,6 +18,8 @@ import '../my_requests/dialogs/request_dialogs.dart';
 import '../../core/backend/backend_exception.dart';
 import '../../core/voice/voice_recorder.dart';
 import '../reports/report_dialog.dart';
+import '../craftsman_profile/craftsman_profile_loader.dart';
+import '../../cubits/auth/auth_cubit.dart';
 import 'widgets/message_status_icon.dart';
 import '../../cubits/unread_count_cubit.dart';
 import 'widgets/voice_bubble.dart';
@@ -318,8 +320,19 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     }
   }
 
+  bool _picking = false;
+
   Future<void> _sendImage() async {
-    final picked = await pickPhotos(max: 1);
+    if (_picking) return;
+    setState(() => _picking = true);
+    List<String> picked;
+    try {
+      picked = await pickPhotos(max: 1);
+    } on Object {
+      if (mounted) _snack('تعذّر فتح معرض الصور، تأكد من صلاحية الوصول للصور');
+      picked = const [];
+    }
+    if (mounted) setState(() => _picking = false);
     if (picked.isEmpty || !mounted) return;
     final path = picked.first;
     if (widget.conversation.id != null) {
@@ -548,6 +561,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               canSend: _canSend,
               onSend: _send,
               onAttach: _sendImage,
+              picking: _picking,
               recording: _recording,
               recSeconds: _recSeconds,
               onMic: _startRecording,
@@ -571,6 +585,12 @@ class _Header extends StatelessWidget {
     ?conversation.participant1Id,
     ?conversation.participant2Id,
   };
+
+  void _openProfile(BuildContext context) {
+    final me = context.read<AuthCubit>().state.session?.userId;
+    final other = _participants.where((id) => id != me);
+    openCraftsmanProfile(context, professionalId: other.length == 1 ? other.first : null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -598,13 +618,19 @@ class _Header extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: craftsmanMode ? null : () => _openProfile(context),
+                  child: Row(
+                    children: [
               CraftsmanAvatar(
                 image: 'assets/images/chat_header_avatar.png',
                 isPro: !craftsmanMode,
                 size: 40,
               ),
               const SizedBox(width: 12),
-              Expanded(
+              Flexible(
                 child: Row(
                   children: [
                     Flexible(
@@ -624,6 +650,10 @@ class _Header extends StatelessWidget {
                       ),
                     ],
                   ],
+                ),
+              ),
+                    ],
+                  ),
                 ),
               ),
               PopupMenuButton<String>(
@@ -1143,6 +1173,7 @@ class _Composer extends StatelessWidget {
     required this.canSend,
     required this.onSend,
     required this.onAttach,
+    this.picking = false,
     required this.recording,
     required this.recSeconds,
     required this.onMic,
@@ -1154,6 +1185,7 @@ class _Composer extends StatelessWidget {
   final bool canSend;
   final VoidCallback onSend;
   final VoidCallback onAttach;
+  final bool picking;
   final bool recording;
   final int recSeconds;
   final VoidCallback onMic;
@@ -1208,8 +1240,12 @@ class _Composer extends StatelessWidget {
                       ? Row(
                           children: [
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: onCancelRecording,
-                              child: Icon(Icons.delete_outline, color: colors.error, size: 26),
+                              child: Padding(
+                                padding: const EdgeInsets.all(9),
+                                child: Icon(Icons.delete_outline, color: colors.error, size: 26),
+                              ),
                             ),
                             const Spacer(),
                             Directionality(
@@ -1247,15 +1283,27 @@ class _Composer extends StatelessWidget {
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: onAttach,
-                        child: SvgPicture.asset(
-                          'assets/icons/ic_attach.svg',
-                          width: 24,
-                          height: 24,
-                          colorFilter: ColorFilter.mode(
-                            colors.primaryContent,
-                            BlendMode.srcIn,
-                          ),
+                        onTap: picking ? null : onAttach,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: picking
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colors.primaryContent,
+                                  ),
+                                )
+                              : SvgPicture.asset(
+                                  'assets/icons/ic_attach.svg',
+                                  width: 24,
+                                  height: 24,
+                                  colorFilter: ColorFilter.mode(
+                                    colors.primaryContent,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                         ),
                       ),
                     ],

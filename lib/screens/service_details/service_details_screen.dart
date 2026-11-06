@@ -42,7 +42,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                     const Spacer(),
                     AppIconButton(
                       icon: 'assets/icons/ic_share.svg',
-                      onTap: () => shareText('جرّب تطبيق صلّحلي لإيجاد أفضل الحرفيين لخدمتك'),
+                      onTap: () => shareText(context, 'جرّب تطبيق صلّحلي لإيجاد أفضل الحرفيين لخدمتك'),
                     ),
                   ],
                 ),
