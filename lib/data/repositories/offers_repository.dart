@@ -4,6 +4,7 @@ import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
 import '../dummy_data.dart';
+import '../service_names.dart';
 
 /// العروض الخاصة (عامة — بتشتغل للضيف كمان).
 abstract class OffersRepository {
@@ -139,7 +140,7 @@ OfferDetails offerDetailsFromJson(Map<String, dynamic> j) {
     city: cityCode == null ? 'جميع المدن' : placeName(cityCode),
     description: str(j, 'description') ?? '',
     images: photos.isNotEmpty ? photos : ['assets/images/offer_carpentry.jpg'],
-    tags: [?category],
+    tags: [if (category != null) serviceLabelAr(category)],
     craftsman: Craftsman(
       name: str(j, 'professionalName') ?? '',
       location: cityCode == null ? '' : placeName(cityCode),
@@ -162,7 +163,7 @@ Offer offerFromJson(Map<String, dynamic> j) {
   final percent = intOf(j, 'discountPercentage');
   final price = j['price'];
   final discount = percent != null && percent > 0
-      ? '$percent%'
+      ? 'خصم $percent%'
       : price != null
       ? '${formatMoney(price)} ${(str(j, 'currency') ?? 'SYP') == 'SYP' ? 'ل.س' : str(j, 'currency')}'
       : '';
@@ -175,7 +176,54 @@ Offer offerFromJson(Map<String, dynamic> j) {
     ),
     image: image == null ? 'assets/images/offer_carpentry.jpg' : resourceUrl(image),
     discount: discount,
-    tags: [if (str(j, 'serviceCategory') != null) str(j, 'serviceCategory')!],
+    tags: [if (str(j, 'serviceCategory') != null) serviceLabelAr(str(j, 'serviceCategory')!)],
     professionalId: str(j, 'professionalId'),
+    craftsman: _craftsmanOf(j),
   );
+}
+
+/// بيانات المهني المضمّنة بالعرض (null إذا ما في id حقيقي).
+Craftsman? _craftsmanOf(Map<String, dynamic> j) {
+  final id = str(j, 'professionalId');
+  if (id == null) return null;
+  final image = str(j, 'professionalProfileImage');
+  final rating = j['professionalRating'];
+  final city = str(j, 'cityCode');
+  final category = str(j, 'serviceCategory');
+  return Craftsman(
+    name: str(j, 'professionalName') ?? '',
+    location: city == null ? '' : placeName(city),
+    services: [if (category != null) serviceLabelAr(category)],
+    image: image == null ? null : resourceUrl(image),
+    rating: rating is num ? rating.toDouble() : null,
+    reviewsCount: intOf(j, 'professionalReviewCount') ?? 0,
+    isPro: boolOf(j, 'professionalIsVip'),
+    professionalId: id,
+  );
+}
+
+/// حرفيو الرئيسية من المهنيين أصحاب العروض (بدون تكرار)؛ خدماتهم من تصنيفات عروضهم.
+List<Craftsman> featuredCraftsmenFromOffers(List<Offer> offers, {int limit = 6}) {
+  final byId = <String, Craftsman>{};
+  final services = <String, Set<String>>{};
+  for (final o in offers) {
+    final c = o.craftsman;
+    final id = c?.professionalId;
+    if (c == null || id == null || c.name.isEmpty) continue;
+    byId.putIfAbsent(id, () => c);
+    services.putIfAbsent(id, () => {}).addAll(c.services);
+  }
+  return [
+    for (final e in byId.entries.take(limit))
+      Craftsman(
+        name: e.value.name,
+        location: e.value.location,
+        services: services[e.key]!.toList(),
+        image: e.value.image,
+        rating: e.value.rating,
+        reviewsCount: e.value.reviewsCount,
+        isPro: e.value.isPro,
+        professionalId: e.key,
+      ),
+  ];
 }

@@ -96,16 +96,6 @@ class OfferDetails {
   final Craftsman craftsman;
 }
 
-const popularServices = [
-  ServiceItem(name: 'الدهانات', image: 'assets/images/ic_paint.png'),
-  ServiceItem(name: 'التكييف', image: 'assets/images/ic_ac.png'),
-  ServiceItem(name: 'الكهرباء', image: 'assets/images/ic_electricity.png'),
-  ServiceItem(name: 'السباكة', image: 'assets/images/ic_plumbing.png'),
-  ServiceItem(name: 'الدهانات', image: 'assets/images/ic_paint.png'),
-  ServiceItem(name: 'التكييف', image: 'assets/images/ic_ac.png'),
-  ServiceItem(name: 'الكهرباء', image: 'assets/images/ic_electricity.png'),
-];
-
 const specialOffers = [
   Offer(
     title: 'خصم 25% على أعمال النجارة',

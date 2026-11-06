@@ -133,15 +133,28 @@ const _placeNames = {
   'daraa_center': 'مركز درعا',
 };
 
-/// اسم المدينة/الحي بالعربي إذا معروف، وإلا الرمز نفسه.
+// عرض فقط: ما بتنرسل للخلفية (placeCode بيتجاهلها).
+const _displayOnlyPlaces = {
+  'rif_dimashq': 'ريف دمشق',
+  'idlib': 'إدلب',
+  'raqqa': 'الرقة',
+  'deir_ez_zor': 'دير الزور',
+  'hasakah': 'الحسكة',
+  'suwayda': 'السويداء',
+  'quneitra': 'القنيطرة',
+};
+
+/// اسم المدينة/الحي بالعربي؛ أي رمز إنجليزي مجهول ما بيطلع خام.
 String placeName(String code) {
-  final known = _placeNames[code];
+  final known = _placeNames[code] ?? _displayOnlyPlaces[code];
   if (known != null) return known;
+  if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(code)) return code;
   if (code.endsWith('_center')) {
-    final city = _placeNames[code.substring(0, code.length - 7)];
-    if (city != null) return 'مركز $city';
+    final base = code.substring(0, code.length - 7);
+    final city = _placeNames[base] ?? _displayOnlyPlaces[base];
+    return city == null ? 'مركز المدينة' : 'مركز $city';
   }
-  return code.contains('_') && RegExp(r'^[a-z_]+$').hasMatch(code) ? code.replaceAll('_', ' ') : code;
+  return 'منطقة أخرى';
 }
 
 /// رقم بفواصل آلاف: 120000 ← 120,000.

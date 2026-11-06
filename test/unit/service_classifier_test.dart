@@ -56,7 +56,9 @@ void main() {
     expect(placeName('latakia_center'), 'مركز اللاذقية');
     expect(placeName('daraa'), 'درعا');
     expect(placeName('damascus_center'), 'مركز المدينة');
-    expect(placeName('some_new_area'), 'some new area');
+    expect(placeName('idlib_center'), 'مركز إدلب');
+    expect(placeName('xyz_center'), 'مركز المدينة');
+    expect(placeName('some_new_area'), 'منطقة أخرى');
     expect(placeName('المزة'), 'المزة');
   });
 }

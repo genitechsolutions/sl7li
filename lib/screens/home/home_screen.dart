@@ -1,12 +1,18 @@
 import '../../cubits/feature_cubits.dart';
+import '../../cubits/load_cubit.dart';
 import '../../cubits/load_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../data/dummy_data.dart';
+import '../../data/popular_services.dart';
+import '../../data/repositories/offers_repository.dart';
+import 'about_screen.dart';
+import 'all_services_screen.dart';
 import '../craftsman_profile/craftsman_profile_loader.dart';
 import '../offer_details/offer_details_screen.dart';
 import '../messages/messages_screen.dart';
@@ -15,7 +21,6 @@ import '../my_requests/my_requests_screen.dart';
 import '../new_request/new_request_screen.dart';
 import '../offers/offers_screen.dart';
 import '../search/search_screen.dart';
-import '../service_details/service_details_screen.dart';
 import '../../core/widgets/craftsman_card.dart';
 import 'widgets/help_card.dart';
 import '../../core/widgets/promo_banner.dart';
@@ -119,19 +124,40 @@ class HomeScreen extends StatelessWidget {
                   child: SectionHeader(title: 'حرفيون مميزون'),
                 ),
                 const SizedBox(height: 12),
-                for (final craftsman in featuredCraftsmen)
-                  Padding(
-                    padding: _padding.copyWith(bottom: 12),
-                    child: CraftsmanCard(
-                      craftsman: craftsman,
-                      onTap: () =>
-                          openCraftsmanProfile(context, professionalId: craftsman.professionalId),
-                    ),
-                  ),
+                BlocBuilder<FeaturedOffersCubit, LoadState<List<Offer>>>(
+                  builder: (context, state) {
+                    final offers = state.data ?? const <Offer>[];
+                    final fromOffers = featuredCraftsmenFromOffers(offers);
+                    // وضع fake: العروض بلا مهنيين حقيقيين فنعرض العينة.
+                    final craftsmen = state.hasData && offers.any((o) => o.professionalId != null)
+                        ? fromOffers
+                        : (state.hasData && offers.isEmpty ? const <Craftsman>[] : featuredCraftsmen);
+                    return Column(
+                      children: [
+                        for (final craftsman in craftsmen)
+                          Padding(
+                            padding: _padding.copyWith(bottom: 12),
+                            child: CraftsmanCard(
+                              craftsman: craftsman,
+                              onTap: () => openCraftsmanProfile(
+                                context,
+                                professionalId: craftsman.professionalId,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
                 const SizedBox(height: 12),
                 Padding(
                   padding: _padding,
-                  child: HelpCard(onLearnMoreTap: () {}), // TODO: navigate to about
+                  child: HelpCard(
+                    onLearnMoreTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AboutScreen()),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -154,17 +180,16 @@ class HomeScreen extends StatelessWidget {
         ServiceCard(
           label: service.name,
           image: service.image,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const ServiceDetailsScreen(details: sampleServiceDetails),
-            ),
-          ),
+          icon: service.icon,
+          onTap: () => Navigator.push(context, NewRequestScreen.route(serviceId: service.id)),
         ),
       ServiceCard(
         label: 'المزيد',
         icon: Icons.more_horiz,
-        onTap: () {}, // TODO: navigate to all services
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AllServicesScreen()),
+        ),
       ),
     ];
 

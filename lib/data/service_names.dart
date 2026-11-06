@@ -229,3 +229,17 @@ const _serviceNames = {
 
 /// اسم الخدمة بالعربي، أو null إذا الكود غير معروف.
 String? serviceNameAr(String id) => _serviceNames[id];
+
+/// اسم الخدمة للعرض: ما بيطلع كود إنجليزي خام أبداً.
+String serviceLabelAr(String id) => _serviceNames[id] ?? 'خدمات أخرى';
+
+/// كل الخدمات (بدون "غير محددة"/"مخصص") مرتّبة بالاسم وبدون أسماء مكررة.
+List<({String id, String name})> allServices() {
+  const skip = {'unspecified', 'custom_request'};
+  final seen = <String>{};
+  final list = [
+    for (final e in _serviceNames.entries)
+      if (!skip.contains(e.key) && seen.add(e.value)) (id: e.key, name: e.value),
+  ]..sort((a, b) => a.name.compareTo(b.name));
+  return list;
+}
