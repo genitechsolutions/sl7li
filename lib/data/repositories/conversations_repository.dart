@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
@@ -9,6 +9,7 @@ import '../../core/backend/backend_exception.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
+import '../../core/backend/media_upload.dart';
 import '../chat_data.dart';
 import 'auth_repository.dart';
 import '../dummy_data.dart';
@@ -27,6 +28,8 @@ abstract class ConversationsRepository {
   Future<String?> voiceUrl(String key);
 
   Future<ChatMessage> sendText(Conversation conversation, String text);
+
+  Future<ChatMessage> sendImage(Conversation conversation, String path);
 
   Future<void> markRead(String conversationId);
 
@@ -63,6 +66,16 @@ class FakeConversationsRepository implements ConversationsRepository {
   Future<String?> voiceUrl(String key) async => null;
 
   @override
+  Future<ChatMessage> sendImage(Conversation conversation, String path) async => ChatMessage(
+    text: '',
+    time: arabicTime(DateTime.now().toIso8601String()),
+    sent: true,
+    status: MessageStatus.sent,
+    content: ChatContent.image,
+    image: path,
+  );
+
+  @override
   Future<ChatMessage> sendText(Conversation conversation, String text) async => ChatMessage(
     text: text,
     time: arabicTime(DateTime.now().toIso8601String()),
@@ -88,21 +101,13 @@ class RemoteConversationsRepository implements ConversationsRepository {
 
   @override
   Future<ChatMessage> sendVoice(Conversation conversation, String path, int seconds) async {
-    final upload = await _gateway.run(
-      Gql.generateUploadUrl,
-      // نوع "image" لأن الخلفية ما بتقبل نوع صوت للدردشة؛ المسار بيكون قابل للقراءة من الطرفين.
-      variables: {
-        'fileType': 'image',
-        'fileName': 'voice_${DateTime.now().millisecondsSinceEpoch}.m4a',
-        'contentType': 'audio/mp4',
-      },
-      mutation: true,
+    // نوع "image" لأن الخلفية ما بتقبل نوع صوت للدردشة؛ المسار بيكون قابل للقراءة من الطرفين.
+    final key = await uploadMedia(
+      _gateway,
+      path,
+      contentType: kIsWeb ? 'audio/webm' : 'audio/mp4',
+      fileName: 'voice_${DateTime.now().millisecondsSinceEpoch}.${kIsWeb ? 'webm' : 'm4a'}',
     );
-    final up = asMap(upload['generateUploadUrlSecure']);
-    throwIfBackendError(up);
-    final key = str(up, 'uploadUrl') == null ? null : str(up, 's3Key');
-    if (key == null) throw const BackendException('تعذّر رفع التسجيل');
-    await _putFile(str(up, 'uploadUrl')!, path);
     final messageId = await _createMessage(
       conversation,
       'voice',
@@ -122,6 +127,21 @@ class RemoteConversationsRepository implements ConversationsRepository {
   }
 
   @override
+  Future<ChatMessage> sendImage(Conversation conversation, String path) async {
+    final key = await uploadMedia(_gateway, path);
+    final id = await _createMessage(conversation, 'text', '', images: [key]);
+    return ChatMessage(
+      id: id,
+      text: '',
+      time: arabicTime(DateTime.now().toIso8601String()),
+      sent: true,
+      status: MessageStatus.sent,
+      content: ChatContent.image,
+      image: path,
+    );
+  }
+
+  @override
   Future<ChatMessage> sendText(Conversation conversation, String text) async {
     final id = await _createMessage(conversation, 'text', text);
     return ChatMessage(
@@ -133,7 +153,12 @@ class RemoteConversationsRepository implements ConversationsRepository {
     );
   }
 
-  Future<String?> _createMessage(Conversation c, String type, String content) async {
+  Future<String?> _createMessage(
+    Conversation c,
+    String type,
+    String content, {
+    List<String> images = const [],
+  }) async {
     final me = _auth.currentUserId;
     final id = c.id;
     final p1 = c.participant1Id;
@@ -151,6 +176,7 @@ class RemoteConversationsRepository implements ConversationsRepository {
           'participant2Id': p2,
           'type': type,
           'content': content,
+          if (images.isNotEmpty) 'imageAttachments': images,
         },
       },
       mutation: true,
@@ -202,23 +228,6 @@ class RemoteConversationsRepository implements ConversationsRepository {
         .map((data) => asMap(data['onCreateMessage']))
         .where((j) => j.isNotEmpty)
         .map((j) => chatMessageFromJson(j, me).message);
-  }
-
-  Future<void> _putFile(String url, String path) async {
-    final bytes = await File(path).readAsBytes();
-    final client = HttpClient();
-    try {
-      final req = await client.putUrl(Uri.parse(url));
-      req.headers.contentType = ContentType('audio', 'mp4');
-      req.add(bytes);
-      final res = await req.close();
-      await res.drain<void>();
-      if (res.statusCode >= 300) throw const BackendException('تعذّر رفع التسجيل');
-    } on SocketException {
-      throw const BackendException('تعذّر الاتصال بالإنترنت');
-    } finally {
-      client.close();
-    }
   }
 
   @override

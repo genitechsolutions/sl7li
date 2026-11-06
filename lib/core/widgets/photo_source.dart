@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 /// بيعرض صورة: أصل محلي (`assets/`) أو ملف مختار من المعرض.
 Widget photoImage(String path, {BoxFit fit = BoxFit.cover}) {
   if (path.startsWith('assets/')) return Image.asset(path, fit: fit);
+  if (path.startsWith('http')) return Image.network(path, fit: fit);
   if (kIsWeb) return Image.network(path, fit: fit);
   return Image.file(File(path), fit: fit);
 }

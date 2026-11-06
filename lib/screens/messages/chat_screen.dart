@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../core/widgets/photo_source.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -206,6 +207,50 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _sendImage() async {
+    final picked = await pickPhotos(max: 1);
+    if (picked.isEmpty || !mounted) return;
+    final path = picked.first;
+    final index = _messages.length;
+    setState(() {
+      _messages.add(
+        ChatMessage(
+          text: '',
+          time: '2:10 م',
+          sent: true,
+          status: MessageStatus.sending,
+          content: ChatContent.image,
+          image: path,
+        ),
+      );
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) _scrollTo(_scroll.position.maxScrollExtent);
+    });
+    if (widget.conversation.id == null) return;
+    try {
+      final sent = await context.read<ConversationsCubit>().sendImage(widget.conversation, path);
+      if (!mounted) return;
+      final live = sent.id != null && _messages.any((x) => x.id == sent.id);
+      setState(() {
+        if (live) {
+          _messages.removeAt(index);
+        } else if (index < _messages.length) {
+          _messages[index] = sent;
+        }
+      });
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (index < _messages.length) _messages.removeAt(index);
+      });
+      final msg = e is BackendException ? e.message : 'تعذّر إرسال الصورة';
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(msg)));
+    }
+  }
+
   Future<void> _send() async {
     if (!_canSend) return;
     final text = _controller.text.trim();
@@ -372,6 +417,7 @@ class _ChatScreenState extends State<ChatScreen> {
               controller: _controller,
               canSend: _canSend,
               onSend: _send,
+              onAttach: _sendImage,
               recording: _recording,
               recSeconds: _recSeconds,
               onMic: _startRecording,
@@ -868,18 +914,17 @@ class _Bubble extends StatelessWidget {
                     message.image != null) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: (message.image!.startsWith('http') ? Image.network : Image.asset)(
-                      message.image!,
-                      fit: BoxFit.cover,
+                    child: SizedBox(
                       width: 258,
                       height: 258,
+                      child: photoImage(message.image!),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  if (message.text.isNotEmpty) const SizedBox(height: 10),
                 ],
                 if (message.content == ChatContent.voice)
                   VoiceBubbleBody(message: message, color: fg)
-                else
+                else if (message.content != ChatContent.image || message.text.isNotEmpty)
                   Text(
                     message.text,
                     style: AppTextStyles.body18.copyWith(color: fg, height: 1.5),
@@ -916,6 +961,7 @@ class _Composer extends StatelessWidget {
     required this.controller,
     required this.canSend,
     required this.onSend,
+    required this.onAttach,
     required this.recording,
     required this.recSeconds,
     required this.onMic,
@@ -926,6 +972,7 @@ class _Composer extends StatelessWidget {
   final TextEditingController controller;
   final bool canSend;
   final VoidCallback onSend;
+  final VoidCallback onAttach;
   final bool recording;
   final int recSeconds;
   final VoidCallback onMic;
@@ -1017,14 +1064,17 @@ class _Composer extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // TODO: اختيار ملف/صورة حقيقي (image_picker)
-                      SvgPicture.asset(
-                        'assets/icons/ic_attach.svg',
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                          colors.primaryContent,
-                          BlendMode.srcIn,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onAttach,
+                        child: SvgPicture.asset(
+                          'assets/icons/ic_attach.svg',
+                          width: 24,
+                          height: 24,
+                          colorFilter: ColorFilter.mode(
+                            colors.primaryContent,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ],

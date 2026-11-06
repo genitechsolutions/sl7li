@@ -116,6 +116,10 @@ class _RecordingConversations implements ConversationsRepository {
       const ChatMessage(text: '', time: '', sent: true);
 
   @override
+  Future<ChatMessage> sendImage(Conversation conversation, String path) async =>
+      const ChatMessage(text: '', time: '', sent: true);
+
+  @override
   Future<void> markRead(String conversationId) async {}
 
   @override

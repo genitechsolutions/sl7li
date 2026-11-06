@@ -145,6 +145,8 @@ class ConversationsCubit extends LoadCubit<List<Conversation>> {
 
   Future<ChatMessage> sendText(Conversation c, String text) => _repo.sendText(c, text);
 
+  Future<ChatMessage> sendImage(Conversation c, String path) => _repo.sendImage(c, path);
+
   Future<void> markRead(String conversationId) => _repo.markRead(conversationId);
 
   /// محادثة الزبون مع مهني معيّن على طلب (بتنعمل إذا ما كانت موجودة).
