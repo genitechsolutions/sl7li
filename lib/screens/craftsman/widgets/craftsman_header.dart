@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/widgets/notification_badge.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../cubits/feature_cubits.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -71,7 +72,7 @@ class CraftsmanHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                AppIconButton(
+                NotificationBadge(child: AppIconButton(
                   icon: 'assets/icons/ic_bell.svg',
                   onTap: () => Navigator.push(
                     context,
@@ -79,7 +80,7 @@ class CraftsmanHeader extends StatelessWidget {
                       builder: (_) => const NotificationsScreen(),
                     ),
                   ),
-                ),
+                )),
               ],
             ),
             const SizedBox(height: 12),

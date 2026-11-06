@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/widgets/notification_badge.dart';
 import '../../core/theme/app_colors.dart';
 import '../notifications/notifications_screen.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -67,7 +68,7 @@ class MessagesScreen extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    AppIconButton(
+                    NotificationBadge(child: AppIconButton(
                       icon: 'assets/icons/ic_bell.svg',
                       onTap: () => Navigator.push(
                         context,
@@ -75,7 +76,7 @@ class MessagesScreen extends StatelessWidget {
                           builder: (_) => const NotificationsScreen(),
                         ),
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ),

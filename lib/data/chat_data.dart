@@ -83,7 +83,24 @@ class NotificationItem {
     this.actionLabel,
     this.entityType,
     this.entityId,
+    this.id,
+    this.conversationId,
   });
+
+  final String? id;
+  final String? conversationId;
+
+  NotificationItem markedRead() => NotificationItem(
+    kind: kind,
+    title: title,
+    body: body,
+    time: time,
+    actionLabel: actionLabel,
+    entityType: entityType,
+    entityId: entityId,
+    id: id,
+    conversationId: conversationId,
+  );
 
   /// الكيان المرتبط بالإشعار (مثلاً job + معرّف الطلب) لفتحه بالنقر.
   final String? entityType;

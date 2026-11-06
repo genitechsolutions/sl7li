@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../cubits/feature_cubits.dart';
 import '../../cubits/load_view.dart';
+import '../../cubits/unread_count_cubit.dart';
 import '../../data/repositories/notifications_repository.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -135,8 +138,10 @@ class NotificationsScreen extends StatelessWidget {
                         data.important,
                         top: 20,
                         trailing: GestureDetector(
-                          onTap: () =>
-                              context.read<NotificationsCubit>().markAllRead(),
+                          onTap: () {
+                            context.read<UnreadCountCubit>().set(0);
+                            context.read<NotificationsCubit>().markAllRead();
+                          },
                           child: Text(
                             'تمييز الكل كمقروءة',
                             style: AppTextStyles.body12.copyWith(
@@ -170,6 +175,10 @@ class NotificationsScreen extends StatelessWidget {
 
 /// نقر الإشعار: إذا مرتبط بطلب بنفتح تفاصيله (تاب العروض إذا إشعار عرض).
 Future<void> _open(BuildContext context, NotificationItem item) async {
+  if (item.unread) {
+    context.read<UnreadCountCubit>().decrement();
+    unawaited(context.read<NotificationsCubit>().markRead(item));
+  }
   final id = item.entityId;
   if (item.entityType != 'job' || id == null) return;
   final cubit = context.read<MyRequestsCubit>();

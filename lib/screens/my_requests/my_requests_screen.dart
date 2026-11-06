@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/widgets/notification_badge.dart';
 import '../../cubits/feature_cubits.dart';
 import '../../cubits/load_view.dart';
 
@@ -89,7 +90,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                       theme: SvgTheme(currentColor: colors.primaryContent),
                     ),
                     const Spacer(),
-                    AppIconButton(
+                    NotificationBadge(child: AppIconButton(
                       icon: 'assets/icons/ic_bell.svg',
                       onTap: () => Navigator.push(
                         context,
@@ -97,7 +98,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                           builder: (_) => const NotificationsScreen(),
                         ),
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ),
