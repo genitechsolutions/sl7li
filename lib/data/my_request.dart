@@ -65,11 +65,21 @@ class RequestOffer {
     required this.materialsFee,
     this.proposalId,
     this.professionalId,
+    this.status,
+    this.pendingClaim,
   });
 
   /// معرّفات الباك (بالبيانات الحقيقية فقط).
   final String? proposalId;
   final String? professionalId;
+
+  /// حالة العرض بالخلفية (submitted/approved/completed...).
+  final String? status;
+
+  /// طلب تأكيد معلّق من المهني: `professional_selected` أو `completed`.
+  final String? pendingClaim;
+
+  bool get isApproved => status == 'approved';
 
   final String craftsmanName;
   final String rating;

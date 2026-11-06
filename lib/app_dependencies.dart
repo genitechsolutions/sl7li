@@ -2,6 +2,7 @@ import 'core/backend/app_config.dart';
 import 'core/backend/graphql_gateway.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/conversations_repository.dart';
+import 'data/repositories/job_lifecycle_repository.dart';
 import 'data/repositories/professional_profile_repository.dart';
 import 'data/repositories/craftsman_signup_repository.dart';
 import 'data/repositories/profile_repository.dart';
@@ -29,9 +30,11 @@ class AppDependencies {
     required this.professionalProfile,
     required this.craftsmanSignup,
     this.classifier = const FakeServiceClassifier(),
+    this.jobLifecycle = const FakeJobLifecycleRepository(),
   });
 
   final ServiceClassifier classifier;
+  final JobLifecycleRepository jobLifecycle;
 
   final AuthRepository auth;
   final OffersRepository offers;
@@ -78,6 +81,7 @@ class AppDependencies {
       professionalProfile: const RemoteProfessionalProfileRepository(gateway),
       craftsmanSignup: const RemoteCraftsmanSignupRepository(gateway),
       classifier: const RemoteServiceClassifier(gateway),
+      jobLifecycle: const RemoteJobLifecycleRepository(gateway),
     );
   }
 

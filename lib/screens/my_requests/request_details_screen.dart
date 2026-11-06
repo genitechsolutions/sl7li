@@ -93,6 +93,21 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
       ? (_proposals ?? const [])
       : [sampleBestOffer, ...sampleOtherOffers];
 
+  RequestOffer? get _approvedOffer => _shownOffers
+      .where((o) => o.status == 'approved' || o.status == 'completed')
+      .firstOrNull;
+
+  bool get _completionPending =>
+      widget.completionPending ||
+      (_real && _shownOffers.any((o) => o.pendingClaim == 'completed'));
+
+  Future<void> _object() async {
+    final id = _shownOffers.where((o) => o.pendingClaim == 'completed').firstOrNull?.proposalId;
+    if (id == null) return;
+    final ok = await rejectCompletionClaim(context, id);
+    if (ok && mounted) Navigator.of(context).pop();
+  }
+
   int get _offersCount =>
       _real ? (_proposals?.length ?? widget.request.offersCount ?? 0) : 3;
 
@@ -108,7 +123,8 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
         backgroundColor: colors.background,
         bottomNavigationBar: _BottomBar(
           request: widget.request,
-          completionPending: widget.completionPending,
+          completionPending: _completionPending,
+          onObject: _real ? _object : null,
           offersTab: _tab == 1,
           selected: _real ? _selected : null,
           onAccept: _accept,
@@ -181,12 +197,12 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: OfferTile(
             offer: _real && _proposals?.isNotEmpty == true
-                ? _proposals!.first
+                ? (_approvedOffer ?? _proposals!.first)
                 : sampleOtherOffers[0],
             onOpen: () {},
           ),
         ),
-        if (widget.completionPending)
+        if (_completionPending)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
             child: Container(
@@ -496,8 +512,10 @@ class _BottomBar extends StatelessWidget {
     this.onAccept,
     this.onMessage,
     this.onUpdate,
+    this.onObject,
   });
 
+  final VoidCallback? onObject;
   final MyRequest request;
   final bool offersTab;
   final RequestOffer? selected;
@@ -565,11 +583,11 @@ class _BottomBar extends StatelessWidget {
                         fg: colors.textOnPrimary,
                         onTap: onUpdate,
                       ),
-                      // TODO: الاعتراض على الإنجاز (ما في نافذة بالتصميم)
                       button(
                         'الاعتراض على إنجاز الطلب',
                         bg: colors.destructive,
                         fg: colors.textOnPrimary,
+                        onTap: onObject,
                       ),
                     ] else if (request.status == RequestStatus.done &&
                         !request.rated)

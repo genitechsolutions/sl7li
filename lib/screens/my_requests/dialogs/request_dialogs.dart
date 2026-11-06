@@ -10,13 +10,14 @@ import '../../../core/widgets/craftsman_avatar.dart';
 import '../../../core/widgets/form/app_select_field.dart';
 import '../../../core/widgets/form/options_sheet.dart';
 import '../../../cubits/feature_cubits.dart';
+import '../../../cubits/job_lifecycle_cubit.dart';
 import '../../../data/my_request.dart';
 import '../../new_request/new_request_screen.dart';
 
 // ───────────────────────── تحديث حالة الطلب ─────────────────────────
 
-/// أزرار "تحديث الحالة". النتيجة: 'agree' | 'done' | 'edit' | 'cancel' أو null (رجوع).
-Future<String?> showUpdateStatusDialog(BuildContext context) {
+/// أزرار "تحديث الحالة". النتيجة: 'agree' | 'done' | 'edit' | 'reopen' | 'cancel' أو null (رجوع).
+Future<String?> showUpdateStatusDialog(BuildContext context, {bool canReopen = false}) {
   return showAppModal<String>(context, (context) {
     final colors = context.colors;
 
@@ -60,6 +61,13 @@ Future<String?> showUpdateStatusDialog(BuildContext context) {
             colors.accentButton,
             colors.textOnAccent,
           ),
+          if (canReopen)
+            action(
+              'إعادة فتح الطلب',
+              'reopen',
+              colors.background,
+              colors.primaryContent,
+            ),
           action(
             'إلغاء الطلب',
             'cancel',
@@ -720,21 +728,99 @@ Future<bool> agreeWithOffer(
     offers: offers,
     initial: preferred < 0 ? 0 : preferred,
   );
-  final proposalId = index == null ? null : offers[index].proposalId;
+  final chosen = index == null ? null : offers[index];
+  final proposalId = chosen?.proposalId;
   if (proposalId == null || !context.mounted) return false;
-  return _backend(
+  final claimed = chosen!.pendingClaim == 'professional_selected';
+  final lifecycle = context.read<JobLifecycleCubit>();
+  final ok = await _backend(
     context,
-    () => cubit.respondToOffer(proposalId, approve: true),
+    () => claimed
+        ? lifecycle.resolveClaim(proposalId, approve: true)
+        : cubit.respondToOffer(proposalId, approve: true),
     'تم الاتفاق مع المهني',
   );
+  if (ok && claimed && context.mounted) {
+    await refreshAfterLifecycle(context, professional: false);
+  }
+  return ok;
+}
+
+/// "تم إنجاز المهمة": تأكيد إنجاز معلّق من المهني، أو تحديد المهني وإكمال الطلب، ثم التقييم.
+Future<bool> markRequestDone(BuildContext context, String jobId) async {
+  final cubit = context.read<MyRequestsCubit>();
+  final lifecycle = context.read<JobLifecycleCubit>();
+  List<RequestOffer> offers;
+  try {
+    offers = await cubit.offers(jobId);
+  } on Object {
+    if (context.mounted) _toast(context, 'تعذّر تحميل العروض');
+    return false;
+  }
+  if (!context.mounted) return false;
+  final claimed = offers.where((o) => o.pendingClaim == 'completed').firstOrNull;
+  var chosen = claimed ??
+      offers.where((o) => o.status == 'approved').firstOrNull;
+  if (chosen == null) {
+    if (offers.isEmpty) {
+      _toast(context, 'ما في مهني محدد لهالطلب');
+      return false;
+    }
+    final index = await showAgreementDialog(context, offers: offers);
+    if (index == null || !context.mounted) return false;
+    chosen = offers[index];
+  }
+  final proposalId = chosen.proposalId;
+  if (proposalId == null) return false;
+  final ok = await _backend(
+    context,
+    () => claimed != null
+        ? lifecycle.resolveClaim(proposalId, approve: true)
+        : lifecycle.markDone(jobId, proposalId: proposalId),
+    'تم إنجاز الطلب',
+  );
+  if (!ok || !context.mounted) return ok;
+  await refreshAfterLifecycle(context, professional: false);
+  if (!context.mounted) return true;
+  await rateProfessional(
+    context,
+    jobId: jobId,
+    professionalIds: {if (chosen.professionalId != null) chosen.professionalId!},
+    name: chosen.craftsmanName,
+  );
+  if (context.mounted) await refreshAfterLifecycle(context, professional: false);
+  return true;
+}
+
+/// "الاعتراض على إنجاز الطلب": رفض ادعاء الإنجاز من المهني.
+Future<bool> rejectCompletionClaim(BuildContext context, String proposalId) async {
+  final lifecycle = context.read<JobLifecycleCubit>();
+  final ok = await _backend(
+    context,
+    () => lifecycle.resolveClaim(proposalId, approve: false),
+    'تم رفض إنجاز الطلب',
+  );
+  if (ok && context.mounted) await refreshAfterLifecycle(context, professional: false);
+  return ok;
 }
 
 /// نافذة "تحديث الحالة" ومتابعتها. بترجع true إذا تغيّر شي بالخلفية.
 Future<bool> runUpdateStatusFlow(BuildContext context, MyRequest request) async {
-  final result = await showUpdateStatusDialog(context);
+  final result = await showUpdateStatusDialog(
+    context,
+    canReopen: request.id != null && request.stage == 1 && request.status == RequestStatus.active,
+  );
   if (!context.mounted) return false;
   final id = request.id;
   switch (result) {
+    case 'done':
+      return id == null ? false : markRequestDone(context, id);
+    case 'reopen':
+      if (id == null) return false;
+      final lifecycle = context.read<JobLifecycleCubit>();
+      final ok = await _backend(context, () => lifecycle.reopen(id), 'تم إعادة فتح الطلب');
+      if (ok && context.mounted) await refreshAfterLifecycle(context, professional: false);
+      return ok;
     case 'agree':
       if (id == null) {
         await showAgreementDialog(context);
