@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/notification_badge.dart';
 import '../../core/backend/backend_exception.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -221,10 +222,10 @@ class _Header extends StatelessWidget {
             top: 43,
             child: SafeArea(
               top: false,
-              child: AppIconButton(
+              child: NotificationBadge(child: AppIconButton(
                 icon: 'assets/icons/ic_bell.svg',
                 onTap: onBell,
-              ),
+              )),
             ),
           ),
           Positioned(

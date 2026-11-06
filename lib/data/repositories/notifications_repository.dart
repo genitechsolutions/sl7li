@@ -1,4 +1,5 @@
 import '../../core/backend/graphql_documents.dart';
+import '../../core/backend/gql_notification_extras.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
 import '../chat_data.dart';
@@ -19,12 +20,30 @@ class NotificationsData {
   final List<NotificationItem> lastWeek;
 
   int get unread => [...important, ...today, ...lastWeek].where((n) => n.unread).length;
+
+  NotificationsData withRead(NotificationItem item) {
+    List<NotificationItem> swap(List<NotificationItem> l) => [
+      for (final n in l)
+        if (identical(n, item) || (item.id != null && n.id == item.id)) n.markedRead() else n,
+    ];
+    return NotificationsData(
+      important: swap(important),
+      today: swap(today),
+      lastWeek: swap(lastWeek),
+    );
+  }
 }
 
 abstract class NotificationsRepository {
   Future<NotificationsData> load();
 
   Future<void> markAllRead();
+
+  Future<void> markRead(String notificationId);
+
+  Future<void> markConversationRead(String conversationId);
+
+  Future<int> unreadCount();
 }
 
 class FakeNotificationsRepository implements NotificationsRepository {
@@ -39,6 +58,19 @@ class FakeNotificationsRepository implements NotificationsRepository {
 
   @override
   Future<void> markAllRead() async {}
+
+  @override
+  Future<void> markRead(String notificationId) async {}
+
+  @override
+  Future<void> markConversationRead(String conversationId) async {}
+
+  @override
+  Future<int> unreadCount() async => const NotificationsData(
+    important: sampleImportantNotifications,
+    today: sampleTodayNotifications,
+    lastWeek: sampleLastWeekNotifications,
+  ).unread;
 }
 
 class RemoteNotificationsRepository implements NotificationsRepository {
@@ -69,6 +101,58 @@ class RemoteNotificationsRepository implements NotificationsRepository {
       mutation: true,
     );
   }
+
+  @override
+  Future<void> markRead(String notificationId) async {
+    final userId = _requireUser();
+    final res = await _gateway.run(
+      GqlNotificationExtras.markNotificationAsRead,
+      variables: {'notificationId': notificationId, 'userId': userId},
+      mutation: true,
+    );
+    _check(res['markNotificationAsRead']);
+  }
+
+  @override
+  Future<void> markConversationRead(String conversationId) async {
+    final userId = _requireUser();
+    final res = await _gateway.run(
+      GqlNotificationExtras.markNotificationsByConversation,
+      variables: {'conversationId': conversationId, 'userId': userId},
+      mutation: true,
+    );
+    _check(res['markNotificationsByConversation']);
+  }
+
+  @override
+  Future<int> unreadCount() async {
+    final userId = _requireUser();
+    final res = await _gateway.run(
+      GqlNotificationExtras.getUnreadNotificationCount,
+      variables: {'userId': userId},
+    );
+    return unreadCountFromJson(res['getUnreadNotificationCount']);
+  }
+
+  String _requireUser() {
+    final userId = _auth.currentUserId;
+    if (userId == null) throw BackendException.unauthenticated;
+    return userId;
+  }
+
+  void _check(Object? raw) {
+    final m = asMap(raw);
+    if (m['success'] == false) {
+      throw BackendException(str(m, 'error') ?? 'تعذّر تحديث الإشعار');
+    }
+  }
+}
+
+/// ردّ العدّاد: `{success, count}` كنص JSON.
+int unreadCountFromJson(Object? raw) {
+  final m = asMap(raw);
+  if (m['success'] == false) throw BackendException(str(m, 'error') ?? 'تعذّر جلب العدد');
+  return intOf(m, 'count') ?? 0;
 }
 
 NotificationsData groupNotifications(
@@ -115,5 +199,17 @@ NotificationItem notificationFromJson(Map<String, dynamic> j, {DateTime? now}) {
     actionLabel: boolOf(j, 'action_required') ? str(j, 'action_text') : null,
     entityType: str(j, 'entity_type'),
     entityId: str(j, 'entity_id'),
+    id: str(j, 'notification_id'),
+    conversationId: notificationConversationId(j),
   );
+}
+
+/// معرّف المحادثة من `template_variables` (نفس منطق الموقع).
+String? notificationConversationId(Map<String, dynamic> j) {
+  final tv = asMap(j['template_variables']);
+  for (final k in const ['conversation_id', 'conversationId', 'conversationID']) {
+    final v = str(tv, k);
+    if (v != null) return v;
+  }
+  return null;
 }

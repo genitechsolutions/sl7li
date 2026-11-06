@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/notification_badge.dart';
 import '../../../data/repositories/wallet_repository.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -91,7 +92,7 @@ class _CraftsmanProfileTabState extends State<CraftsmanProfileTab> {
                           ),
                         ),
                         const Spacer(),
-                        AppIconButton(
+                        NotificationBadge(child: AppIconButton(
                           icon: 'assets/icons/ic_set_bell_dark.svg',
                           onTap: () => Navigator.push(
                             context,
@@ -99,7 +100,7 @@ class _CraftsmanProfileTabState extends State<CraftsmanProfileTab> {
                               builder: (_) => const NotificationsScreen(),
                             ),
                           ),
-                        ),
+                        )),
                       ],
                     ),
                   ),

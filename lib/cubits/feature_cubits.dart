@@ -209,6 +209,20 @@ class NotificationsCubit extends LoadCubit<NotificationsData> {
     await _repo.markAllRead();
     await load(force: true);
   }
+
+  /// تحديث متفائل؛ إذا فشل الطلب بنرجّع القائمة من الخلفية.
+  Future<void> markRead(NotificationItem item) async {
+    final data = state.data;
+    final id = item.id;
+    if (!item.unread || data == null) return;
+    emit(LoadState(status: state.status, data: data.withRead(item)));
+    if (id == null) return;
+    try {
+      await _repo.markRead(id);
+    } on Object {
+      await load(force: true);
+    }
+  }
 }
 
 /// بيانات حساب المستخدم (الاسم/الرقم) للإعدادات.

@@ -17,6 +17,7 @@ import '../my_requests/dialogs/request_dialogs.dart';
 import '../../core/backend/backend_exception.dart';
 import '../../core/voice/voice_recorder.dart';
 import 'widgets/message_status_icon.dart';
+import '../../cubits/unread_count_cubit.dart';
 import 'widgets/voice_bubble.dart';
 
 /// دردشة مع حرفي: رسائل، بطاقة الطلب، صور، وشريط كتابة.
@@ -68,6 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!mounted) return;
       setState(() => _messages = [...loaded]);
       unawaited(cubit.markRead(id).catchError((Object _) {}));
+      unawaited(context.read<UnreadCountCubit>().markConversation(id));
     } on Object {
       // نكمّل بالعينة.
     }
