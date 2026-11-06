@@ -10,6 +10,7 @@ import 'data/repositories/notifications_repository.dart';
 import 'data/repositories/my_offers_repository.dart';
 import 'data/repositories/offers_repository.dart';
 import 'data/repositories/public_profile_repository.dart';
+import 'data/repositories/reports_ratings_repository.dart';
 import 'data/repositories/requests_repository.dart';
 import 'data/repositories/service_classifier_repository.dart';
 
@@ -29,7 +30,12 @@ class AppDependencies {
     required this.professionalProfile,
     required this.craftsmanSignup,
     this.classifier = const FakeServiceClassifier(),
+    this.reports = const FakeServiceReportsRepository(),
+    this.ratings = const FakeProfessionalRatingsRepository(),
   });
+
+  final ServiceReportsRepository reports;
+  final ProfessionalRatingsRepository ratings;
 
   final ServiceClassifier classifier;
 
@@ -78,6 +84,8 @@ class AppDependencies {
       professionalProfile: const RemoteProfessionalProfileRepository(gateway),
       craftsmanSignup: const RemoteCraftsmanSignupRepository(gateway),
       classifier: const RemoteServiceClassifier(gateway),
+      reports: const RemoteServiceReportsRepository(gateway),
+      ratings: const RemoteProfessionalRatingsRepository(gateway),
     );
   }
 

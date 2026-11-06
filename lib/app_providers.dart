@@ -7,6 +7,8 @@ import 'cubits/craftsman_signup_cubit.dart';
 import 'cubits/feature_cubits.dart';
 import 'cubits/professional_profile_cubit.dart';
 import 'cubits/load_cubit.dart';
+import 'cubits/ratings_cubit.dart';
+import 'data/repositories/reports_ratings_repository.dart';
 import 'data/repositories/public_profile_repository.dart';
 import 'data/repositories/service_classifier_repository.dart';
 
@@ -39,6 +41,8 @@ class AppProviders extends StatelessWidget {
         RepositoryProvider<PublicProfileRepository>.value(value: d.publicProfile),
         BlocProvider(create: (_) => ProfessionalProfileCubit(d.professionalProfile)),
         BlocProvider(create: (_) => CraftsmanSignupCubit(d.craftsmanSignup)),
+        RepositoryProvider<ServiceReportsRepository>.value(value: d.reports),
+        BlocProvider(create: (_) => RatingsCubit(d.ratings)),
       ],
       child: child,
       ),
@@ -59,6 +63,7 @@ Future<void> signOutAndReset(BuildContext context) async {
     context.read<MyOffersCubit>(),
     context.read<WalletTxCubit>(),
     context.read<ProfessionalProfileCubit>(),
+    context.read<RatingsCubit>(),
   ];
   await auth.signOut();
   for (final c in cubits) {

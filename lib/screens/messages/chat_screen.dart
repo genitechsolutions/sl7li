@@ -16,6 +16,7 @@ import '../my_requests/request_details_screen.dart';
 import '../my_requests/dialogs/request_dialogs.dart';
 import '../../core/backend/backend_exception.dart';
 import '../../core/voice/voice_recorder.dart';
+import '../reports/report_dialog.dart';
 import 'widgets/message_status_icon.dart';
 import 'widgets/voice_bubble.dart';
 
@@ -526,7 +527,13 @@ class _Header extends StatelessWidget {
                         professionalIds: _participants,
                         name: conversation.name,
                       );
-                    // TODO: إبلاغ (ما في تصميم لنافذة الإبلاغ)
+                    case 'report':
+                      reportConversationOffer(
+                        context,
+                        jobId: conversation.jobId,
+                        professionalIds: _participants,
+                        name: conversation.name,
+                      );
                   }
                 },
                 itemBuilder: (context) => [
