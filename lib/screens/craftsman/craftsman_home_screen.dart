@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/backend/json_utils.dart';
 import '../../data/repositories/wallet_repository.dart';
 
 import '../../data/craftsman_verification.dart';
@@ -53,6 +54,7 @@ class _CraftsmanHomeScreenState extends State<CraftsmanHomeScreen> {
     });
     context.read<WalletCubit>().load();
     context.read<WalletTxCubit>().load(force: true);
+    context.read<EarningsCubit>().load(force: true);
   }
 
   void _select(int i) => setState(() => _tab = i);
@@ -92,6 +94,10 @@ class _HomeTab extends StatelessWidget {
     final colors = context.colors;
     final label = AppTextStyles.body16.copyWith(color: colors.textSecondary);
     final real = AppConfig.mode == BackendMode.amplify;
+    final earnings = context.select((EarningsCubit c) => c.state.data);
+    final now = DateTime.now();
+    final sunday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday % 7));
+    final weekRange = '${arabicDate(sunday.subtract(const Duration(days: 7)).toIso8601String())} — ${arabicDate(sunday.subtract(const Duration(days: 1)).toIso8601String())}';
     final jobs = context.select((CraftsmanJobsCubit c) => c.state.data);
     final points = context.select((WalletCubit c) => c.state.data);
     final num = AppTextStyles.title24Medium.copyWith(
@@ -208,7 +214,7 @@ class _HomeTab extends StatelessWidget {
                     'assets/icons/cr_star_box.svg',
                     'التقييم',
                     Text(
-                      real ? '—' : '5 / 4.3',
+                      real ? (earnings?.averageRating?.toString() ?? '—') : '5 / 4.3',
                       textDirection: TextDirection.ltr,
                       style: num,
                     ),
@@ -217,7 +223,7 @@ class _HomeTab extends StatelessWidget {
                     'assets/icons/cr_cash.svg',
                     'إجمالي الأرباح',
                     Text(
-                      real ? '—' : r'$1000',
+                      real ? (earnings == null ? '—' : earningsLabel(earnings.total)) : r'$1000',
                       textDirection: TextDirection.ltr,
                       style: num,
                     ),
@@ -248,14 +254,14 @@ class _HomeTab extends StatelessWidget {
                           Text('أرباح الأسبوع الماضي', style: label),
                           const SizedBox(height: 4),
                           Text(
-                            '16 آب 2026 — 22 آب 2026',
+                            real ? weekRange : '16 آب 2026 — 22 آب 2026',
                             style: AppTextStyles.body12.copyWith(
                               fontSize: 13,
                               color: colors.textHint,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          money(real ? '—' : '100000'),
+                          money(real ? (earnings == null ? '—' : earningsLabel(earnings.lastWeek)) : '100000'),
                         ],
                       ),
                     ),

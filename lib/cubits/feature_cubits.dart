@@ -298,3 +298,13 @@ class WalletTxCubit extends LoadCubit<List<WalletTx>> {
   @override
   Future<List<WalletTx>> fetch() => _repo.transactions();
 }
+
+/// أرباح وتقييم المهني.
+class EarningsCubit extends LoadCubit<Earnings> {
+  EarningsCubit(this._repo);
+
+  final WalletRepository _repo;
+
+  @override
+  Future<Earnings> fetch() => _repo.earnings();
+}

@@ -35,6 +35,7 @@ class AppProviders extends StatelessWidget {
         BlocProvider(create: (_) => WalletCubit(d.wallet)),
         BlocProvider(create: (_) => MyOffersCubit(d.myOffers)),
         BlocProvider(create: (_) => WalletTxCubit(d.wallet)),
+        BlocProvider(create: (_) => EarningsCubit(d.wallet)),
         RepositoryProvider<PublicProfileRepository>.value(value: d.publicProfile),
         BlocProvider(create: (_) => ProfessionalProfileCubit(d.professionalProfile)),
         BlocProvider(create: (_) => CraftsmanSignupCubit(d.craftsmanSignup)),

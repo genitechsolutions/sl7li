@@ -11,6 +11,7 @@ import 'package:khaled_flutter/data/repositories/offers_repository.dart';
 import 'package:khaled_flutter/data/repositories/requests_repository.dart';
 
 void main() {
+  earningsTests();
   liveShapeTests();
   voiceTests();
   group('json utils', () {
@@ -426,5 +427,22 @@ void voiceTests() {
     expect(asMapList('"[{\\"a\\":1}]"'), [
       {'a': 1},
     ]);
+  });
+}
+
+void earningsTests() {
+  test('earningsFromCompletions: مجموع وأسبوع ماضي ومتوسط تقييم', () {
+    final now = DateTime(2026, 11, 5); // خميس
+    final e = earningsFromCompletions([
+      {'actual_earnings': 1000, 'earnings_currency': 'SYP', 'completed_at': '2026-10-28T10:00:00', 'user_rating': 5},
+      {'actual_earnings': 500, 'earnings_currency': 'SYP', 'completed_at': '2026-11-04T10:00:00', 'user_rating': 4},
+      {'actual_earnings': 20, 'earnings_currency': 'USD', 'completed_at': '2026-10-29T10:00:00'},
+    ], now);
+    expect(e.total['SYP'], 1500);
+    expect(e.lastWeek['SYP'], 1000);
+    expect(e.lastWeek['USD'], 20);
+    expect(e.averageRating, 4.5);
+    expect(earningsLabel(e.total), '1,500 ل.س + \$20');
+    expect(earningsLabel(const {}), '0');
   });
 }

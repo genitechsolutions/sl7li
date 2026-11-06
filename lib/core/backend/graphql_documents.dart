@@ -241,6 +241,14 @@ mutation CreateOfferSecure($input: AWSJSON!) {
   }
 }''';
 
+  static const getCompletionsByProfessional = r'''
+query GetJobCompletionsByProfessional($professionalId: String!) {
+  getJobCompletionsByProfessional(professionalId: $professionalId) {
+    completions
+    error
+  }
+}''';
+
   static const createJobProposal = r'''
 mutation CreateJobProposalSecure($input: AWSJSON!) {
   createJobProposalSecure(input: $input) {

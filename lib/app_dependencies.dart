@@ -71,7 +71,7 @@ class AppDependencies {
       craftsmanJobs: RemoteCraftsmanJobsRepository(gateway, auth),
       conversations: RemoteConversationsRepository(gateway, auth),
       profile: const RemoteProfileRepository(gateway),
-      wallet: const RemoteWalletRepository(gateway),
+      wallet: RemoteWalletRepository(gateway, auth),
       notifications: RemoteNotificationsRepository(gateway, auth),
       myOffers: const RemoteMyOffersRepository(gateway),
       publicProfile: const RemotePublicProfileRepository(gateway),
