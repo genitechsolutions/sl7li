@@ -46,7 +46,8 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
     RequestPriority.emergency,
   ];
 
-  bool get _valid => _description.text.trim().length >= 10;
+  bool get _valid =>
+      _description.text.trim().length >= 10 || _description.text.trim() == widget.request.description.trim();
 
   @override
   void dispose() {

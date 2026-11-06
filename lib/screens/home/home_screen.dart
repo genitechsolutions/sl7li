@@ -2,6 +2,7 @@ import '../../cubits/feature_cubits.dart';
 import '../../cubits/load_cubit.dart';
 import '../../cubits/load_view.dart';
 import 'package:flutter/material.dart';
+import '../../core/backend/app_config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -131,7 +132,7 @@ class HomeScreen extends StatelessWidget {
                     // وضع fake: العروض بلا مهنيين حقيقيين فنعرض العينة.
                     final craftsmen = state.hasData && offers.any((o) => o.professionalId != null)
                         ? fromOffers
-                        : (state.hasData && offers.isEmpty ? const <Craftsman>[] : featuredCraftsmen);
+                        : (AppConfig.mode == BackendMode.fake ? featuredCraftsmen : const <Craftsman>[]);
                     return Column(
                       children: [
                         for (final craftsman in craftsmen)
