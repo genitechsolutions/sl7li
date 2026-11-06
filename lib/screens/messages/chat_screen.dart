@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/theme/app_colors.dart';
 import '../../cubits/feature_cubits.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_dialog.dart';
 import '../../core/widgets/craftsman_avatar.dart';
 import '../../data/chat_data.dart';
 import '../../data/dummy_data.dart';
@@ -207,10 +208,46 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _snack(String text) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<void> _confirmDelete(ChatMessage m) async {
+    final ok = await showAppModal<bool>(
+      context,
+      (c) => _DeleteMessageDialog(onClose: (v) => Navigator.of(c).pop(v)),
+    );
+    if (ok != true || !mounted) return;
+    final index = _messages.indexOf(m);
+    if (index < 0) return;
+    setState(() => _messages.removeAt(index));
+    final id = m.id;
+    if (id == null || widget.conversation.id == null) return;
+    try {
+      await context.read<ConversationsCubit>().deleteMessage(id);
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => _messages.insert(index.clamp(0, _messages.length), m));
+      _snack(e is BackendException ? e.message : 'تعذّر حذف الرسالة');
+    }
+  }
+
   Future<void> _sendImage() async {
     final picked = await pickPhotos(max: 1);
     if (picked.isEmpty || !mounted) return;
     final path = picked.first;
+    if (widget.conversation.id != null) {
+      try {
+        await context.read<ConversationsCubit>().validateImage(widget.conversation);
+      } on Object catch (e) {
+        if (!mounted) return;
+        _snack(e is BackendException ? e.message : 'تعذّر التحقق من الصورة');
+        return;
+      }
+      if (!mounted) return;
+    }
     final index = _messages.length;
     setState(() {
       _messages.add(
@@ -331,7 +368,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: _Bubble(message: _messages[i]),
+                          child: _Bubble(
+                            message: _messages[i],
+                            onLongPress:
+                                _messages[i].sent && _messages[i].status != MessageStatus.sending
+                                ? () => _confirmDelete(_messages[i])
+                                : null,
+                          ),
                         ),
                       ],
                     ],
@@ -875,9 +918,10 @@ class _RequestCardBubble extends StatelessWidget {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message});
+  const _Bubble({required this.message, this.onLongPress});
 
   final ChatMessage message;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -894,7 +938,9 @@ class _Bubble extends StatelessWidget {
           : AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 340),
-        child: Container(
+        child: GestureDetector(
+          onLongPress: onLongPress,
+          child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: bg,
@@ -951,6 +997,47 @@ class _Bubble extends StatelessWidget {
             ),
           ),
         ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteMessageDialog extends StatelessWidget {
+  const _DeleteMessageDialog({required this.onClose});
+
+  final ValueChanged<bool> onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return AppDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('حذف الرسالة', style: AppTextStyles.title18Medium),
+          const SizedBox(height: 8),
+          Text(
+            'هل تريد حذف هذه الرسالة؟ ما بتقدر ترجّعها.',
+            style: AppTextStyles.body16.copyWith(color: colors.textSecondary),
+          ),
+          const SizedBox(height: 16),
+          AppDialogButton(
+            label: 'حذف الرسالة',
+            background: colors.destructive,
+            foreground: colors.textOnPrimary,
+            onTap: () => onClose(true),
+          ),
+          const SizedBox(height: 8),
+          AppDialogButton(
+            label: 'إلغاء',
+            background: colors.background,
+            foreground: colors.primaryContent,
+            border: colors.border,
+            onTap: () => onClose(false),
+          ),
+        ],
       ),
     );
   }

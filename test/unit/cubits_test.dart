@@ -105,6 +105,15 @@ class _RecordingConversations implements ConversationsRepository {
   Future<List<ChatMessage>> messages(String conversationId) async => const [];
 
   @override
+  Future<void> validateImage(Conversation conversation) async {}
+
+  @override
+  Future<void> deleteMessage(String messageId) async {}
+
+  @override
+  Future<String?> assignedWhatsApp(String jobId) async => null;
+
+  @override
   Future<ChatMessage> sendVoice(Conversation conversation, String path, int seconds) async =>
       const ChatMessage(text: '', time: '', sent: true);
 
