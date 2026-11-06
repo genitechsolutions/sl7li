@@ -13,7 +13,7 @@
 - UI + تنقل + **ربط بالخلفية الحقيقية** (AWS Amplify: Cognito + AppSync GraphQL) عبر Cubit — بطلب المستخدم صراحةً. شوف قسم "الخلفية والـ Cubits" تحت.
 - البيانات الوهمية بـ `lib/data/dummy_data.dart` و`craftsman_data.dart` لسا موجودة: هي اللي بيرجعها وضع `fake` (الافتراضي، للتصميم والاختبارات). [request_draft.dart](lib/data/request_draft.dart) كائن عادي بيتمرّر بين خطوات "طلب خدمة".
 - صورة النجار `assets/images/offer_carpentry.jpg` هي الـ placeholder المعتمد لكل صور العروض/الأعمال/الطلبات (المستخدم موافق).
-- **لا packages إضافية بدون موافقة.** معتمدة بآخر موافقة: `image_picker`, `share_plus`, `geolocator`. الموجود: `flutter_localizations`, `flutter_svg`، ومعتمدة بطلب المستخدم للخلفية: `flutter_bloc`, `equatable`, `amplify_flutter`, `amplify_auth_cognito`, `amplify_api`. ومعتمدة للرسائل الصوتية: `record`, `just_audio`. (للرفع/تشغيل التسجيلات المستلمة: `amplify_storage_s3` أو `aws_signature_v4` بموافقة.)
+- **لا packages إضافية بدون موافقة.** معتمدة بآخر موافقة: `image_picker`, `share_plus`, `geolocator`, `http` (رفع S3 المتوافق مع الويب). الموجود: `flutter_localizations`, `flutter_svg`، ومعتمدة بطلب المستخدم للخلفية: `flutter_bloc`, `equatable`, `amplify_flutter`, `amplify_auth_cognito`, `amplify_api`. ومعتمدة للرسائل الصوتية: `record`, `just_audio`. (للرفع/تشغيل التسجيلات المستلمة: `amplify_storage_s3` أو `aws_signature_v4` بموافقة.)
 
 ## اللغة والاتجاه
 - **عربي فقط، RTL بالكامل.** لا إنجليزي، لا `intl`. النصوص بتنكتب مباشرة بالـ widgets حرفياً متل التصميم.
