@@ -80,6 +80,17 @@ class _CountingRequests implements MyRequestsRepository {
   Future<List<RequestOffer>> offers(String jobId) async => const [];
 
   @override
+  Future<void> update(
+    String jobId, {
+    required String description,
+    required RequestPriority priority,
+    required bool shareWhatsapp,
+    String? cityCode,
+  }) async => updated.add(jobId);
+
+  final updated = <String>[];
+
+  @override
   Future<void> respondToOffer(String proposalId, {required bool approve}) async {}
 
   @override

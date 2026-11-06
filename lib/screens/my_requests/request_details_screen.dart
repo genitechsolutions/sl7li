@@ -13,7 +13,10 @@ import '../../data/dummy_data.dart';
 import '../../data/chat_data.dart';
 import '../../data/my_request.dart';
 import '../messages/chat_screen.dart';
+import '../../data/repositories/proposal_filter.dart';
+import '../craftsman_profile/craftsman_profile_loader.dart';
 import 'dialogs/request_dialogs.dart';
+import 'edit_request_screen.dart';
 import 'widgets/offer_tile.dart';
 import 'widgets/request_stepper.dart';
 
@@ -38,10 +41,57 @@ class RequestDetailsScreen extends StatefulWidget {
 
 class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   late int _tab = widget.initialTab;
-  bool _whatsapp = true;
+  late bool _whatsapp = widget.request.shareWhatsapp;
   List<RequestOffer>? _proposals;
-  RequestOffer? _selected;
+  String? _pickedId;
   bool _offersFailed = false;
+
+  /// العرض المختار: الوحيد تلقائياً، وإلا اللي ضغط عليه المستخدم.
+  RequestOffer? get _selected {
+    if (!_real) return null;
+    final list = _shownOffers;
+    final id = effectiveSelection([for (final o in list) o.proposalId], _pickedId);
+    return list.where((o) => o.proposalId == id).firstOrNull;
+  }
+
+  bool get _editable =>
+      widget.request.stage == 0 &&
+      widget.request.status == RequestStatus.active &&
+      !widget.request.hasCraftsman;
+
+  void _openProfile(RequestOffer offer) =>
+      openCraftsmanProfile(context, professionalId: offer.professionalId);
+
+  Future<void> _edit() async {
+    if (await EditRequestScreen.open(context, widget.request) && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _setWhatsapp(bool value) async {
+    final id = widget.request.id;
+    if (id == null) {
+      setState(() => _whatsapp = value);
+      return;
+    }
+    final before = _whatsapp;
+    setState(() => _whatsapp = value);
+    try {
+      await context.read<MyRequestsCubit>().updateRequest(
+        id,
+        description: widget.request.description,
+        priority: widget.request.priority,
+        shareWhatsapp: value,
+        cityCode: widget.request.cityCode,
+      );
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => _whatsapp = before);
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e is BackendException ? e.message : 'تعذّر حفظ التعديل')));
+    }
+  }
 
   bool get _real => widget.request.id != null;
 
@@ -126,7 +176,10 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           completionPending: _completionPending,
           onObject: _real ? _object : null,
           offersTab: _tab == 1,
-          selected: _real ? _selected : null,
+          selected: _selected,
+          offersCount: _shownOffers.length,
+          editable: _editable || !_real,
+          onEdit: _edit,
           onAccept: _accept,
           onMessage: _message,
           onUpdate: _update,
@@ -192,14 +245,17 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           padding: const EdgeInsets.fromLTRB(32, 24, 32, 8),
           child: Text('العرض المعتمد:', style: label),
         ),
-        // TODO: navigate to offer / craftsman profile
-        Padding(
+          Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: OfferTile(
             offer: _real && _proposals?.isNotEmpty == true
                 ? (_approvedOffer ?? _proposals!.first)
                 : sampleOtherOffers[0],
-            onOpen: () {},
+            onOpen: () => _openProfile(
+              _real && _proposals?.isNotEmpty == true
+                  ? (_approvedOffer ?? _proposals!.first)
+                  : sampleOtherOffers[0],
+            ),
           ),
         ),
         if (_completionPending)
@@ -352,9 +408,9 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
           children: [
             Text('يسمح تواصل المهنيين عبر وتساب', style: AppTextStyles.body18),
             const Spacer(),
-            AppToggle(
-              value: _whatsapp,
-              onChanged: (v) => setState(() => _whatsapp = v),
+            IgnorePointer(
+              ignoring: _real && !_editable,
+              child: AppToggle(value: _whatsapp, onChanged: _setWhatsapp),
             ),
           ],
         ),
@@ -388,10 +444,11 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
   }
 
   Widget _selectable(RequestOffer offer) {
-    final selected = _real && identical(_selected, offer);
+    final picked = _selected;
+    final selected = _real && picked != null && picked.proposalId == offer.proposalId;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: _real ? () => setState(() => _selected = selected ? null : offer) : null,
+      onTap: _real ? () => setState(() => _pickedId = offer.proposalId) : null,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
@@ -400,7 +457,11 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
             width: 2,
           ),
         ),
-        child: OfferTile(offer: offer, onOpen: () {}),
+        child: OfferTile(
+          offer: offer,
+          selected: _real ? selected : null,
+          onOpen: () => _openProfile(offer),
+        ),
       ),
     );
   }
@@ -431,7 +492,6 @@ class _RequestDetailsScreenState extends State<RequestDetailsScreen> {
         padding: const EdgeInsets.fromLTRB(32, 20, 32, 8),
         child: Text('أفضل عرض:', style: label),
       ),
-      // TODO: navigate to offer / craftsman profile
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: _selectable(list.first),
@@ -509,6 +569,9 @@ class _BottomBar extends StatelessWidget {
     required this.offersTab,
     required this.completionPending,
     this.selected,
+    this.offersCount = 0,
+    this.editable = true,
+    this.onEdit,
     this.onAccept,
     this.onMessage,
     this.onUpdate,
@@ -519,6 +582,9 @@ class _BottomBar extends StatelessWidget {
   final MyRequest request;
   final bool offersTab;
   final RequestOffer? selected;
+  final int offersCount;
+  final bool editable;
+  final VoidCallback? onEdit;
   final VoidCallback? onAccept;
   final VoidCallback? onMessage;
   final VoidCallback? onUpdate;
@@ -570,7 +636,6 @@ class _BottomBar extends StatelessWidget {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-          // TODO: navigate to edit request / update status / accept offer / chat
           child: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: 7,
@@ -611,6 +676,11 @@ class _BottomBar extends StatelessWidget {
                   ]
                 : offersTab
                 ? [
+                    if (selected == null && offersCount > 1)
+                      Text(
+                        'اختر عرضاً من العروض لقبوله أو لمراسلة المختص',
+                        style: AppTextStyles.body12.copyWith(color: colors.textSecondary),
+                      ),
                     button(
                       'قبول العرض',
                       bg: selected == null
@@ -633,12 +703,14 @@ class _BottomBar extends StatelessWidget {
                       fg: colors.textOnPrimary,
                       onTap: onUpdate,
                     ),
-                    button(
-                      'تعديل الطلب',
-                      bg: colors.background,
-                      fg: colors.primaryContent,
-                      border: colors.border,
-                    ),
+                    if (editable)
+                      button(
+                        'تعديل الطلب',
+                        bg: colors.background,
+                        fg: colors.primaryContent,
+                        border: colors.border,
+                        onTap: onEdit,
+                      ),
                   ],
           ),
         ),

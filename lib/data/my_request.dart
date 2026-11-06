@@ -22,7 +22,13 @@ class MyRequest {
     this.id,
     this.images = const [],
     this.location,
+    this.shareWhatsapp = true,
+    this.cityCode,
   });
+
+  /// السماح للمهنيين بالتواصل عبر واتساب، ورمز مدينة الطلب (من الخلفية).
+  final bool shareWhatsapp;
+  final String? cityCode;
 
   /// صور الطلب (روابط) وموقعه؛ فاضيين بالبيانات الوهمية.
   final List<String> images;

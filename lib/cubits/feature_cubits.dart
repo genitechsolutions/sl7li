@@ -85,6 +85,24 @@ class MyRequestsCubit extends LoadCubit<List<MyRequest>> {
     comment: comment,
   );
 
+  /// تعديل طلب مفتوح وتحديث القائمة.
+  Future<void> updateRequest(
+    String jobId, {
+    required String description,
+    required RequestPriority priority,
+    required bool shareWhatsapp,
+    String? cityCode,
+  }) async {
+    await _repo.update(
+      jobId,
+      description: description,
+      priority: priority,
+      shareWhatsapp: shareWhatsapp,
+      cityCode: cityCode,
+    );
+    await load(force: true);
+  }
+
   /// بيرسل طلب جديد وبيحدّث القائمة.
   Future<void> create(RequestDraft draft) async {
     await _repo.create(draft);

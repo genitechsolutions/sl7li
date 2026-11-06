@@ -3,6 +3,7 @@ import 'dart:math';
 
 import '../../core/backend/backend_exception.dart';
 import '../../core/backend/gql_chat_extras.dart';
+import '../../core/backend/gql_job_edit.dart';
 import '../../core/backend/gql_proposal_actions.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/media_upload.dart';
@@ -13,6 +14,7 @@ import '../dummy_data.dart';
 import '../my_request.dart';
 import '../request_draft.dart';
 import 'auth_repository.dart';
+import 'proposal_filter.dart';
 
 /// قوائم طلبات الزبون ("طلباتي").
 abstract class MyRequestsRepository {
@@ -25,6 +27,15 @@ abstract class MyRequestsRepository {
 
   /// عروض الأسعار الواردة على طلب.
   Future<List<RequestOffer>> offers(String jobId);
+
+  /// تعديل طلب مفتوح (وصف/إلحاح/مدينة/واتساب).
+  Future<void> update(
+    String jobId, {
+    required String description,
+    required RequestPriority priority,
+    required bool shareWhatsapp,
+    String? cityCode,
+  });
 
   /// قبول أو رفض عرض سعر.
   Future<void> respondToOffer(String proposalId, {required bool approve});
@@ -57,6 +68,15 @@ class FakeMyRequestsRepository implements MyRequestsRepository {
 
   @override
   Future<List<RequestOffer>> offers(String jobId) async => [sampleBestOffer, ...sampleOtherOffers];
+
+  @override
+  Future<void> update(
+    String jobId, {
+    required String description,
+    required RequestPriority priority,
+    required bool shareWhatsapp,
+    String? cityCode,
+  }) async {}
 
   @override
   Future<void> respondToOffer(String proposalId, {required bool approve}) async {}
@@ -109,8 +129,28 @@ class RemoteMyRequestsRepository implements MyRequestsRepository {
     final data = await _gateway.run(Gql.getJobProposals, variables: {'jobId': jobId});
     final res = asMap(data['getSecureJobProposals']);
     throwIfBackendError(res);
-    final list = asMapList(res['proposals']).map(requestOfferFromJson).toList();
-    return list;
+    return liveProposals(asMapList(res['proposals'])).map(requestOfferFromJson).toList();
+  }
+
+  @override
+  Future<void> update(
+    String jobId, {
+    required String description,
+    required RequestPriority priority,
+    required bool shareWhatsapp,
+    String? cityCode,
+  }) async {
+    await _gateway.run(
+      GqlJobEdit.updateJob,
+      variables: {'input': updateJobInput(
+        jobId,
+        description: description,
+        priority: priority,
+        shareWhatsapp: shareWhatsapp,
+        cityCode: cityCode,
+      )},
+      mutation: true,
+    );
   }
 
   @override
@@ -194,6 +234,25 @@ Map<String, dynamic> createJobInput(RequestDraft d, {String? jobId, List<String>
       'customer_name': d.customerName.trim(),
   };
 }
+
+/// حقول updateJob لتعديل الطلب المفتوح.
+Map<String, dynamic> updateJobInput(
+  String jobId, {
+  required String description,
+  required RequestPriority priority,
+  required bool shareWhatsapp,
+  String? cityCode,
+}) => {
+  'job_id': jobId,
+  'description': description.trim(),
+  'urgency': switch (priority) {
+    RequestPriority.emergency => 'emergency',
+    RequestPriority.urgent => 'urgent',
+    RequestPriority.normal => 'normal',
+  },
+  'share_whatsapp_with_professionals': shareWhatsapp,
+  'city_code': ?cityCode,
+};
 
 /// متغيرات recordCustomerFeedback (متل الموقع: كل التقييمات = عدد النجوم).
 Map<String, dynamic> customerFeedbackVariables(
@@ -475,12 +534,16 @@ MyRequest myRequestFromJson(Map<String, dynamic> j) {
     cancelNote: canceled
         ? (status == 'expired' ? 'لقد انتهت مدة طلبك' : 'تم إلغاء الطلب')
         : null,
-    offersCount: stage == 0 && !canceled
-        ? (intOf(j, 'response_count') ?? 0)
-        : null,
+    offersCount: stage == 0 && !canceled ? _liveOffersCount(j) : null,
+    shareWhatsapp: j['share_whatsapp_with_professionals'] != false,
+    cityCode: str(j, 'city_code'),
     craftsmanName: str(j, 'accepted_pro_name') ?? _selectedProName(j),
   );
 }
+
+/// عدد العروض الفعّالة: من عروض الطلب المرفقة (response_count بيعدّ المسحوب كمان).
+int _liveOffersCount(Map<String, dynamic> j) =>
+    j['proposals'] is List ? liveProposals(asMapList(j['proposals'])).length : (intOf(j, 'response_count') ?? 0);
 
 /// اسم المهني المختار من عروض الطلب (لوحة الزبون ما بترجع accepted_pro_name للعروض).
 String? _selectedProName(Map<String, dynamic> j) {
