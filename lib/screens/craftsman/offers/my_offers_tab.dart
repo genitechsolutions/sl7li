@@ -10,6 +10,7 @@ import '../../../cubits/feature_cubits.dart';
 import '../../../data/repositories/my_offers_repository.dart';
 import '../../notifications/notifications_screen.dart';
 import 'create_offer_screen.dart';
+import 'offer_actions.dart';
 
 /// تاب "عروضي" (عروض ترويجية للمهني): حالياً الحالة الفاضية (الكل / قيد المراجعة / نشط).
 class MyOffersTab extends StatefulWidget {
@@ -76,7 +77,13 @@ class _MyOffersTabState extends State<MyOffersTab> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          Builder(
+            builder: (ctx) => IconButton(
+              tooltip: 'خيارات العرض',
+              icon: Icon(Icons.more_vert, color: colors.textSecondary),
+              onPressed: () => showOfferMenu(ctx, o),
+            ),
+          ),
         ],
       ),
     );
