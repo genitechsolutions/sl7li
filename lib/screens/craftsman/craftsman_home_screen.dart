@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/backend/json_utils.dart';
 import '../../data/repositories/wallet_repository.dart';
 
@@ -22,6 +23,10 @@ import 'ratings_screen.dart';
 import 'profile/craftsman_profile_tab.dart';
 import 'requests/craftsman_request_details_screen.dart';
 import 'requests/craftsman_requests_tab.dart';
+import 'requests/offer_dialogs.dart';
+import 'requests/task_dialogs.dart';
+import 'wallet_actions.dart';
+import 'wallet_history_screen.dart';
 import 'widgets/craftsman_bottom_nav.dart';
 import 'widgets/craftsman_cards.dart';
 import 'widgets/craftsman_header.dart';
@@ -97,8 +102,13 @@ class _HomeTab extends StatelessWidget {
     final real = AppConfig.mode == BackendMode.amplify;
     final earnings = context.select((EarningsCubit c) => c.state.data);
     final now = DateTime.now();
-    final sunday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday % 7));
-    final weekRange = '${arabicDate(sunday.subtract(const Duration(days: 7)).toIso8601String())} — ${arabicDate(sunday.subtract(const Duration(days: 1)).toIso8601String())}';
+    final sunday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday % 7));
+    final weekRange =
+        '${arabicDate(sunday.subtract(const Duration(days: 7)).toIso8601String())} — ${arabicDate(sunday.subtract(const Duration(days: 1)).toIso8601String())}';
     final jobs = context.select((CraftsmanJobsCubit c) => c.state.data);
     final points = context.select((WalletCubit c) => c.state.data);
     final num = AppTextStyles.title24Medium.copyWith(
@@ -120,32 +130,37 @@ class _HomeTab extends StatelessWidget {
       child: child,
     );
 
-    Widget stat(String icon, String title, Widget value, {VoidCallback? onTap}) => Expanded(
+    Widget stat(
+      String icon,
+      String title,
+      Widget value, {
+      VoidCallback? onTap,
+    }) => Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SvgPicture.asset(icon, width: 32, height: 32),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  SvgPicture.asset(icon, width: 32, height: 32),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            value,
-          ],
-        ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              value,
+            ],
+          ),
         ),
       ),
     );
@@ -219,7 +234,9 @@ class _HomeTab extends StatelessWidget {
                     'assets/icons/cr_star_box.svg',
                     'التقييم',
                     Text(
-                      real ? (earnings?.averageRating?.toString() ?? '—') : '5 / 4.3',
+                      real
+                          ? (earnings?.averageRating?.toString() ?? '—')
+                          : '5 / 4.3',
                       textDirection: TextDirection.ltr,
                       style: num,
                     ),
@@ -232,7 +249,11 @@ class _HomeTab extends StatelessWidget {
                     'assets/icons/cr_cash.svg',
                     'إجمالي الأرباح',
                     Text(
-                      real ? (earnings == null ? '—' : earningsLabel(earnings.total)) : r'$1000',
+                      real
+                          ? (earnings == null
+                                ? '—'
+                                : earningsLabel(earnings.total))
+                          : r'$1000',
                       textDirection: TextDirection.ltr,
                       style: num,
                     ),
@@ -270,7 +291,13 @@ class _HomeTab extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          money(real ? (earnings == null ? '—' : earningsLabel(earnings.lastWeek)) : '100000'),
+                          money(
+                            real
+                                ? (earnings == null
+                                      ? '—'
+                                      : earningsLabel(earnings.lastWeek))
+                                : '100000',
+                          ),
                         ],
                       ),
                     ),
@@ -338,6 +365,7 @@ class _HomeTab extends StatelessWidget {
                             label: 'شحن الرصيد',
                             icon: 'assets/icons/cr_charge.svg',
                             filled: true,
+                            onTap: () => showTopUpDialog(context),
                           ),
                         ),
                         Expanded(
@@ -345,6 +373,7 @@ class _HomeTab extends StatelessWidget {
                             label: 'سحب رصيد',
                             icon: 'assets/icons/cr_withdraw.svg',
                             filled: false,
+                            onTap: () => showWithdrawDialog(context),
                           ),
                         ),
                       ],
@@ -353,15 +382,25 @@ class _HomeTab extends StatelessWidget {
                 ),
               ),
               for (final t
-                  in (context.select((WalletTxCubit c) => c.state.data) ?? const <WalletTx>[]).take(2))
+                  in (context.select((WalletTxCubit c) => c.state.data) ??
+                          const <WalletTx>[])
+                      .take(2))
                 CraftsmanTxRow(
                   title: t.title,
                   value: t.value,
                   color: t.income ? colors.success : colors.error,
                   income: t.income,
+                  ago: walletTxAgo(t.createdAt, DateTime.now()),
                 ),
               GestureDetector(
-                onTap: () {}, // TODO: سجل المحفظة الكامل (ما في تصميم)
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => WalletHistoryScreen(
+                      repository: context.read<WalletRepository>(),
+                    ),
+                  ),
+                ),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -429,7 +468,12 @@ class _HomeTab extends StatelessWidget {
                         ),
                       ),
                     ),
-                    onPrimary: () {},
+                    onPrimary: () => showTaskStatusDialog(
+                      context,
+                      jobId: jobs.tasks.first.id,
+                    ),
+                    onMore: (c) =>
+                        showRequestMoreMenu(c, jobId: jobs.tasks.first.id),
                   ),
                 ),
             ],
@@ -450,85 +494,100 @@ class _MiniRequest extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.cardAlt,
-        borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CraftsmanRequestDetailsScreen(
+            request: request,
+            offerSent: request.state != CraftsmanRequestState.open,
+          ),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                request.date,
-                style: AppTextStyles.body12.copyWith(
-                  fontSize: 13,
-                  color: colors.textHint,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 20,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                color: colors.barrier,
-              ),
-              Text(
-                request.urgency,
-                style: AppTextStyles.body12.copyWith(
-                  fontSize: 13,
-                  color: colors.warning,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            request.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.title18Medium,
-          ),
-          const SizedBox(height: 8),
-          Text.rich(
-            TextSpan(
-              text: _clip(request.description),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.cardAlt,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                TextSpan(
-                  text: ' قراءة المزيد',
-                  style: TextStyle(
-                    color: colors.link,
-                    decoration: TextDecoration.underline,
-                    decorationColor: colors.link,
+                Text(
+                  request.date,
+                  style: AppTextStyles.body12.copyWith(
+                    fontSize: 13,
+                    color: colors.textHint,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  color: colors.barrier,
+                ),
+                Text(
+                  request.urgency,
+                  style: AppTextStyles.body12.copyWith(
+                    fontSize: 13,
+                    color: colors.warning,
                   ),
                 ),
               ],
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.body16.copyWith(
-              color: colors.textSecondary,
-              height: 1.5,
+            const SizedBox(height: 4),
+            Text(
+              request.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.title18Medium,
             ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              SvgPicture.asset(
-                'assets/icons/cr_pin.svg',
-                width: 16,
-                height: 16,
-                colorFilter: ColorFilter.mode(colors.chipText, BlendMode.srcIn),
+            const SizedBox(height: 8),
+            Text.rich(
+              TextSpan(
+                text: _clip(request.description),
+                children: [
+                  TextSpan(
+                    text: ' قراءة المزيد',
+                    style: TextStyle(
+                      color: colors.link,
+                      decoration: TextDecoration.underline,
+                      decorationColor: colors.link,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                request.location,
-                style: AppTextStyles.body16.copyWith(color: colors.chipText),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.body16.copyWith(
+                color: colors.textSecondary,
+                height: 1.5,
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/cr_pin.svg',
+                  width: 16,
+                  height: 16,
+                  colorFilter: ColorFilter.mode(
+                    colors.chipText,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  request.location,
+                  style: AppTextStyles.body16.copyWith(color: colors.chipText),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

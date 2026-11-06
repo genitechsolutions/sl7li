@@ -18,6 +18,7 @@ import '../../craftsman_profile/craftsman_profile_loader.dart';
 import '../../home/home_screen.dart';
 import '../../notifications/notifications_screen.dart';
 import '../../settings/settings_screen.dart';
+import '../wallet_actions.dart';
 import '../widgets/craftsman_cards.dart';
 import 'edit_profile_screen.dart';
 import 'portfolio_section.dart';
@@ -340,7 +341,7 @@ class _CraftsmanProfileTabState extends State<CraftsmanProfileTab> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Row(
+                      Row(
                         spacing: 12,
                         children: [
                           Expanded(
@@ -348,6 +349,7 @@ class _CraftsmanProfileTabState extends State<CraftsmanProfileTab> {
                               label: 'شحن الرصيد',
                               icon: 'assets/icons/cr_charge.svg',
                               filled: true,
+                              onTap: () => showTopUpDialog(context),
                             ),
                           ),
                           Expanded(
@@ -355,6 +357,7 @@ class _CraftsmanProfileTabState extends State<CraftsmanProfileTab> {
                               label: 'سحب رصيد',
                               icon: 'assets/icons/cr_withdraw.svg',
                               filled: false,
+                              onTap: () => showWithdrawDialog(context),
                             ),
                           ),
                         ],
@@ -371,6 +374,7 @@ class _CraftsmanProfileTabState extends State<CraftsmanProfileTab> {
                     value: t.value,
                     color: t.income ? colors.success : colors.error,
                     income: t.income,
+                    ago: walletTxAgo(t.createdAt, DateTime.now()),
                   ),
               ],
             ),

@@ -27,15 +27,38 @@ abstract class WalletRepository {
   Future<Earnings> earnings();
 
   Future<List<WalletTx>> transactions();
+
+  Future<WalletTxPage> transactionsPage({String? nextToken});
+}
+
+/// صفحة من حركات المحفظة (nextToken لجلب الصفحة التالية).
+class WalletTxPage {
+  const WalletTxPage(this.items, {this.nextToken});
+
+  final List<WalletTx> items;
+  final String? nextToken;
 }
 
 /// حركة على رصيد النقاط.
 class WalletTx {
-  const WalletTx({required this.title, required this.value, required this.income});
+  const WalletTx({required this.title, required this.value, required this.income, this.createdAt});
 
   final String title;
   final String value;
   final bool income;
+  final DateTime? createdAt;
+}
+
+/// "منذ 3 أيام" من تاريخ الحركة (فاضي إذا ما في تاريخ).
+String walletTxAgo(DateTime? at, DateTime now) {
+  if (at == null) return '';
+  final d = now.difference(at);
+  if (d.inMinutes < 1) return 'الآن';
+  if (d.inMinutes < 60) return 'منذ ${d.inMinutes} دقيقة';
+  if (d.inHours < 24) return 'منذ ${d.inHours} ساعة';
+  if (d.inDays < 30) return 'منذ ${d.inDays} يوم';
+  if (d.inDays < 365) return 'منذ ${d.inDays ~/ 30} شهر';
+  return 'منذ ${d.inDays ~/ 365} سنة';
 }
 
 class FakeWalletRepository implements WalletRepository {
@@ -48,10 +71,16 @@ class FakeWalletRepository implements WalletRepository {
   Future<Earnings> earnings() async => const Earnings();
 
   @override
-  Future<List<WalletTx>> transactions() async => const [
-    WalletTx(title: 'أرباح خدمة - تنظيف مكيفات', value: '+1000', income: true),
-    WalletTx(title: 'سحب رصيد', value: '-1000', income: false),
-  ];
+  Future<List<WalletTx>> transactions() async {
+    final at = DateTime.now().subtract(const Duration(days: 3));
+    return [
+      WalletTx(title: 'أرباح خدمة - تنظيف مكيفات', value: '+1000', income: true, createdAt: at),
+      WalletTx(title: 'سحب رصيد', value: '-1000', income: false, createdAt: at),
+    ];
+  }
+
+  @override
+  Future<WalletTxPage> transactionsPage({String? nextToken}) async => WalletTxPage(await transactions());
 }
 
 class RemoteWalletRepository implements WalletRepository {
@@ -85,6 +114,18 @@ class RemoteWalletRepository implements WalletRepository {
     throwIfBackendError(res);
     return asMapList(res['transactions']).map(walletTxFromJson).toList();
   }
+
+  @override
+  Future<WalletTxPage> transactionsPage({String? nextToken}) async {
+    final data = await _gateway.run(Gql.getMyWallet, variables: {'nextToken': nextToken});
+    final res = asMap(data['getMyWalletSecure']);
+    throwIfBackendError(res);
+    final next = res['nextToken'];
+    return WalletTxPage(
+      asMapList(res['transactions']).map(walletTxFromJson).toList(),
+      nextToken: next is String && next.isNotEmpty ? next : null,
+    );
+  }
 }
 
 WalletTx walletTxFromJson(Map<String, dynamic> j) {
@@ -94,7 +135,12 @@ WalletTx walletTxFromJson(Map<String, dynamic> j) {
   final title = debit
       ? (job == null ? 'خصم نقاط' : 'عرض على: $job')
       : (str(j, 'note') ?? 'إضافة نقاط');
-  return WalletTx(title: title, value: debit ? '-$amount' : '+$amount', income: !debit);
+  return WalletTx(
+    title: title,
+    value: debit ? '-$amount' : '+$amount',
+    income: !debit,
+    createdAt: DateTime.tryParse(str(j, 'createdAt') ?? str(j, 'created_at') ?? '')?.toLocal(),
+  );
 }
 
 /// الأسبوع الماضي = من الأحد قبل الماضي لحد الأحد الماضي (متل الموقع).

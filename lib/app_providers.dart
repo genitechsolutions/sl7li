@@ -10,6 +10,7 @@ import 'cubits/job_lifecycle_cubit.dart';
 import 'cubits/load_cubit.dart';
 import 'cubits/unread_count_cubit.dart';
 import 'cubits/ratings_cubit.dart';
+import 'data/repositories/wallet_repository.dart';
 import 'data/repositories/reports_ratings_repository.dart';
 import 'data/repositories/public_profile_repository.dart';
 import 'data/repositories/service_classifier_repository.dart';
@@ -46,6 +47,7 @@ class AppProviders extends StatelessWidget {
         BlocProvider(create: (_) => ProfessionalProfileCubit(d.professionalProfile)),
         BlocProvider(create: (_) => CraftsmanSignupCubit(d.craftsmanSignup)),
         RepositoryProvider<ServiceReportsRepository>.value(value: d.reports),
+        RepositoryProvider<WalletRepository>.value(value: d.wallet),
         BlocProvider(create: (_) => RatingsCubit(d.ratings)),
       ],
       child: _ResumeRefresh(child: child),
