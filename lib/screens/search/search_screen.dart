@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/craftsman_card.dart';
 import '../../core/widgets/filter_chip_button.dart';
+import '../../core/widgets/form/options_sheet.dart';
 import '../../core/widgets/promo_banner.dart';
 import '../../data/dummy_data.dart';
 import '../craftsman_profile/craftsman_profile_loader.dart';
@@ -28,6 +29,29 @@ class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   bool _showResults = false;
+  String? _type;
+  String? _area;
+  String? _rating;
+
+  static const _ratings = {'4 فأكثر': 4.0, '4.5 فأكثر': 4.5};
+
+  List<Craftsman> get _filtered => [
+    for (final c in searchResults)
+      if ((_type == null || c.services.any((s) => _type!.contains(s) || s.contains(_type!))) &&
+          (_area == null || c.location.contains(_area!)) &&
+          (_rating == null || (c.rating ?? 0) >= _ratings[_rating]!))
+        c,
+  ];
+
+  Future<void> _pick(
+    String title,
+    List<String> options,
+    String? current,
+    void Function(String?) set,
+  ) async {
+    final v = await showOptionsSheet(context, title: title, options: ['الكل', ...options]);
+    if (v != null) setState(() => set(v == 'الكل' ? null : v));
+  }
 
   @override
   void dispose() {
@@ -116,9 +140,18 @@ class _SearchScreenState extends State<SearchScreen> {
         Row(
           spacing: 10,
           children: [
-            FilterChipButton(label: 'تصنيف المهني', onTap: () {}), // TODO: open filter
-            FilterChipButton(label: 'المنطقة', onTap: () {}), // TODO: open filter
-            FilterChipButton(label: 'التقييم', onTap: () {}), // TODO: open filter
+            FilterChipButton(
+              label: _type ?? 'تصنيف المهني',
+              onTap: () => _pick('تصنيف المهني', requestServiceTypes, _type, (v) => _type = v),
+            ),
+            FilterChipButton(
+              label: _area ?? 'المنطقة',
+              onTap: () => _pick('المنطقة', requestCities, _area, (v) => _area = v),
+            ),
+            FilterChipButton(
+              label: _rating ?? 'التقييم',
+              onTap: () => _pick('التقييم', _ratings.keys.toList(), _rating, (v) => _rating = v),
+            ),
           ],
         ),
         const SizedBox(height: 21),
@@ -134,7 +167,17 @@ class _SearchScreenState extends State<SearchScreen> {
           onPressed: () => Navigator.push(context, NewRequestScreen.route()),
         ),
         const SizedBox(height: 13),
-        for (final craftsman in searchResults)
+        if (_filtered.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Center(
+              child: Text(
+                'لا توجد نتائج مطابقة',
+                style: AppTextStyles.body16.copyWith(color: context.colors.textSecondary),
+              ),
+            ),
+          ),
+        for (final craftsman in _filtered)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: CraftsmanCard(

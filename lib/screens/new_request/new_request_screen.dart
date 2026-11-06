@@ -1,3 +1,4 @@
+import '../../core/widgets/coming_soon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -241,7 +242,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                   PhoneField(
                     controller: _phone,
                     inline: true,
-                    onCountryTap: () {},
+                    onCountryTap: showCountryNotice,
                   ), // TODO: pick country code
                 ),
                 ..._field(

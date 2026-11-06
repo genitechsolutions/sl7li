@@ -1,3 +1,4 @@
+import '../../../core/widgets/coming_soon.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -205,7 +206,7 @@ class _VerificationDialogState extends State<_VerificationDialog> {
                     color: colors.link,
                     decoration: TextDecoration.underline,
                   ),
-                  recognizer: TapGestureRecognizer()..onTap = () {},
+                  recognizer: TapGestureRecognizer()..onTap = showComingSoon,
                 ),
               ],
             ),

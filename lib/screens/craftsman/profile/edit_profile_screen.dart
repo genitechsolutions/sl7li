@@ -1,3 +1,4 @@
+import '../../../core/widgets/coming_soon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -317,7 +318,7 @@ class _EditState extends State<_EditForm> {
                         controller: _phone,
                         inline: true,
                         restrictInput: true,
-                        onCountryTap: () {},
+                        onCountryTap: showCountryNotice,
                       ),
                     ),
                   ),

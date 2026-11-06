@@ -1,3 +1,4 @@
+import '../../core/widgets/coming_soon.dart';
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
@@ -35,7 +36,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
   final _code = TextEditingController();
   final _supportTap = TapGestureRecognizer()
-    ..onTap = () {}; // TODO: open customer support
+    ..onTap = showComingSoon;
   Timer? _timer;
   int _secondsLeft = _resendAfter;
 

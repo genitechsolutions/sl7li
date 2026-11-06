@@ -1,3 +1,4 @@
+import '../../core/widgets/coming_soon.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,9 +28,9 @@ class _RequestConfirmScreenState extends State<RequestConfirmScreen> {
   // العناوين الفرعية بالتصميم داخلة 12.
   static const _labelPadding = EdgeInsetsDirectional.symmetric(horizontal: 12);
 
-  final _termsTap = TapGestureRecognizer()..onTap = () {}; // TODO: open terms
+  final _termsTap = TapGestureRecognizer()..onTap = showComingSoon;
   final _privacyTap = TapGestureRecognizer()
-    ..onTap = () {}; // TODO: open privacy policy
+    ..onTap = showComingSoon;
 
   bool _sending = false;
 

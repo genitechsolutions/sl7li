@@ -1,3 +1,4 @@
+import '../../core/widgets/coming_soon.dart';
 import 'package:flutter/material.dart';
 import '../../core/widgets/app_image.dart';
 import '../../core/widgets/photo_source.dart';
@@ -201,7 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       controller: _phone,
                       inline: true,
                       restrictInput: true,
-                      onCountryTap: () {}, // TODO: pick country code
+                      onCountryTap: showCountryNotice,
                     ),
                     Padding(
                       padding: _labelPadding.add(
