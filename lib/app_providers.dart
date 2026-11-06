@@ -67,6 +67,7 @@ Future<void> signOutAndReset(BuildContext context) async {
     context.read<WalletCubit>(),
     context.read<MyOffersCubit>(),
     context.read<WalletTxCubit>(),
+    context.read<EarningsCubit>(),
     context.read<ProfessionalProfileCubit>(),
     context.read<RatingsCubit>(),
   ];

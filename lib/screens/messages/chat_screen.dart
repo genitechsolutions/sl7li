@@ -604,7 +604,8 @@ class _Header extends StatelessWidget {
                         height: 20,
                       ),
                     ),
-                  _menuItem(
+                  if (!craftsmanMode)
+                    _menuItem(
                     context,
                     'report',
                     'إبلاغ',

@@ -197,7 +197,10 @@ class _CompletionDialogState extends State<_CompletionDialog> {
     super.dispose();
   }
 
-  int? get _value => int.tryParse(_amount.text.replaceAll(RegExp(r'[^0-9]'), ''));
+  int? get _value {
+    final v = int.tryParse(_amount.text.replaceAll(RegExp(r'[^0-9]'), ''));
+    return v != null && v > 0 && v <= 2147483647 ? v : null;
+  }
 
   @override
   Widget build(BuildContext context) {

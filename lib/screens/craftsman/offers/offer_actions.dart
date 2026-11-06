@@ -77,6 +77,10 @@ Future<void> _run(BuildContext context, Future<void> Function() action) async {
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(e.message)));
+  } on Object {
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('تعذّر تنفيذ العملية، حاول مرة ثانية')));
   }
 }
 

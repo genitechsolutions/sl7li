@@ -792,8 +792,49 @@ Future<bool> markRequestDone(BuildContext context, String jobId) async {
   return true;
 }
 
+/// نافذة تأكيد بسيطة قبل الإجراءات اللي ما بتنرجع (true = تأكيد).
+Future<bool> confirmLifecycleAction(BuildContext context, String title, String body, String label) async {
+  final ok = await showAppModal<bool>(
+    context,
+    (context) => AppDialogCard(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTextStyles.title20),
+          const SizedBox(height: 12),
+          Text(body, style: AppTextStyles.body16.copyWith(color: context.colors.textSecondary)),
+          const SizedBox(height: 20),
+          AppDialogButton(
+            label: label,
+            background: context.colors.primary,
+            foreground: context.colors.textOnPrimary,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
+          const SizedBox(height: 8),
+          AppDialogButton(
+            label: 'رجوع',
+            background: context.colors.background,
+            foreground: context.colors.primaryContent,
+            border: context.colors.border,
+            onTap: () => Navigator.of(context).pop(false),
+          ),
+        ],
+      ),
+    ),
+  );
+  return ok == true;
+}
+
 /// "الاعتراض على إنجاز الطلب": رفض ادعاء الإنجاز من المهني.
 Future<bool> rejectCompletionClaim(BuildContext context, String proposalId) async {
+  final sure = await confirmLifecycleAction(
+    context,
+    'الاعتراض على الإنجاز',
+    'رح نرفض ادعاء المهني بإنجاز الطلب. بتقدر تتواصل معه لتحل الموضوع.',
+    'رفض الإنجاز',
+  );
+  if (!sure || !context.mounted) return false;
   final lifecycle = context.read<JobLifecycleCubit>();
   final ok = await _backend(
     context,
@@ -814,7 +855,15 @@ Future<bool> runUpdateStatusFlow(BuildContext context, MyRequest request) async 
   final id = request.id;
   switch (result) {
     case 'done':
-      return id == null ? false : markRequestDone(context, id);
+      if (id == null) return false;
+      final sure = await confirmLifecycleAction(
+        context,
+        'تأكيد إنجاز الطلب',
+        'رح نسجّل الطلب كمكتمل. ما بتقدر ترجع عن هالخطوة.',
+        'تأكيد الإنجاز',
+      );
+      if (!sure || !context.mounted) return false;
+      return markRequestDone(context, id);
     case 'reopen':
       if (id == null) return false;
       final lifecycle = context.read<JobLifecycleCubit>();
