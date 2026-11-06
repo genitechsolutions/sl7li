@@ -11,6 +11,7 @@ import 'data/repositories/notifications_repository.dart';
 import 'data/repositories/my_offers_repository.dart';
 import 'data/repositories/offers_repository.dart';
 import 'data/repositories/public_profile_repository.dart';
+import 'data/repositories/reports_ratings_repository.dart';
 import 'data/repositories/requests_repository.dart';
 import 'data/repositories/service_classifier_repository.dart';
 
@@ -31,7 +32,12 @@ class AppDependencies {
     required this.craftsmanSignup,
     this.classifier = const FakeServiceClassifier(),
     this.jobLifecycle = const FakeJobLifecycleRepository(),
+    this.reports = const FakeServiceReportsRepository(),
+    this.ratings = const FakeProfessionalRatingsRepository(),
   });
+
+  final ServiceReportsRepository reports;
+  final ProfessionalRatingsRepository ratings;
 
   final ServiceClassifier classifier;
   final JobLifecycleRepository jobLifecycle;
@@ -82,6 +88,8 @@ class AppDependencies {
       craftsmanSignup: const RemoteCraftsmanSignupRepository(gateway),
       classifier: const RemoteServiceClassifier(gateway),
       jobLifecycle: const RemoteJobLifecycleRepository(gateway),
+      reports: const RemoteServiceReportsRepository(gateway),
+      ratings: const RemoteProfessionalRatingsRepository(gateway),
     );
   }
 

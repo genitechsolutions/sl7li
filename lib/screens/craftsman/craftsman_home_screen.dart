@@ -18,6 +18,7 @@ import '../../data/craftsman_data.dart';
 import '../../data/repositories/requests_repository.dart';
 import '../messages/messages_screen.dart';
 import 'offers/my_offers_tab.dart';
+import 'ratings_screen.dart';
 import 'profile/craftsman_profile_tab.dart';
 import 'requests/craftsman_request_details_screen.dart';
 import 'requests/craftsman_requests_tab.dart';
@@ -119,8 +120,11 @@ class _HomeTab extends StatelessWidget {
       child: child,
     );
 
-    Widget stat(String icon, String title, Widget value) => Expanded(
-      child: card(
+    Widget stat(String icon, String title, Widget value, {VoidCallback? onTap}) => Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -141,6 +145,7 @@ class _HomeTab extends StatelessWidget {
             const SizedBox(height: 4),
             value,
           ],
+        ),
         ),
       ),
     );
@@ -217,6 +222,10 @@ class _HomeTab extends StatelessWidget {
                       real ? (earnings?.averageRating?.toString() ?? '—') : '5 / 4.3',
                       textDirection: TextDirection.ltr,
                       style: num,
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RatingsScreen()),
                     ),
                   ),
                   stat(
