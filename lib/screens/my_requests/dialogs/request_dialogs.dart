@@ -12,7 +12,7 @@ import '../../../core/widgets/form/options_sheet.dart';
 import '../../../cubits/feature_cubits.dart';
 import '../../../cubits/job_lifecycle_cubit.dart';
 import '../../../data/my_request.dart';
-import '../../new_request/new_request_screen.dart';
+import '../edit_request_screen.dart';
 
 // ───────────────────────── تحديث حالة الطلب ─────────────────────────
 
@@ -140,7 +140,9 @@ class _AgreementDialogState extends State<_AgreementDialog> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
             child: Text(
-              'اختر المهني الذي تم الاتفاق معه من العروض المقدّمة',
+              _selected < 0
+                  ? 'اختر المهني الذي تم الاتفاق معه ثم اضغط تأكيد'
+                  : 'اختر المهني الذي تم الاتفاق معه من العروض المقدّمة',
               style: AppTextStyles.body14.copyWith(color: colors.textSecondary),
             ),
           ),
@@ -170,9 +172,9 @@ class _AgreementDialogState extends State<_AgreementDialog> {
                 Expanded(
                   child: AppDialogButton(
                     label: 'تأكيد',
-                    background: colors.primary,
+                    background: _selected < 0 ? colors.disabled : colors.primary,
                     foreground: colors.textOnPrimary,
-                    onTap: () => Navigator.of(context).pop(_selected),
+                    onTap: _selected < 0 ? null : () => Navigator.of(context).pop(_selected),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -726,7 +728,7 @@ Future<bool> agreeWithOffer(
   final index = await showAgreementDialog(
     context,
     offers: offers,
-    initial: preferred < 0 ? 0 : preferred,
+    initial: preferred >= 0 ? preferred : (offers.length == 1 ? 0 : -1),
   );
   final chosen = index == null ? null : offers[index];
   final proposalId = chosen?.proposalId;
@@ -877,8 +879,11 @@ Future<bool> runUpdateStatusFlow(BuildContext context, MyRequest request) async 
       }
       return agreeWithOffer(context, id);
     case 'edit':
-      // TODO: تعبئة الطلب الحالي مسبقاً (ما في frames مخصصة)؛ هلق بيفتح خطوات الطلب.
-      await Navigator.push(context, NewRequestScreen.route());
+      if (request.stage != 0 || request.status != RequestStatus.active) {
+        _toast(context, 'ما بتقدر تعدّل الطلب بعد الاتفاق مع مهني');
+        return false;
+      }
+      return EditRequestScreen.open(context, request);
     case 'cancel':
       final reason = await showCancelRequestDialog(context);
       if (reason == null || id == null || !context.mounted) return false;

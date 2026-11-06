@@ -7,10 +7,13 @@ import '../../../data/my_request.dart';
 
 /// كرت عرض سعر وارد (صفحة تفاصيل الطلب ← العروض).
 class OfferTile extends StatelessWidget {
-  const OfferTile({super.key, required this.offer, this.onOpen});
+  const OfferTile({super.key, required this.offer, this.onOpen, this.selected});
 
   final RequestOffer offer;
   final VoidCallback? onOpen;
+
+  /// null = بدون مؤشر اختيار؛ غير هيك دائرة اختيار (مفعّلة لما true).
+  final bool? selected;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +110,31 @@ class OfferTile extends StatelessWidget {
                   ],
                 ),
               ),
+              if (selected != null) ...[
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selected! ? colors.success : colors.border,
+                      width: 2,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: selected!
+                      ? Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: colors.success,
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+              ],
               GestureDetector(
                 onTap: onOpen,
                 child: Container(
