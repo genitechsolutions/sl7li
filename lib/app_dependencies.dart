@@ -6,6 +6,7 @@ import 'data/repositories/job_lifecycle_repository.dart';
 import 'data/repositories/professional_profile_repository.dart';
 import 'data/repositories/craftsman_signup_repository.dart';
 import 'data/repositories/profile_repository.dart';
+import 'data/repositories/push_token_repository.dart';
 import 'data/repositories/wallet_repository.dart';
 import 'data/repositories/notifications_repository.dart';
 import 'data/repositories/my_offers_repository.dart';
@@ -27,6 +28,7 @@ class AppDependencies {
     required this.wallet,
     required this.notifications,
     required this.myOffers,
+    required this.pushTokens,
     required this.publicProfile,
     required this.professionalProfile,
     required this.craftsmanSignup,
@@ -51,6 +53,7 @@ class AppDependencies {
   final WalletRepository wallet;
   final NotificationsRepository notifications;
   final MyOffersRepository myOffers;
+  final PushTokenRepository pushTokens;
   final PublicProfileRepository publicProfile;
   final ProfessionalProfileRepository professionalProfile;
   final CraftsmanSignupRepository craftsmanSignup;
@@ -65,6 +68,7 @@ class AppDependencies {
     wallet: const FakeWalletRepository(),
     notifications: const FakeNotificationsRepository(),
     myOffers: const FakeMyOffersRepository(),
+    pushTokens: const FakePushTokenRepository(),
     publicProfile: const FakePublicProfileRepository(),
     professionalProfile: const FakeProfessionalProfileRepository(),
     craftsmanSignup: const FakeCraftsmanSignupRepository(),
@@ -83,6 +87,7 @@ class AppDependencies {
       wallet: RemoteWalletRepository(gateway, auth),
       notifications: RemoteNotificationsRepository(gateway, auth),
       myOffers: const RemoteMyOffersRepository(gateway),
+      pushTokens: RemotePushTokenRepository(gateway, auth),
       publicProfile: const RemotePublicProfileRepository(gateway),
       professionalProfile: const RemoteProfessionalProfileRepository(gateway),
       craftsmanSignup: const RemoteCraftsmanSignupRepository(gateway),
