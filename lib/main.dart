@@ -1,3 +1,4 @@
+import './core/widgets/coming_soon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -43,6 +44,7 @@ class App extends StatelessWidget {
 
   Widget _buildApp(ThemeMode themeMode) {
     return MaterialApp(
+      scaffoldMessengerKey: appMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

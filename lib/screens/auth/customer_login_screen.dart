@@ -1,3 +1,4 @@
+import '../../core/widgets/coming_soon.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,8 +35,8 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
   final _name = TextEditingController();
   final _district = TextEditingController();
   final _districtFocus = FocusNode();
-  final _termsTap = TapGestureRecognizer()..onTap = () {}; // TODO: open terms
-  final _privacyTap = TapGestureRecognizer()..onTap = () {}; // TODO: open privacy policy
+  final _termsTap = TapGestureRecognizer()..onTap = showComingSoon;
+  final _privacyTap = TapGestureRecognizer()..onTap = showComingSoon;
 
   String? _city;
   bool _cityOpen = false;

@@ -1,3 +1,4 @@
+import '../../core/widgets/coming_soon.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,7 +56,7 @@ class RequestSentScreen extends StatefulWidget {
 
 class _RequestSentScreenState extends State<RequestSentScreen> {
   final _supportTap = TapGestureRecognizer()
-    ..onTap = () {}; // TODO: open customer support
+    ..onTap = showComingSoon;
 
   static const _steps = [
     'تم إشعار المهنيين بوجود طلب خدمة جديد',

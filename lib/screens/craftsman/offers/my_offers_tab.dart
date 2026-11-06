@@ -1,3 +1,4 @@
+import '../../../core/widgets/coming_soon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -280,19 +281,22 @@ class _MyOffersTabState extends State<MyOffersTab> {
                             style: AppTextStyles.title18Medium,
                           ),
                           const SizedBox(height: 12),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: colors.accentButton,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              'مشاهدة فيديو توضيحي',
-                              style: AppTextStyles.title18Medium.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colors.textOnAccent,
+                          GestureDetector(
+                            onTap: showComingSoon,
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: colors.accentButton,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'مشاهدة فيديو توضيحي',
+                                style: AppTextStyles.title18Medium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.textOnAccent,
+                                ),
                               ),
                             ),
                           ),

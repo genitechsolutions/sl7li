@@ -1,3 +1,4 @@
+import '../../../core/widgets/coming_soon.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -102,13 +103,13 @@ class SignupReviewScreen extends StatelessWidget {
             TextSpan(
               text: 'الشروط والأحكام',
               style: link,
-              recognizer: TapGestureRecognizer()..onTap = () {},
+              recognizer: TapGestureRecognizer()..onTap = showComingSoon,
             ),
             const TextSpan(text: ' و '),
             TextSpan(
               text: 'سياسة الخصوصية',
               style: link,
-              recognizer: TapGestureRecognizer()..onTap = () {},
+              recognizer: TapGestureRecognizer()..onTap = showComingSoon,
             ),
           ],
         ),

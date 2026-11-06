@@ -17,6 +17,7 @@ import '../../core/widgets/app_icon_button.dart';
 import '../../data/chat_data.dart';
 import '../../data/dummy_data.dart';
 import '../my_requests/request_details_screen.dart';
+import '../settings/notification_settings_screen.dart';
 
 /// الإشعارات: مهمة / اليوم / الأسبوع الماضي، مع "تمييز الكل كمقروءة".
 class NotificationsScreen extends StatelessWidget {
@@ -108,15 +109,19 @@ class NotificationsScreen extends StatelessWidget {
                         ),
                       ),
                     const Spacer(),
-                    // TODO: إعدادات الإشعارات / تحديث
                     AppIconButton(
                       icon: 'assets/icons/ic_refresh.svg',
-                      onTap: () {},
+                      onTap: () => context.read<NotificationsCubit>().load(force: true),
                     ),
                     const SizedBox(width: 8),
                     AppIconButton(
                       icon: 'assets/icons/ic_settings.svg',
-                      onTap: () {},
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationSettingsScreen(),
+                        ),
+                      ),
                     ),
                   ],
                 ),

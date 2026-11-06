@@ -1,3 +1,4 @@
+import '../../core/widgets/coming_soon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -97,7 +98,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
             isLoading: sending,
             onPressed: _phoneValid && !sending ? _sendCode : null,
             secondaryLabel: 'مشاهدة فيديو توضيحي',
-            onSecondaryPressed: () {}, // TODO: open intro video
+            onSecondaryPressed: showComingSoon,
             note: GestureDetector(
               onTap: _continueAsGuest,
               child: Text(
@@ -154,7 +155,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                         restrictInput: true,
                         hasError: _showPhoneError,
                         showFocusBorder: true,
-                        onCountryTap: () {}, // TODO: pick country code
+                        onCountryTap: showCountryNotice,
                       ),
                     ),
                     if (_showPhoneError)

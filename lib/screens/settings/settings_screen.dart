@@ -1,3 +1,6 @@
+import '../craftsman/signup/signup_step1_screen.dart';
+import '../../core/widgets/form/options_sheet.dart';
+import '../../core/widgets/info_dialog.dart';
 import 'package:flutter/material.dart';
 import '../../core/widgets/notification_badge.dart';
 import '../../core/backend/backend_exception.dart';
@@ -122,16 +125,31 @@ class SettingsScreen extends StatelessWidget {
               onTap: () => _push(context, const NotificationSettingsScreen()),
             ),
             sectionTitle('المساعدة والدعم'),
-            // TODO: شاشات المساعدة والأمان والانضمام كحرفي (ما في تصاميم)
             _Row(
               icon: 'assets/icons/ic_set_help.svg',
               title: 'كيفية استخدام التطبيق',
-              onTap: () {},
+              onTap: () => showInfoDialog(
+                context,
+                title: 'كيفية استخدام التطبيق',
+                lines: const [
+                  '1. اضغط زر + وصف مشكلتك واختر نوع الخدمة والموقع.',
+                  '2. بتوصلك عروض من المهنيين المناسبين بتابع "طلباتي".',
+                  '3. قارن العروض وتواصل مع المهني واتفق معه عبر الدردشة.',
+                  '4. بعد إنجاز العمل قيّم المهني لتساعد باقي الزبائن.',
+                ],
+              ),
             ),
             _Row(
               icon: 'assets/icons/ic_set_shield.svg',
               title: 'الأمان والخصوصية',
-              onTap: () {},
+              onTap: () => showInfoDialog(
+                context,
+                title: 'الأمان والخصوصية',
+                lines: const [
+                  'رقمك بيُستخدم لتسجيل الدخول والتواصل مع المهنيين اللي بتختارهم بس.',
+                  'ما منشارك بياناتك مع أي جهة خارجية، وفيك تحذف حسابك بأي وقت من "إدارة الحساب".',
+                ],
+              ),
             ),
             if (craftsmanMode)
               _Row(
@@ -155,7 +173,7 @@ class SettingsScreen extends StatelessWidget {
               _Row(
                 icon: 'assets/icons/ic_set_tools.svg',
                 title: 'انضم كحرفي',
-                onTap: () {},
+                onTap: () => _push(context, const SignupStep1Screen()),
               ),
             sectionTitle('إدارة الحساب'),
             Padding(
@@ -436,8 +454,23 @@ class _LogoutDialog extends StatelessWidget {
   }
 }
 
-class _DeleteDialog extends StatelessWidget {
+class _DeleteDialog extends StatefulWidget {
   const _DeleteDialog();
+
+  @override
+  State<_DeleteDialog> createState() => _DeleteDialogState();
+}
+
+class _DeleteDialogState extends State<_DeleteDialog> {
+  static const _reasons = [
+    'ما عدت بحتاج التطبيق',
+    'ما لقيت المهنيين المناسبين',
+    'مشاكل بالتطبيق',
+    'قلق على الخصوصية',
+    'سبب آخر',
+  ];
+
+  String? _reason;
 
   @override
   Widget build(BuildContext context) {
@@ -507,8 +540,18 @@ class _DeleteDialog extends StatelessWidget {
           const SizedBox(height: 20),
           Text('سبب الحذف', style: AppTextStyles.body16Medium),
           const SizedBox(height: 8),
-          // TODO: قائمة أسباب الحذف مش موجودة بالتصميم (الحقل بس).
-          AppSelectField(hint: 'اختر سبب الحذف', onTap: () {}),
+          AppSelectField(
+            hint: 'اختر سبب الحذف',
+            value: _reason,
+            onTap: () async {
+              final v = await showOptionsSheet(
+                context,
+                title: 'سبب الحذف',
+                options: _reasons,
+              );
+              if (v != null) setState(() => _reason = v);
+            },
+          ),
           const SizedBox(height: 20),
           Text('ملاحظات إضافية', style: AppTextStyles.body16Medium),
           const SizedBox(height: 8),

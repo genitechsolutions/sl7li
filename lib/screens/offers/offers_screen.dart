@@ -2,15 +2,29 @@ import '../../cubits/feature_cubits.dart';
 import '../../cubits/load_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_icon_button.dart';
 import '../../core/widgets/filter_chip_button.dart';
+import '../../core/widgets/form/options_sheet.dart';
+import '../../cubits/load_cubit.dart';
 import '../../data/dummy_data.dart';
+import '../../data/repositories/craftsman_signup_repository.dart';
 import '../offer_details/offer_details_screen.dart';
 import 'widgets/offer_list_card.dart';
+
+const _cityCodes = {
+  'دمشق': 'damascus',
+  'حلب': 'aleppo',
+  'حمص': 'homs',
+  'حماة': 'hama',
+  'اللاذقية': 'latakia',
+  'طرطوس': 'tartus',
+  'درعا': 'daraa',
+};
 
 class OffersScreen extends StatelessWidget {
   const OffersScreen({super.key});
@@ -40,21 +54,50 @@ class OffersScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 20),
-                child: Row(
-                  spacing: 10,
-                  children: [
-                    FilterChipButton(
-                      label: 'نوع الخدمة',
-                      onTap: () {}, // TODO: open service type filter
+              BlocBuilder<OffersCubit, LoadState<List<Offer>>>(
+                builder: (context, _) {
+                  final cubit = context.read<OffersCubit>();
+                  String? nameOf(Map<String, String> m, String? code) =>
+                      m.entries.where((e) => e.value == code).firstOrNull?.key;
+                  return Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(horizontal: 20),
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        FilterChipButton(
+                          label: nameOf(craftsmanServiceIds, cubit.serviceCategory) ?? 'نوع الخدمة',
+                          onTap: () async {
+                            final v = await showOptionsSheet(
+                              context,
+                              title: 'نوع الخدمة',
+                              options: ['الكل', ...craftsmanServiceIds.keys],
+                            );
+                            if (v == null) return;
+                            cubit.applyFilters(
+                              cityCode: cubit.cityCode,
+                              serviceCategory: craftsmanServiceIds[v],
+                            );
+                          },
+                        ),
+                        FilterChipButton(
+                          label: nameOf(_cityCodes, cubit.cityCode) ?? 'المنطقة',
+                          onTap: () async {
+                            final v = await showOptionsSheet(
+                              context,
+                              title: 'المنطقة',
+                              options: ['الكل', ..._cityCodes.keys],
+                            );
+                            if (v == null) return;
+                            cubit.applyFilters(
+                              cityCode: _cityCodes[v],
+                              serviceCategory: cubit.serviceCategory,
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    FilterChipButton(
-                      label: 'المنطقة',
-                      onTap: () {}, // TODO: open region filter
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
               Expanded(
                 child: LoadView<OffersCubit, List<Offer>>(
