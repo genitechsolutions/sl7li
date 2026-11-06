@@ -289,6 +289,21 @@ class MyOffersCubit extends LoadCubit<List<MyOffer>> {
     await _repo.create(offer);
     await load(force: true);
   }
+
+  Future<void> update(String id, NewOffer offer) async {
+    await _repo.update(id, offer);
+    await load(force: true);
+  }
+
+  Future<void> toggle(String id) async {
+    await _repo.toggle(id);
+    await load(force: true);
+  }
+
+  Future<void> delete(String id) async {
+    await _repo.delete(id);
+    await load(force: true);
+  }
 }
 
 /// آخر حركات المحفظة.

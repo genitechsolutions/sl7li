@@ -26,8 +26,11 @@ import '../../new_request/widgets/request_step_header.dart';
 import '../../new_request/widgets/success_illustration.dart';
 
 /// إنشاء عرض ترويجي (4 خطوات + نجاح): وصف، تفاصيل (سعر/خصم، تاريخ، صور)، موقع، تأكيد.
+/// مع [editing] بيتعبّى بالعرض وبيحفظ تعديل (بدون تاريخ الانتهاء).
 class CreateOfferScreen extends StatefulWidget {
-  const CreateOfferScreen({super.key});
+  const CreateOfferScreen({super.key, this.editing});
+
+  final MyOffer? editing;
 
   @override
   State<CreateOfferScreen> createState() => _CreateOfferScreenState();
@@ -57,9 +60,30 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
   bool _confirmed = false;
   bool _sending = false;
 
+  MyOffer? get _editing => widget.editing;
+
+  void _prefill(MyOffer o) {
+    _title.text = o.title;
+    _desc.text = o.description;
+    final amount = o.amount % 1 == 0 ? o.amount.toInt() : o.amount;
+    (o.percentage ? _percent : _price).text = '$amount';
+    _offerType = o.percentage ? 'خصم نسبة' : 'سعر خاص';
+    for (final e in craftsmanServiceIds.entries) {
+      if (e.value == o.serviceCategory) _service = e.key;
+    }
+    _photos.addAll(o.photoKeys.map(resourceUrl));
+    if (o.cityCode.isNotEmpty) _city = placeName(o.cityCode);
+    _districts
+      ..clear()
+      ..addAll(o.neighborhoods.map(placeName));
+    _confirmed = true;
+  }
+
   @override
   void initState() {
     super.initState();
+    final editing = _editing;
+    if (editing != null) _prefill(editing);
     for (final c in [_title, _desc, _price, _percent, _district]) {
       c.addListener(() => setState(() {}));
     }
@@ -77,7 +101,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     1 =>
       _title.text.trim().isNotEmpty &&
           _desc.text.trim().isNotEmpty &&
-          _service != null,
+          (_service != null || _editing?.serviceCategory.isNotEmpty == true),
     2 =>
       (_offerType == 'سعر خاص'
               ? _price.text.trim().isNotEmpty
@@ -99,27 +123,37 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     setState(() => _sending = true);
     try {
       final percent = _offerType != 'سعر خاص';
-      await context.read<MyOffersCubit>().create(
-        NewOffer(
-          title: _title.text.trim(),
-          description: _desc.text.trim(),
-          serviceCategory: _categories[_service] ?? 'general',
-          percentage: percent,
-          amount:
-              num.tryParse(
-                (percent ? _percent : _price).text.replaceAll(
-                  RegExp(r'[^0-9.]'),
-                  '',
-                ),
-              ) ??
-              0,
-          expiresAt: _expiry ?? DateTime.now().add(const Duration(days: 30)),
-          photos: _photos,
-          cityCode: placeCode(_city),
-          neighborhoods: [for (final d in _districts) placeCode(d)],
-        ),
+      final cubit = context.read<MyOffersCubit>();
+      final offer = NewOffer(
+        title: _title.text.trim(),
+        description: _desc.text.trim(),
+        serviceCategory:
+            _categories[_service] ?? _editing?.serviceCategory ?? 'general',
+        percentage: percent,
+        amount:
+            num.tryParse(
+              (percent ? _percent : _price).text.replaceAll(
+                RegExp(r'[^0-9.]'),
+                '',
+              ),
+            ) ??
+            0,
+        expiresAt: _expiry ?? DateTime.now().add(const Duration(days: 30)),
+        photos: _photos,
+        cityCode: placeCode(_city),
+        neighborhoods: [for (final d in _districts) placeCode(d)],
       );
-      if (mounted) setState(() => _step = 5);
+      final editing = _editing;
+      if (editing == null) {
+        await cubit.create(offer);
+        if (mounted) setState(() => _step = 5);
+      } else {
+        await cubit.update(editing.id, offer);
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(content: Text('تم حفظ التعديلات')));
+        if (mounted) Navigator.pop(context);
+      }
     } on BackendException catch (e) {
       messenger
         ..hideCurrentSnackBar()
@@ -309,25 +343,27 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                 ),
               ),
             ],
-            label(const FormLabel('تاريخ انتهاء العرض', note: '(اختياري)')),
-            AppSelectField(
-              hint: 'يوم / شهر / سنة',
-              value: _expiry == null
-                  ? null
-                  : '${_expiry!.year} / ${_expiry!.month} / ${_expiry!.day}',
-              trailing: Icon(
-                Icons.calendar_month_outlined,
-                color: colors.primaryContent,
+            if (_editing == null) ...[
+              label(const FormLabel('تاريخ انتهاء العرض', note: '(اختياري)')),
+              AppSelectField(
+                hint: 'يوم / شهر / سنة',
+                value: _expiry == null
+                    ? null
+                    : '${_expiry!.year} / ${_expiry!.month} / ${_expiry!.day}',
+                trailing: Icon(
+                  Icons.calendar_month_outlined,
+                  color: colors.primaryContent,
+                ),
+                onTap: _pickDate,
               ),
-              onTap: _pickDate,
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.only(top: 8, start: 12),
-              child: Text(
-                'إذا لم تحدد تاريخا، سيتم تعيين مدة افتراضية شهر واحد',
-                style: AppTextStyles.body12.copyWith(color: colors.link),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: 8, start: 12),
+                child: Text(
+                  'إذا لم تحدد تاريخا، سيتم تعيين مدة افتراضية شهر واحد',
+                  style: AppTextStyles.body12.copyWith(color: colors.link),
+                ),
               ),
-            ),
+            ],
             label(
               Row(
                 children: [
@@ -741,7 +777,11 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                         btn('العودة لصفحة عروضي', () => Navigator.pop(context))
                       else ...[
                         btn(
-                          _step == 4 ? 'إنشاء العرض' : 'المتابعة',
+                          _step == 4
+                              ? (_editing == null
+                                    ? 'إنشاء العرض'
+                                    : 'حفظ التعديلات')
+                              : 'المتابعة',
                           _valid && !_sending
                               ? (_step == 4 ? _submit : _next)
                               : null,
@@ -763,7 +803,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               RequestStepHeader(
-                title: 'إنشاء عرض',
+                title: _editing == null ? 'إنشاء عرض' : 'تعديل العرض',
                 step: done ? 5 : _step,
                 totalSteps: 4,
                 subtitle: done ? 'تم إنشاء العرض' : null,
