@@ -71,7 +71,7 @@ class _Placeholder extends StatelessWidget {
       backgroundColor: colors.background,
       body: Column(
         children: [
-          ProfileTopBar(onShareTap: () => shareText('تعرّف على حرفيين موثوقين عبر تطبيق صلّحلي')),
+          ProfileTopBar(onShareTap: () => shareText(context, 'تعرّف على حرفيين موثوقين عبر تطبيق صلّحلي')),
           Expanded(
             child: Center(
               child: error == null

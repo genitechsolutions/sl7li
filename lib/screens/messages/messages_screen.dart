@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/arabic_search.dart';
 import '../../core/widgets/notification_badge.dart';
 import '../../core/theme/app_colors.dart';
 import '../notifications/notifications_screen.dart';
@@ -19,11 +20,27 @@ import 'chat_screen.dart';
 import 'widgets/message_status_icon.dart';
 
 /// "محادثاتي" — قائمة المحادثات مع الحرفيين (تاب "الرسائل").
-class MessagesScreen extends StatelessWidget {
+class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key, this.craftsmanMode = false});
 
   /// رسائل المهني: بدون الشريط السفلي، ومحادثات مع الزبائن.
   final bool craftsmanMode;
+
+  @override
+  State<MessagesScreen> createState() => _MessagesScreenState();
+}
+
+class _MessagesScreenState extends State<MessagesScreen> {
+  final _search = TextEditingController();
+  String _query = '';
+
+  bool get craftsmanMode => widget.craftsmanMode;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,13 +121,25 @@ class MessagesScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          'البحث في المحادثات...',
-                          style: AppTextStyles.body16.copyWith(
-                            color: colors.textHint,
+                        child: TextField(
+                          controller: _search,
+                          onChanged: (v) => setState(() => _query = v),
+                          style: AppTextStyles.body16,
+                          decoration: InputDecoration.collapsed(
+                            hintText: 'البحث في المحادثات...',
+                            hintStyle: AppTextStyles.body16.copyWith(color: colors.textHint),
                           ),
                         ),
                       ),
+                      if (_query.isNotEmpty)
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => setState(() {
+                            _search.clear();
+                            _query = '';
+                          }),
+                          child: Icon(Icons.close, size: 20, color: colors.textSecondary),
+                        ),
                     ],
                   ),
                 ),
@@ -121,22 +150,36 @@ class MessagesScreen extends StatelessWidget {
                   onInit: (c) => c.loadFor(professionalMode: craftsmanMode),
                   emptyText: 'لا توجد محادثات بعد',
                   isEmpty: (list) => list.isEmpty,
-                  builder: (context, list) => ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: list.length,
-                    itemBuilder: (context, i) => _ConversationRow(
-                      conversation: list[i],
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ChatScreen(
-                            conversation: list[i],
-                            craftsmanMode: craftsmanMode,
+                  builder: (context, all) {
+                    final list = all
+                        .where((c) =>
+                            arabicContains(c.name, _query) || arabicContains(c.lastMessage, _query))
+                        .toList();
+                    if (list.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'لا نتائج',
+                          style: AppTextStyles.body16.copyWith(color: colors.textSecondary),
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: list.length,
+                      itemBuilder: (context, i) => _ConversationRow(
+                        conversation: list[i],
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatScreen(
+                              conversation: list[i],
+                              craftsmanMode: craftsmanMode,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ],

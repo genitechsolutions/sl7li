@@ -64,7 +64,7 @@ class _CraftsmanProfileScreenState extends State<CraftsmanProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ProfileTopBar(
-                onShareTap: () => shareText('تعرّف على حرفيين موثوقين عبر تطبيق صلّحلي'),
+                onShareTap: () => shareText(context, 'تعرّف على حرفيين موثوقين عبر تطبيق صلّحلي'),
               ),
               Padding(
                 padding: _padding,
