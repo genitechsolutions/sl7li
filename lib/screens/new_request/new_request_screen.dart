@@ -17,19 +17,23 @@ import '../../data/dummy_data.dart';
 import '../../data/repositories/craftsman_signup_repository.dart';
 import '../../data/repositories/service_classifier_repository.dart';
 import '../../data/request_draft.dart';
+import '../../data/service_names.dart';
 import 'request_details_screen.dart';
 import 'widgets/request_step_header.dart';
 
 /// طلب خدمة — الخطوة 1: تصنيف الطلب.
 class NewRequestScreen extends StatefulWidget {
-  const NewRequestScreen({super.key});
+  const NewRequestScreen({super.key, this.serviceId});
+
+  /// خدمة مختارة مسبقاً (من الرئيسية/قائمة الخدمات).
+  final String? serviceId;
 
   static const routeName = '/new-request';
 
   /// افتح الطلب بهالـ route مشان "إلغاء" بالخطوات الجاية يعرف لوين يرجع.
-  static Route<void> route() => MaterialPageRoute(
+  static Route<void> route({String? serviceId}) => MaterialPageRoute(
     settings: const RouteSettings(name: routeName),
-    builder: (_) => const NewRequestScreen(),
+    builder: (_) => NewRequestScreen(serviceId: serviceId),
   );
 
   /// "إلغاء" من أي خطوة: بيسكّر كل خطوات الطلب.
@@ -61,6 +65,16 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   bool _classifying = false;
   bool _onBehalf = false;
   String _city = requestCities.first;
+
+  @override
+  void initState() {
+    super.initState();
+    final id = widget.serviceId;
+    if (id != null) {
+      _serviceId = id;
+      _serviceType = serviceLabelAr(id);
+    }
+  }
 
   @override
   void dispose() {

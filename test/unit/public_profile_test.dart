@@ -79,7 +79,7 @@ void main() {
       ],
     );
     expect(p.offers.single.professionalId, _pid);
-    expect(p.offers.single.discount, '20%');
+    expect(p.offers.single.discount, 'خصم 20%');
   });
 
   test('PublicProfileCubit بيحمّل من الريبو الوهمي', () async {

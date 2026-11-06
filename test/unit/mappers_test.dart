@@ -83,10 +83,10 @@ void main() {
         'neighborhoods': ['المزة'],
         'serviceCategory': 'carpentry',
       });
-      expect(o.discount, '25%');
+      expect(o.discount, 'خصم 25%');
       expect(o.location, 'المزة');
       expect(o.image, startsWith('https://'));
-      expect(o.tags, ['carpentry']);
+      expect(o.tags, ['النجارة']);
     });
 
     test('عرض بسعر وبدون صور بياخد الصورة الافتراضية', () {
@@ -122,7 +122,7 @@ void main() {
       expect(d.city, 'دمشق');
       expect(d.images, hasLength(2));
       expect(d.images.first, startsWith('https://'));
-      expect(d.tags, ['electrical_repair']);
+      expect(d.tags, ['الإصلاحات الكهربائية']);
       expect(d.craftsman.name, 'سارة');
       expect(d.craftsman.isPro, isTrue);
       expect(d.craftsman.rating, 4.0);
