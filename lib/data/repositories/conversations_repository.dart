@@ -6,6 +6,7 @@ import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 
 import '../../core/backend/app_config.dart';
 import '../../core/backend/backend_exception.dart';
+import '../../core/backend/gql_chat_extras.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/graphql_gateway.dart';
 import '../../core/backend/json_utils.dart';
@@ -32,6 +33,15 @@ abstract class ConversationsRepository {
   Future<ChatMessage> sendImage(Conversation conversation, String path);
 
   Future<void> markRead(String conversationId);
+
+  /// بيتحقق قبل إرسال صورة (بيرمي BackendException إذا تجاوز الحد).
+  Future<void> validateImage(Conversation conversation);
+
+  /// حذف رسالة أنا كاتبها.
+  Future<void> deleteMessage(String messageId);
+
+  /// رقم واتساب المهني المعتمد للطلب (null = غير متاح).
+  Future<String?> assignedWhatsApp(String jobId);
 
   /// بيفتح (أو بيعمل) محادثة الطلب بين الزبون والمهني الحالي.
   Future<void> ensureJobConversation(String jobId, String otherId, {bool asCustomer = false});
@@ -85,6 +95,15 @@ class FakeConversationsRepository implements ConversationsRepository {
 
   @override
   Future<void> markRead(String conversationId) async {}
+
+  @override
+  Future<void> validateImage(Conversation conversation) async {}
+
+  @override
+  Future<void> deleteMessage(String messageId) async {}
+
+  @override
+  Future<String?> assignedWhatsApp(String jobId) async => null;
 
   @override
   Future<void> ensureJobConversation(String jobId, String otherId, {bool asCustomer = false}) async {}
@@ -198,6 +217,37 @@ class RemoteConversationsRepository implements ConversationsRepository {
   }
 
   @override
+  Future<void> validateImage(Conversation conversation) async {
+    final id = conversation.id;
+    if (id == null) return;
+    final data = await _gateway.run(
+      GqlChatExtras.validateImageCount,
+      variables: {'conversationId': id, 'newImageCount': 1},
+    );
+    final msg = imageCountError(asMap(data['validateConversationImageCount']));
+    if (msg != null) throw BackendException(msg);
+  }
+
+  @override
+  Future<void> deleteMessage(String messageId) async {
+    await _gateway.run(
+      GqlChatExtras.deleteMessage,
+      variables: {
+        'input': {'id': messageId},
+      },
+      mutation: true,
+    );
+  }
+
+  @override
+  Future<String?> assignedWhatsApp(String jobId) async {
+    final data = await _gateway.run(GqlChatExtras.assignedWhatsApp, variables: {'jobId': jobId});
+    final res = asMap(data['getJobAssignedProfessionalWhatsAppSecure']);
+    if (str(res, 'error') != null) return null;
+    return str(res, 'whatsappNumber');
+  }
+
+  @override
   Future<void> markRead(String conversationId) async {
     await _gateway.run(
       Gql.markMessagesRead,
@@ -272,6 +322,20 @@ class RemoteConversationsRepository implements ConversationsRepository {
     throwIfBackendError(res);
     return asMapList(res['conversations']).map(conversationFromJson).toList();
   }
+}
+
+/// رسالة خطأ لرد validateConversationImageCount (null = مسموح).
+String? imageCountError(Map<String, dynamic> res) {
+  final error = str(res, 'error');
+  if (error != null) {
+    return error.contains('Invalid image count')
+        ? 'يمكنك إرفاق من 1 إلى 5 صور فقط في كل رسالة'
+        : error;
+  }
+  if (res.isNotEmpty && res['canAttach'] == false) {
+    return 'وصلت للحد الأقصى من الصور في هذه المحادثة (${intOf(res, 'maxAllowed') ?? 30})';
+  }
+  return null;
 }
 
 /// حقول Conversation + اسم الطرف الآخر (الخلفية بتضيفه بالرد؛ أسماء بديلة للاحتياط).

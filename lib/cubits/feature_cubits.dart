@@ -124,6 +124,11 @@ class CraftsmanJobsCubit extends LoadCubit<CraftsmanJobs> {
     await _repo.ignore(jobId, reason: reason, other: other);
     await load(force: true);
   }
+
+  Future<void> unignore(String jobId) async {
+    await _repo.unignore(jobId);
+    await load(force: true);
+  }
 }
 
 /// قائمة المحادثات؛ الوضع (زبون/مهني) بيتحدد عند الطلب.
@@ -148,6 +153,12 @@ class ConversationsCubit extends LoadCubit<List<Conversation>> {
   Future<ChatMessage> sendImage(Conversation c, String path) => _repo.sendImage(c, path);
 
   Future<void> markRead(String conversationId) => _repo.markRead(conversationId);
+
+  Future<void> validateImage(Conversation c) => _repo.validateImage(c);
+
+  Future<void> deleteMessage(String id) => _repo.deleteMessage(id);
+
+  Future<String?> assignedWhatsApp(String jobId) => _repo.assignedWhatsApp(jobId);
 
   /// محادثة الزبون مع مهني معيّن على طلب (بتنعمل إذا ما كانت موجودة).
   Future<Conversation?> openWithProfessional(String jobId, String professionalId) async {

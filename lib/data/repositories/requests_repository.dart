@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import '../../core/backend/backend_exception.dart';
+import '../../core/backend/gql_chat_extras.dart';
 import '../../core/backend/gql_proposal_actions.dart';
 import '../../core/backend/graphql_documents.dart';
 import '../../core/backend/media_upload.dart';
@@ -251,6 +252,8 @@ abstract class CraftsmanJobsRepository {
 
   Future<void> ignore(String jobId, {required String reason, String? other});
 
+  Future<void> unignore(String jobId);
+
   /// العرض اللي قدّمه المهني على الطلب (null = ما قدّم).
   Future<RequestOffer?> myProposal(String jobId);
 
@@ -280,6 +283,9 @@ class FakeCraftsmanJobsRepository implements CraftsmanJobsRepository {
   }) async {}
 
   @override
+  Future<void> unignore(String jobId) async {}
+
+  @override
   Future<RequestOffer?> myProposal(String jobId) async => null;
 
   @override
@@ -299,6 +305,7 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
   Future<CraftsmanJobs> load() async {
     final userId = _auth.currentUserId;
     if (userId == null) throw BackendException.unauthenticated;
+    final ignoredFuture = _ignoredIds(userId);
     final results = await Future.wait([
       _gateway.run(
         Gql.getAvailableJobsForProfessional,
@@ -316,7 +323,9 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
     throwIfBackendError(availableRes);
     throwIfBackendError(tasksRes);
 
+    final ignored = await ignoredFuture;
     final available = asMapList(availableRes['jobs'])
+        .where((j) => !ignored.contains(str(j, 'job_id') ?? str(j, 'id')))
         .map((j) => craftsmanRequestFromJson(j, open: true))
         .toList();
     final all = asMapList(tasksRes['jobs'])
@@ -334,6 +343,29 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
           )
           .toList(),
     );
+  }
+
+  // فشل جلب القائمة ما لازم يوقّف الطلبات.
+  Future<Set<String>> _ignoredIds(String userId) async {
+    try {
+      final data = await _gateway.run(
+        GqlChatExtras.listIgnoredJobIds,
+        variables: {'professionalId': userId},
+      );
+      return ignoredJobIdsFromJson(asMap(data['listIgnoredJobIdsForProfessionalSecure']));
+    } on Object {
+      return {};
+    }
+  }
+
+  @override
+  Future<void> unignore(String jobId) async {
+    final data = await _gateway.run(
+      GqlChatExtras.unignoreJob,
+      variables: {'jobId': jobId},
+      mutation: true,
+    );
+    throwIfBackendError(asMap(data['unignoreJobForProfessionalSecure']));
   }
 
   @override
@@ -383,6 +415,10 @@ class RemoteCraftsmanJobsRepository implements CraftsmanJobsRepository {
     throwIfBackendError(asMap(data['ignoreJobForProfessionalSecure']));
   }
 }
+
+/// معرّفات الطلبات المتجاهَلة من ردّ listIgnoredJobIdsForProfessionalSecure.
+Set<String> ignoredJobIdsFromJson(Map<String, dynamic> res) =>
+    res['error'] != null ? <String>{} : strList(res, 'jobIds').toSet();
 
 // ───────────────────────── تحويل JSON ← نماذج الواجهة ─────────────────────────
 
