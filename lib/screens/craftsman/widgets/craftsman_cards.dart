@@ -138,44 +138,50 @@ class WalletBtn extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.filled,
+    this.onTap,
   });
 
   final String label;
   final String icon;
   final bool filled;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: filled ? colors.primaryContent : colors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: filled ? null : Border.all(color: colors.border),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.title18Medium.copyWith(
-              fontWeight: FontWeight.w600,
-              color: filled ? colors.primary : colors.primaryContent,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: filled ? colors.primaryContent : colors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: filled ? null : Border.all(color: colors.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.title18Medium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: filled ? colors.primary : colors.primaryContent,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          SvgPicture.asset(
-            icon,
-            width: 24,
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              filled ? colors.primary : colors.primaryContent,
-              BlendMode.srcIn,
+            const SizedBox(width: 8),
+            SvgPicture.asset(
+              icon,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                filled ? colors.primary : colors.primaryContent,
+                BlendMode.srcIn,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -188,7 +194,10 @@ class CraftsmanTxRow extends StatelessWidget {
     required this.value,
     required this.color,
     this.income = true,
+    this.ago = '',
   });
+
+  final String ago;
 
   final String title;
   final String value;
@@ -217,7 +226,7 @@ class CraftsmanTxRow extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(title, style: AppTextStyles.body16)),
-              Text('منذ 3 أيام', style: small),
+              Text(ago, style: small),
             ],
           ),
           const SizedBox(height: 4),
