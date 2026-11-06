@@ -442,8 +442,18 @@ MyRequest myRequestFromJson(Map<String, dynamic> j) {
     offersCount: stage == 0 && !canceled
         ? (intOf(j, 'response_count') ?? 0)
         : null,
-    craftsmanName: str(j, 'accepted_pro_name'),
+    craftsmanName: str(j, 'accepted_pro_name') ?? _selectedProName(j),
   );
+}
+
+/// اسم المهني المختار من عروض الطلب (لوحة الزبون ما بترجع accepted_pro_name للعروض).
+String? _selectedProName(Map<String, dynamic> j) {
+  final selected = str(j, 'selected_professional_id');
+  if (selected == null) return null;
+  for (final p in asMapList(j['proposals'])) {
+    if (str(p, 'professional_id') == selected) return str(p, 'professional_name');
+  }
+  return null;
 }
 
 CraftsmanRequest craftsmanRequestFromJson(
@@ -505,6 +515,8 @@ RequestOffer requestOfferFromJson(Map<String, dynamic> j) {
   return RequestOffer(
     proposalId: str(j, 'proposal_id'),
     professionalId: str(j, 'professional_id'),
+    status: str(j, 'status'),
+    pendingClaim: str(j, 'claim_state') == 'pending' ? str(j, 'claim_status') : null,
     craftsmanName: str(j, 'professional_name') ?? 'مهني',
     rating: str(j, 'professional_rating') ?? '–',
     reviews: intOf(j, 'professional_review_count') ?? 0,

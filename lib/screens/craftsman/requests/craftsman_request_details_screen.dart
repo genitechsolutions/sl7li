@@ -201,7 +201,7 @@ class _CraftsmanRequestDetailsScreenState
                           jobId: r.id,
                           proposalId: _mine?.proposalId,
                         );
-                        if (res == 'cancel' && r.id != null && context.mounted) {
+                        if (res != null && r.id != null && context.mounted) {
                           Navigator.of(context).pop();
                         }
                       },
