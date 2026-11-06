@@ -12,16 +12,47 @@ import 'screens/onboarding/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  var dependencies = AppDependencies.fake();
-  if (AppConfig.mode == BackendMode.amplify) {
+  runApp(const _Boot());
+}
+
+/// بيعرض مؤشر تحميل فوراً وبيهيّئ Amplify بالخلفية (بدل شاشة سودا لحد ما يخلص).
+class _Boot extends StatefulWidget {
+  const _Boot();
+
+  @override
+  State<_Boot> createState() => _BootState();
+}
+
+class _BootState extends State<_Boot> {
+  late final Future<AppDependencies> _deps = _init();
+
+  Future<AppDependencies> _init() async {
+    if (AppConfig.mode != BackendMode.amplify) return AppDependencies.fake();
     try {
-      await configureAmplify();
-      dependencies = AppDependencies.amplify();
+      await configureAmplify().timeout(const Duration(seconds: 25));
+      return AppDependencies.amplify();
     } on Object catch (e, st) {
       debugPrint('Amplify configuration failed, using fake data: $e\n$st');
+      return AppDependencies.fake();
     }
   }
-  runApp(App(dependencies: dependencies));
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<AppDependencies>(
+      future: _deps,
+      builder: (context, snap) {
+        final deps = snap.data;
+        if (deps != null) return App(dependencies: deps);
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          home: const Scaffold(body: Center(child: CircularProgressIndicator())),
+        );
+      },
+    );
+  }
 }
 
 class App extends StatelessWidget {
