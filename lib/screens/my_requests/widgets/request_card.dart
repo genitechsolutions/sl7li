@@ -374,7 +374,7 @@ class _CraftsmanRow extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '(${request.craftsmanReviews}) ${request.craftsmanRating}',
+                    '(${request.craftsmanReviews ?? 0}) ${request.craftsmanRating ?? '–'}',
                     textDirection: TextDirection.ltr,
                     style: AppTextStyles.body12.copyWith(
                       fontSize: 13,

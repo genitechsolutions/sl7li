@@ -301,6 +301,9 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatMessage(text: text, time: '2:10 م', sent: true, status: MessageStatus.sending),
       );
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) _scrollTo(_scroll.position.maxScrollExtent);
+    });
     if (widget.conversation.id == null) return;
     try {
       final sent = await context.read<ConversationsCubit>().sendText(widget.conversation, text);
