@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app_dependencies.dart';
 import 'app_providers.dart';
+import 'core/push/app_navigator.dart';
 import 'core/backend/amplify_bootstrap.dart';
 import 'core/backend/app_config.dart';
 import 'core/theme/app_theme.dart';
@@ -75,6 +76,7 @@ class App extends StatelessWidget {
 
   Widget _buildApp(ThemeMode themeMode) {
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       scaffoldMessengerKey: appMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,

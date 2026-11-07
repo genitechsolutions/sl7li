@@ -49,3 +49,6 @@ app.*.map.json
 
 # Local release builds (APKs etc.)
 /dist/
+
+# إعداد Firebase المحلي (ما بينرفع للريبو)
+android/app/google-services.json

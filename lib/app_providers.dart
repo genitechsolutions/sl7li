@@ -1,7 +1,11 @@
+import 'package:flutter/material.dart' show MaterialPageRoute;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app_dependencies.dart';
+import 'core/push/app_navigator.dart';
+import 'core/push/push_service.dart';
+import 'screens/notifications/notifications_screen.dart';
 import 'cubits/auth/auth_cubit.dart';
 import 'cubits/craftsman_signup_cubit.dart';
 import 'cubits/feature_cubits.dart';
@@ -25,7 +29,9 @@ class AppProviders extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = dependencies;
-    return RepositoryProvider<ServiceClassifier>.value(
+    return RepositoryProvider<PushService>(
+      create: (_) => PushService(d.pushTokens),
+      child: RepositoryProvider<ServiceClassifier>.value(
       value: d.classifier,
       child: MultiBlocProvider(
       providers: [
@@ -50,7 +56,8 @@ class AppProviders extends StatelessWidget {
         RepositoryProvider<WalletRepository>.value(value: d.wallet),
         BlocProvider(create: (_) => RatingsCubit(d.ratings)),
       ],
-      child: _ResumeRefresh(child: child),
+      child: _PushBootstrap(child: _ResumeRefresh(child: child)),
+      ),
       ),
     );
   }
@@ -123,8 +130,40 @@ Future<void> signOutAndReset(BuildContext context) async {
     context.read<ProfessionalProfileCubit>(),
     context.read<RatingsCubit>(),
   ];
+  await context.read<PushService>().stop();
   await auth.signOut();
   for (final c in cubits) {
     c.reset();
+  }
+}
+
+/// بيشغّل الإشعارات لما المستخدم يسجّل دخول، وبيفتح شاشة الإشعارات لما يضغط إشعار.
+class _PushBootstrap extends StatefulWidget {
+  const _PushBootstrap({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_PushBootstrap> createState() => _PushBootstrapState();
+}
+
+class _PushBootstrapState extends State<_PushBootstrap> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<PushService>().onOpen = () {
+      appNavigatorKey.currentState?.push(MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()));
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthCubit, AuthState>(
+      listenWhen: (a, b) => a.status != b.status,
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) context.read<PushService>().start();
+      },
+      child: widget.child,
+    );
   }
 }
