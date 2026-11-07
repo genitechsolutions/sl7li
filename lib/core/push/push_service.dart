@@ -37,7 +37,7 @@ class PushService {
       return false;
     }
     await _local.initialize(
-      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
       onDidReceiveNotificationResponse: (_) => onOpen?.call(),
     );
     await _local
@@ -55,10 +55,10 @@ class PushService {
     final n = m.notification;
     if (n == null) return;
     await _local.show(
-      id: m.hashCode,
-      title: n.title,
-      body: n.body,
-      notificationDetails: NotificationDetails(
+      m.hashCode,
+      n.title,
+      n.body,
+      NotificationDetails(
         android: AndroidNotificationDetails(_channel.id, _channel.name, importance: Importance.high, priority: Priority.high),
       ),
     );
@@ -70,12 +70,10 @@ class PushService {
     try {
       final settings = await FirebaseMessaging.instance.requestPermission();
       if (settings.authorizationStatus == AuthorizationStatus.denied) return;
-      // ignore: deprecated_member_use
       final token = await FirebaseMessaging.instance.getToken();
       if (token == null) return;
       _token = token;
       await _tokens.register(token);
-      // ignore: deprecated_member_use
       _refresh ??= FirebaseMessaging.instance.onTokenRefresh.listen((t) async {
         _token = t;
         try {
