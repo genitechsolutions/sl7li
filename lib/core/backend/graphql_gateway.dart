@@ -13,6 +13,7 @@ abstract class GraphQlGateway {
     Map<String, dynamic> variables = const {},
     bool mutation = false,
     bool guest = false,
+    bool apiKeyOnly = false,
   });
 
   /// اشتراك GraphQL (subscription): بيرجّع `data` لكل حدث.
@@ -50,16 +51,17 @@ class AmplifyGraphQlGateway implements GraphQlGateway {
     Map<String, dynamic> variables = const {},
     bool mutation = false,
     bool guest = false,
+    bool apiKeyOnly = false,
   }) async {
-    var useApiKey = guest;
+    var useApiKey = guest || apiKeyOnly;
     var signedIn = false;
     try {
       signedIn = (await Amplify.Auth.fetchAuthSession()).isSignedIn;
     } on AuthException {
       signedIn = false;
     }
-    if (!guest && !signedIn) throw BackendException.unauthenticated;
-    if (guest && signedIn) useApiKey = false;
+    if (!guest && !apiKeyOnly && !signedIn) throw BackendException.unauthenticated;
+    if (guest && !apiKeyOnly && signedIn) useApiKey = false;
     if (useApiKey && AppConfig.apiKey.isEmpty) {
       throw const BackendException('هالقسم بيحتاج تسجيل دخول', code: 'NO_API_KEY');
     }

@@ -266,6 +266,40 @@ query GetJobCompletionsByProfessional($professionalId: String!) {
   }
 }''';
 
+  static const createAnonymousDeviceToken = r'''
+mutation CreateAnonymousDeviceToken($input: CreateAnonymousDeviceTokenInput!) {
+  createAnonymousDeviceToken(input: $input) {
+    anon_id
+    endpoint_arn
+  }
+}''';
+
+  static const updateAnonymousDeviceToken = r'''
+mutation UpdateAnonymousDeviceToken($input: UpdateAnonymousDeviceTokenInput!) {
+  updateAnonymousDeviceToken(input: $input) {
+    anon_id
+    endpoint_arn
+  }
+}''';
+
+  static const getAnonymousDeviceToken = r'''
+query GetAnonymousDeviceToken($anon_id: String!) {
+  getAnonymousDeviceToken(anon_id: $anon_id) {
+    anon_id
+    token
+    platform
+    device_id
+    endpoint_arn
+  }
+}''';
+
+  static const deleteAnonymousDeviceToken = r'''
+mutation DeleteAnonymousDeviceToken($input: DeleteAnonymousDeviceTokenInput!) {
+  deleteAnonymousDeviceToken(input: $input) {
+    anon_id
+  }
+}''';
+
   static const createJobProposal = r'''
 mutation CreateJobProposalSecure($input: AWSJSON!) {
   createJobProposalSecure(input: $input) {

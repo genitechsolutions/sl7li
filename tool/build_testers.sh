@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # بيبني APKين تجريبيين (زبون + مهني) بأسماء حزم مختلفة مشان ينثبّتوا سوا على نفس الموبايل.
+# اختياري: APPSYNC_API_KEY=<المفتاح> (مطلوب لتسجيل SNS endpoint للإشعارات؛ ما بينكتب بالريبو).
 # الاستعمال: TEST_LOGIN_PASSWORD=<كلمة السر> bash tool/build_testers.sh <مجلد_بناء_مؤقت> <مجلد_خرج>
 set -euo pipefail
 : "${TEST_LOGIN_PASSWORD:?حط TEST_LOGIN_PASSWORD}"
@@ -27,6 +28,7 @@ build() { # who phone id label
   sed -i "s|android:label=\"[^\"]*\"|android:label=\"$4\"|" "$MANIFEST"
   flutter build apk --release --target-platform android-arm64 \
     --dart-define=BACKEND=amplify --dart-define=APP_ENV=devqa \
+    ${APPSYNC_API_KEY:+--dart-define=APPSYNC_API_KEY=$APPSYNC_API_KEY} \
     --dart-define=ENABLE_TEST_LOGIN=true "--dart-define=TEST_LOGIN_PASSWORD=$TEST_LOGIN_PASSWORD" \
     --dart-define=TEST_LOGIN_PHONE="$2"
   cp build/app/outputs/flutter-apk/app-release.apk "$OUT/salehli-tester-$1.apk"

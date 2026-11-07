@@ -40,6 +40,7 @@ class _FakeGateway implements GraphQlGateway {
     Map<String, dynamic> variables = const {},
     bool mutation = false,
     bool guest = false,
+    bool apiKeyOnly = false,
   }) async {
     calls.add((document, variables));
     if (document.contains('GetCurrentUserSecure')) {

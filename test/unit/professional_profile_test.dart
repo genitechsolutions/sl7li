@@ -32,6 +32,7 @@ class _RecordingGateway implements GraphQlGateway {
     Map<String, dynamic> variables = const {},
     bool mutation = false,
     bool guest = false,
+    bool apiKeyOnly = false,
   }) async {
     vars = variables;
     return {

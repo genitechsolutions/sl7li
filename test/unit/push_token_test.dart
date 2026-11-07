@@ -17,6 +17,14 @@ void main() {
     expect(added['deviceId'], pushDeviceId('android', 'fcm-1'));
   });
 
+  test('mergePushTokens: بيحفظ endpointArn والصيغة نفس الموقع', () {
+    final out = mergePushTokens(const [], token: 'fcm-9', platform: 'android', now: now, endpointArn: 'arn:aws:sns:x');
+    final m = jsonDecode(out.single) as Map;
+    expect(m['endpointArn'], 'arn:aws:sns:x');
+    expect(m['lastUpdated'], isNotNull);
+    expect(pushAnonId('fcm-9'), startsWith('anon-'));
+  });
+
   test('mergePushTokens: نفس التوكن ما بيتكرر وبيتحدّث', () {
     final first = mergePushTokens(const [], token: 'fcm-1', platform: 'android', now: now);
     final again = mergePushTokens(first, token: 'fcm-1', platform: 'android', now: now);
